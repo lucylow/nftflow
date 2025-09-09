@@ -119,24 +119,72 @@ export const switchToNetwork = async (chainId: number) => {
       if (switchError.code === 4902) {
         const network = Object.values(NETWORKS).find(n => n.chainId === chainId);
         if (network) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: `0x${chainId.toString(16)}`,
-              chainName: network.name,
-              rpcUrls: [network.rpcUrl],
-              nativeCurrency: {
-                name: network.currency,
-                symbol: network.currency,
-                decimals: 18,
-              },
-            }],
-          });
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: `0x${chainId.toString(16)}`,
+                chainName: network.name,
+                rpcUrls: [network.rpcUrl],
+                nativeCurrency: {
+                  name: network.currency,
+                  symbol: network.currency,
+                  decimals: 18,
+                },
+                blockExplorerUrls: network.blockExplorerUrl ? [network.blockExplorerUrl] : undefined,
+              }],
+            });
+          } catch (addError: any) {
+            if (addError.code === 4001) {
+              throw new Error('Network addition rejected. Please approve adding the Somnia network in MetaMask.');
+            } else {
+              throw new Error(`Failed to add Somnia network: ${addError.message}`);
+            }
+          }
+        } else {
+          throw new Error(`Network configuration not found for chain ID ${chainId}`);
         }
+      } else if (switchError.code === 4001) {
+        throw new Error('Network switch rejected. Please approve the network switch in MetaMask.');
       } else {
-        throw switchError;
+        throw new Error(`Failed to switch network: ${switchError.message}`);
       }
     }
+  } else {
+    throw new Error('MetaMask not available. Please install MetaMask to switch networks.');
+  }
+};
+
+// MetaMask utility functions
+export const isMetaMaskInstalled = (): boolean => {
+  return typeof window !== 'undefined' && !!window.ethereum;
+};
+
+export const isMetaMaskConnected = async (): Promise<boolean> => {
+  if (!isMetaMaskInstalled()) return false;
+  
+  try {
+    const accounts = await window.ethereum.request({
+      method: 'eth_accounts',
+    });
+    return accounts && accounts.length > 0;
+  } catch (error) {
+    console.warn('Failed to check MetaMask connection:', error);
+    return false;
+  }
+};
+
+export const getMetaMaskAccount = async (): Promise<string | null> => {
+  if (!isMetaMaskInstalled()) return null;
+  
+  try {
+    const accounts = await window.ethereum.request({
+      method: 'eth_accounts',
+    });
+    return accounts && accounts.length > 0 ? accounts[0] : null;
+  } catch (error) {
+    console.warn('Failed to get MetaMask account:', error);
+    return null;
   }
 };
 

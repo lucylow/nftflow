@@ -12,7 +12,10 @@ import {
   switchToNetwork,
   NETWORKS,
   formatEther,
-  CONTRACT_ADDRESSES
+  CONTRACT_ADDRESSES,
+  isMetaMaskInstalled,
+  isMetaMaskConnected,
+  getMetaMaskAccount
 } from '@/lib/web3';
 
 interface Web3ContextType {
@@ -112,16 +115,40 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
 
     setIsConnecting(true);
     try {
-      // Check if MetaMask is unlocked
-      const isUnlocked = await window.ethereum._metamask?.isUnlocked?.();
-      if (isUnlocked === false) {
-        throw new Error('MetaMask is locked. Please unlock your MetaMask wallet and try again.');
+      // First, try to get accounts without requesting access
+      let accounts;
+      try {
+        accounts = await window.ethereum.request({
+          method: 'eth_accounts',
+        });
+      } catch (error) {
+        console.warn('Failed to get existing accounts:', error);
+        accounts = [];
       }
 
-      // Request account access with better error handling
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      });
+      // If no accounts are available, request access
+      if (!accounts || accounts.length === 0) {
+        try {
+          accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+        } catch (requestError: any) {
+          // Handle specific MetaMask errors
+          if (requestError.code === 4001) {
+            throw new Error('Connection rejected. Please approve the connection in MetaMask.');
+          } else if (requestError.code === -32002) {
+            throw new Error('Connection request already pending. Please check MetaMask and try again.');
+          } else if (requestError.code === -32603) {
+            throw new Error('Internal MetaMask error. Please refresh the page and try again.');
+          } else if (requestError.message?.includes('User denied') || requestError.message?.includes('denied')) {
+            throw new Error('Connection denied. Please try again and approve the connection.');
+          } else if (requestError.message?.includes('locked') || requestError.message?.includes('unlock')) {
+            throw new Error('MetaMask is locked. Please unlock your wallet and try again.');
+          } else {
+            throw new Error('Failed to connect to MetaMask. Please ensure MetaMask is unlocked and try again.');
+          }
+        }
+      }
 
       if (!accounts || accounts.length === 0) {
         throw new Error('No accounts found. Please create an account in MetaMask or unlock your wallet.');
@@ -145,19 +172,11 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Failed to connect wallet:', error);
       
-      // Provide more specific error messages
-      if (error.code === 4001) {
-        throw new Error('Connection rejected. Please approve the connection in MetaMask.');
-      } else if (error.code === -32002) {
-        throw new Error('Connection request already pending. Please check MetaMask and try again.');
-      } else if (error.code === -32603) {
-        throw new Error('Internal MetaMask error. Please refresh the page and try again.');
-      } else if (error.message?.includes('User denied')) {
-        throw new Error('Connection denied. Please try again and approve the connection.');
-      } else if (error.message?.includes('unlock')) {
-        throw new Error('MetaMask is locked. Please unlock your wallet and try again.');
+      // Re-throw the error with proper message
+      if (error.message) {
+        throw error;
       } else {
-        throw new Error(error.message || 'Failed to connect wallet. Please ensure MetaMask is properly installed and try again.');
+        throw new Error('Failed to connect wallet. Please ensure MetaMask is properly installed and unlocked.');
       }
     } finally {
       setIsConnecting(false);
@@ -205,13 +224,16 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   // Check if already connected on mount
   useEffect(() => {
     const checkConnection = async () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({
-            method: 'eth_accounts',
-          });
+      if (!isMetaMaskInstalled()) {
+        console.log('MetaMask not installed');
+        return;
+      }
 
-          if (accounts.length > 0) {
+      try {
+        const isConnected = await isMetaMaskConnected();
+        if (isConnected) {
+          const account = await getMetaMaskAccount();
+          if (account) {
             const provider = getProvider();
             const signer = await provider.getSigner();
             const address = await signer.getAddress();
@@ -224,9 +246,9 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
             await initializeContracts();
             await refreshBalance();
           }
-        } catch (error) {
-          console.error('Failed to check connection:', error);
         }
+      } catch (error) {
+        console.error('Failed to check connection:', error);
       }
     };
 

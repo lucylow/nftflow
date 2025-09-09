@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { LoadingSpinner } from "@/components/ui/skeleton";
+import { isMetaMaskInstalled } from "@/lib/web3";
 
 const WalletConnect = () => {
   const { 
@@ -21,8 +22,21 @@ const WalletConnect = () => {
   const { toast } = useToast();
 
   const handleConnect = async () => {
+    if (!isMetaMaskInstalled()) {
+      toast({
+        title: "MetaMask Not Found",
+        description: "Please install MetaMask browser extension to connect your wallet",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await connectWallet();
+      toast({
+        title: "Wallet Connected",
+        description: "Successfully connected to MetaMask",
+      });
     } catch (error: any) {
       toast({
         title: "Connection Failed",
@@ -65,19 +79,26 @@ const WalletConnect = () => {
 
   if (!isConnected) {
     return (
-      <Button 
-        onClick={handleConnect}
-        disabled={isConnecting}
-        size="sm"
-        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-      >
-        {isConnecting ? (
-          <LoadingSpinner size="sm" className="mr-2 text-white" />
-        ) : (
-          <Wallet className="w-4 h-4 mr-2" />
+      <div className="flex flex-col gap-2">
+        <Button 
+          onClick={handleConnect}
+          disabled={isConnecting}
+          size="sm"
+          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+        >
+          {isConnecting ? (
+            <LoadingSpinner size="sm" className="mr-2 text-white" />
+          ) : (
+            <Wallet className="w-4 h-4 mr-2" />
+          )}
+          {isConnecting ? "Connecting..." : "Connect Wallet"}
+        </Button>
+        {!isMetaMaskInstalled() && (
+          <p className="text-xs text-yellow-500 text-center">
+            MetaMask not detected
+          </p>
         )}
-        {isConnecting ? "Connecting..." : "Connect Wallet"}
-      </Button>
+      </div>
     );
   }
 
