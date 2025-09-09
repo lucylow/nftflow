@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
+import Upload from "./pages/Upload";
 import Analytics from "./pages/Analytics";
 import NFTDetail from "./pages/NFTDetail";
 import Profile from "./pages/Profile";
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/create" element={<Create />} />
+                <Route path="/upload" element={<Upload />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/nft/:id" element={<NFTDetail />} />
                 <Route path="/profile" element={<Profile />} />

@@ -16,6 +16,7 @@ const Header = () => {
   const navItems = [
     { label: "Marketplace", href: "/marketplace", icon: "🏪" },
     { label: "Create", href: "/create", icon: "✨" },
+    { label: "Upload", href: "/upload", icon: "📤" },
     { label: "Dashboard", href: "/dashboard", icon: "📊" },
     { label: "Analytics", href: "/analytics", icon: "📈" },
     { label: "Profile", href: "/profile", icon: "👤" }
