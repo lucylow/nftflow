@@ -259,6 +259,7 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
                 )
             );
             // Continue even if utility tracking fails
+            success; // Silence unused variable warning
         }
 
         // Reactivate listing

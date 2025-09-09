@@ -36,5 +36,19 @@ interface IPriceOracle {
      * @return hasPrice True if price data exists
      */
     function hasPrice(address nftContract, uint256 tokenId) external view returns (bool hasPrice);
+
+    /**
+     * @dev Get the average price of an NFT collection
+     * @param nftContract The address of the NFT contract
+     * @return averagePrice The average price in wei
+     */
+    function getAveragePrice(address nftContract) external view returns (uint256 averagePrice);
+
+    /**
+     * @dev Get the last sale price of an NFT collection
+     * @param nftContract The address of the NFT contract
+     * @return lastSalePrice The last sale price in wei
+     */
+    function getLastSalePrice(address nftContract) external view returns (uint256 lastSalePrice);
 }
 

@@ -3,13 +3,15 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title PaymentStream
- * @dev Contract for real-time payment streaming for NFT rentals
- * Enables continuous payment flow from renter to owner during rental period
+ * @dev Enhanced contract for real-time payment streaming for NFT rentals
+ * Implements continuous payment flow with platform fees and creator royalties
+ * Designed for formal verification and security
  */
-contract PaymentStream is ReentrancyGuard, Ownable {
+contract PaymentStream is ReentrancyGuard, Ownable, Pausable {
 
     struct Stream {
         address sender;
@@ -19,7 +21,12 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         uint256 startTime;
         uint256 stopTime;
         uint256 remainingBalance;
+        uint256 totalWithdrawn;
         bool active;
+        bool finalized;
+        uint256 platformFeeAmount;
+        uint256 creatorRoyaltyAmount;
+        address creatorAddress;
     }
 
     // State variables
@@ -29,6 +36,17 @@ contract PaymentStream is ReentrancyGuard, Ownable {
     
     uint256 public nextStreamId;
     uint256 public constant MINIMUM_STREAM_DURATION = 1; // 1 second
+    uint256 public constant BASIS_POINTS = 10000;
+    
+    // Fee structure
+    uint256 public platformFeePercentage = 250; // 2.5%
+    uint256 public creatorRoyaltyPercentage = 50; // 0.5% of total rental
+    address public treasury;
+    mapping(address => address) public collectionCreators; // NFT contract => creator address
+    
+    // Security features
+    mapping(address => bool) public authorizedContracts;
+    uint256 public maxStreamDuration = 30 days;
     
     // Events
     event StreamCreated(
@@ -38,13 +56,16 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         uint256 deposit,
         uint256 ratePerSecond,
         uint256 startTime,
-        uint256 stopTime
+        uint256 stopTime,
+        uint256 platformFeeAmount,
+        uint256 creatorRoyaltyAmount
     );
     
     event StreamWithdrawn(
         uint256 indexed streamId,
         address indexed recipient,
-        uint256 amount
+        uint256 amount,
+        uint256 totalWithdrawn
     );
     
     event StreamCancelled(
@@ -54,18 +75,51 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         uint256 senderBalance,
         uint256 recipientBalance
     );
+    
+    event StreamFinalized(
+        uint256 indexed streamId,
+        uint256 totalPaid,
+        uint256 platformFeeCollected,
+        uint256 creatorRoyaltyCollected
+    );
+    
+    event PlatformFeeWithdrawn(
+        address indexed treasury,
+        uint256 amount
+    );
+    
+    event CreatorRoyaltyPaid(
+        address indexed creator,
+        uint256 amount
+    );
+
+    // Modifiers
+    modifier onlyAuthorized() {
+        require(
+            authorizedContracts[msg.sender] || 
+            msg.sender == owner(),
+            "Not authorized"
+        );
+        _;
+    }
+
+    constructor(address _treasury) {
+        treasury = _treasury;
+    }
 
     /**
-     * @dev Create a new payment stream
+     * @dev Create a new payment stream with fee calculation
      * @param recipient Address to receive the stream
      * @param startTime When the stream starts (unix timestamp)
      * @param stopTime When the stream stops (unix timestamp)
+     * @param nftContract NFT contract address for creator royalty calculation
      */
     function createStream(
         address recipient,
         uint256 startTime,
-        uint256 stopTime
-    ) external payable nonReentrant returns (uint256 streamId) {
+        uint256 stopTime,
+        address nftContract
+    ) external payable nonReentrant whenNotPaused returns (uint256 streamId) {
         require(recipient != address(0), "Invalid recipient");
         require(recipient != msg.sender, "Cannot stream to self");
         require(msg.value > 0, "Deposit must be greater than 0");
@@ -74,8 +128,14 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         
         uint256 duration = stopTime - startTime;
         require(duration >= MINIMUM_STREAM_DURATION, "Duration too short");
+        require(duration <= maxStreamDuration, "Duration too long");
         
-        uint256 ratePerSecond = msg.value / duration;
+        // Calculate fees
+        uint256 platformFeeAmount = msg.value * platformFeePercentage / BASIS_POINTS;
+        uint256 creatorRoyaltyAmount = msg.value * creatorRoyaltyPercentage / BASIS_POINTS;
+        uint256 netAmount = msg.value - platformFeeAmount - creatorRoyaltyAmount;
+        
+        uint256 ratePerSecond = netAmount / duration;
         require(ratePerSecond > 0, "Rate per second must be greater than 0");
 
         streamId = nextStreamId++;
@@ -83,12 +143,17 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         streams[streamId] = Stream({
             sender: msg.sender,
             recipient: recipient,
-            deposit: msg.value,
+            deposit: netAmount,
             ratePerSecond: ratePerSecond,
             startTime: startTime,
             stopTime: stopTime,
-            remainingBalance: msg.value,
-            active: true
+            remainingBalance: netAmount,
+            totalWithdrawn: 0,
+            active: true,
+            finalized: false,
+            platformFeeAmount: platformFeeAmount,
+            creatorRoyaltyAmount: creatorRoyaltyAmount,
+            creatorAddress: collectionCreators[nftContract]
         });
 
         senderStreams[msg.sender].push(streamId);
@@ -98,10 +163,12 @@ contract PaymentStream is ReentrancyGuard, Ownable {
             streamId,
             msg.sender,
             recipient,
-            msg.value,
+            netAmount,
             ratePerSecond,
             startTime,
-            stopTime
+            stopTime,
+            platformFeeAmount,
+            creatorRoyaltyAmount
         );
     }
 
@@ -130,14 +197,14 @@ contract PaymentStream is ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Withdraw available funds from a stream
+     * @dev Withdraw available funds from a stream with enhanced security
      * @param streamId The stream ID
      * @param amount Amount to withdraw (0 for all available)
      */
-    function withdrawFromStream(uint256 streamId, uint256 amount) external nonReentrant {
+    function withdrawFromStream(uint256 streamId, uint256 amount) external nonReentrant whenNotPaused {
         Stream storage stream = streams[streamId];
         require(stream.recipient == msg.sender, "Not the recipient");
-        require(stream.active, "Stream not active");
+        require(stream.active && !stream.finalized, "Stream not active");
         
         uint256 availableBalance = this.balanceOf(streamId);
         require(availableBalance > 0, "No funds available");
@@ -147,46 +214,71 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         require(withdrawAmount <= stream.remainingBalance, "Exceeds remaining balance");
         
         stream.remainingBalance = stream.remainingBalance - withdrawAmount;
+        stream.totalWithdrawn = stream.totalWithdrawn + withdrawAmount;
         
         payable(msg.sender).transfer(withdrawAmount);
         
-        emit StreamWithdrawn(streamId, msg.sender, withdrawAmount);
+        emit StreamWithdrawn(streamId, msg.sender, withdrawAmount, stream.totalWithdrawn);
     }
 
     /**
-     * @dev Cancel a stream and return remaining funds
+     * @dev Release funds automatically (called by upkeeper bots)
      * @param streamId The stream ID
      */
-    function cancelStream(uint256 streamId) external nonReentrant {
+    function releaseFunds(uint256 streamId) external nonReentrant {
         Stream storage stream = streams[streamId];
-        require(
-            stream.sender == msg.sender || stream.recipient == msg.sender,
-            "Not authorized"
-        );
-        require(stream.active, "Stream not active");
+        require(stream.active && !stream.finalized, "Stream not active");
+        require(block.timestamp >= stream.startTime, "Stream not started");
         
-        uint256 availableToRecipient = this.balanceOf(streamId);
-        uint256 remainingToSender = stream.remainingBalance - availableToRecipient;
+        uint256 availableBalance = this.balanceOf(streamId);
+        if (availableBalance > 0) {
+            stream.remainingBalance = stream.remainingBalance - availableBalance;
+            stream.totalWithdrawn = stream.totalWithdrawn + availableBalance;
+            
+            payable(stream.recipient).transfer(availableBalance);
+            
+            emit StreamWithdrawn(streamId, stream.recipient, availableBalance, stream.totalWithdrawn);
+        }
+    }
+
+    /**
+     * @dev Finalize a stream and distribute remaining funds and fees
+     * @param streamId The stream ID
+     */
+    function finalizeStream(uint256 streamId) external onlyAuthorized {
+        Stream storage stream = streams[streamId];
+        require(stream.active && !stream.finalized, "Stream not active");
         
         stream.active = false;
-        stream.remainingBalance = 0;
+        stream.finalized = true;
         
-        if (availableToRecipient > 0) {
-            payable(stream.recipient).transfer(availableToRecipient);
+        // Transfer any remaining balance to recipient
+        if (stream.remainingBalance > 0) {
+            payable(stream.recipient).transfer(stream.remainingBalance);
+            stream.totalWithdrawn = stream.totalWithdrawn + stream.remainingBalance;
+            stream.remainingBalance = 0;
         }
         
-        if (remainingToSender > 0) {
-            payable(stream.sender).transfer(remainingToSender);
+        // Distribute platform fee to treasury
+        if (stream.platformFeeAmount > 0 && treasury != address(0)) {
+            payable(treasury).transfer(stream.platformFeeAmount);
+            emit PlatformFeeWithdrawn(treasury, stream.platformFeeAmount);
         }
         
-        emit StreamCancelled(
+        // Distribute creator royalty
+        if (stream.creatorRoyaltyAmount > 0 && stream.creatorAddress != address(0)) {
+            payable(stream.creatorAddress).transfer(stream.creatorRoyaltyAmount);
+            emit CreatorRoyaltyPaid(stream.creatorAddress, stream.creatorRoyaltyAmount);
+        }
+        
+        emit StreamFinalized(
             streamId,
-            stream.sender,
-            stream.recipient,
-            remainingToSender,
-            availableToRecipient
+            stream.totalWithdrawn,
+            stream.platformFeeAmount,
+            stream.creatorRoyaltyAmount
         );
     }
+
 
     /**
      * @dev Get stream details
@@ -257,6 +349,119 @@ contract PaymentStream is ReentrancyGuard, Ownable {
     }
 
     /**
+     * @dev Cancel a stream and return remaining funds with pro-rata distribution
+     * @param streamId The stream ID
+     */
+    function cancelStream(uint256 streamId) external nonReentrant {
+        Stream storage stream = streams[streamId];
+        require(
+            stream.sender == msg.sender || 
+            stream.recipient == msg.sender ||
+            authorizedContracts[msg.sender],
+            "Not authorized"
+        );
+        require(stream.active && !stream.finalized, "Stream not active");
+        
+        uint256 availableToRecipient = this.balanceOf(streamId);
+        uint256 remainingToSender = stream.remainingBalance - availableToRecipient;
+        
+        stream.active = false;
+        stream.finalized = true;
+        stream.remainingBalance = 0;
+        
+        if (availableToRecipient > 0) {
+            payable(stream.recipient).transfer(availableToRecipient);
+        }
+        
+        if (remainingToSender > 0) {
+            payable(stream.sender).transfer(remainingToSender);
+        }
+        
+        emit StreamCancelled(
+            streamId,
+            stream.sender,
+            stream.recipient,
+            remainingToSender,
+            availableToRecipient
+        );
+    }
+
+    /**
+     * @dev Set creator address for a collection
+     * @param nftContract NFT contract address
+     * @param creator Creator address
+     */
+    function setCollectionCreator(address nftContract, address creator) external onlyOwner {
+        collectionCreators[nftContract] = creator;
+    }
+
+    /**
+     * @dev Update platform fee percentage
+     * @param newFeePercentage New fee percentage in basis points
+     */
+    function updatePlatformFee(uint256 newFeePercentage) external onlyOwner {
+        require(newFeePercentage <= 1000, "Fee too high"); // Max 10%
+        platformFeePercentage = newFeePercentage;
+    }
+
+    /**
+     * @dev Update creator royalty percentage
+     * @param newRoyaltyPercentage New royalty percentage in basis points
+     */
+    function updateCreatorRoyalty(uint256 newRoyaltyPercentage) external onlyOwner {
+        require(newRoyaltyPercentage <= 500, "Royalty too high"); // Max 5%
+        creatorRoyaltyPercentage = newRoyaltyPercentage;
+    }
+
+    /**
+     * @dev Update treasury address
+     * @param newTreasury New treasury address
+     */
+    function updateTreasury(address newTreasury) external onlyOwner {
+        require(newTreasury != address(0), "Invalid treasury address");
+        treasury = newTreasury;
+    }
+
+    /**
+     * @dev Add authorized contract
+     * @param contractAddr Contract address to authorize
+     */
+    function addAuthorizedContract(address contractAddr) external onlyOwner {
+        authorizedContracts[contractAddr] = true;
+    }
+
+    /**
+     * @dev Remove authorized contract
+     * @param contractAddr Contract address to remove
+     */
+    function removeAuthorizedContract(address contractAddr) external onlyOwner {
+        authorizedContracts[contractAddr] = false;
+    }
+
+    /**
+     * @dev Update maximum stream duration
+     * @param newMaxDuration New maximum duration in seconds
+     */
+    function updateMaxStreamDuration(uint256 newMaxDuration) external onlyOwner {
+        require(newMaxDuration >= MINIMUM_STREAM_DURATION, "Duration too short");
+        maxStreamDuration = newMaxDuration;
+    }
+
+    /**
+     * @dev Emergency pause function
+     */
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause function
+     */
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    /**
      * @dev Emergency function to recover stuck funds (only owner)
      * @param streamId The stream ID
      */
@@ -267,8 +472,63 @@ contract PaymentStream is ReentrancyGuard, Ownable {
         uint256 amount = stream.remainingBalance;
         stream.remainingBalance = 0;
         stream.active = false;
+        stream.finalized = true;
         
         payable(owner()).transfer(amount);
     }
+
+    /**
+     * @dev Get comprehensive stream information
+     * @param streamId The stream ID
+     * @return Stream struct with all details
+     */
+    function getStreamDetails(uint256 streamId) external view returns (Stream memory) {
+        return streams[streamId];
+    }
+
+    /**
+     * @dev Get total platform fees collected
+     * @return Total platform fees in contract
+     */
+    function getTotalPlatformFees() external view returns (uint256) {
+        uint256 totalFees = 0;
+        for (uint256 i = 0; i < nextStreamId; i++) {
+            if (streams[i].finalized) {
+                totalFees += streams[i].platformFeeAmount;
+            }
+        }
+        return totalFees;
+    }
+
+    /**
+     * @dev Get total creator royalties collected
+     * @return Total creator royalties in contract
+     */
+    function getTotalCreatorRoyalties() external view returns (uint256) {
+        uint256 totalRoyalties = 0;
+        for (uint256 i = 0; i < nextStreamId; i++) {
+            if (streams[i].finalized) {
+                totalRoyalties += streams[i].creatorRoyaltyAmount;
+            }
+        }
+        return totalRoyalties;
+    }
+
+    /**
+     * @dev Withdraw accumulated platform fees
+     */
+    function withdrawPlatformFees() external onlyOwner {
+        require(treasury != address(0), "Treasury not set");
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+        
+        payable(treasury).transfer(balance);
+        emit PlatformFeeWithdrawn(treasury, balance);
+    }
+
+    /**
+     * @dev Receive function to accept ETH
+     */
+    receive() external payable {}
 }
 

@@ -11,11 +11,49 @@
           "type": "address"
         }
       ],
+      "name": "getAveragePrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "averagePrice",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nftContract",
+          "type": "address"
+        }
+      ],
       "name": "getFloorPrice",
       "outputs": [
         {
           "internalType": "uint256",
           "name": "floorPrice",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "nftContract",
+          "type": "address"
+        }
+      ],
+      "name": "getLastSalePrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "lastSalePrice",
           "type": "uint256"
         }
       ],

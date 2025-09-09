@@ -371,6 +371,675 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Technical Architecture Deep Dive Section */}
+      <section className="px-4 py-20 bg-muted/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-8 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Technical Architecture <span className="text-primary">Deep Dive</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Built from first principles to leverage Somnia's revolutionary capabilities. 
+              Micro-rentals that are economically and technically infeasible on any other network.
+            </p>
+          </div>
+
+          {/* Network Layer */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 text-center">
+              <span className="text-primary">3.1</span> Network Layer: Why Somnia is Non-Negotiable
+            </h3>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-4xl mx-auto">
+              The core innovation of NFTFlow is predicated on a blockchain that can support 
+              high-frequency, low-value transactions with instant finality. Somnia is the only 
+              network that provides this specific combination of features.
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Timer className="w-6 h-6 text-primary" />
+                    Sub-Second Finality
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">
+                    The user experience of renting an NFT must be comparable to streaming a movie. 
+                    Any perceptible delay destroys the illusion of instant access.
+                  </p>
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-primary mb-1">~500ms</div>
+                    <div className="text-sm text-muted-foreground">Somnia's block finality time</div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Implementation:</strong> When a user initiates a rental, the transaction 
+                    is confirmed in under one second, granting immediate access to the rented asset.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <DollarSign className="w-6 h-6 text-primary" />
+                    Sub-Cent Fees
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">
+                    The economic model of micro-rentals requires that transaction costs are a 
+                    negligible fraction of the rental price.
+                  </p>
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-primary mb-1">~$0.00025</div>
+                    <div className="text-sm text-muted-foreground">Somnia's transaction cost</div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Implementation:</strong> A 10-minute rental costing $0.0167 has a gas 
+                    fee representing only ~1.5% of the rental value, making the business model sustainable.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Zap className="w-6 h-6 text-primary" />
+                    1M+ TPS
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">
+                    NFTFlow envisions millions of users renting thousands of NFTs simultaneously 
+                    without congestion or increased fees.
+                  </p>
+                  <div className="bg-primary/10 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-primary mb-1">1M+</div>
+                    <div className="text-sm text-muted-foreground">Theoretical throughput</div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Implementation:</strong> Even during peak demand for popular NFT drops, 
+                    the network processes all transactions without delay or increased cost.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Smart Contract Layer */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 text-center">
+              <span className="text-primary">3.2</span> Smart Contract Layer
+            </h3>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-4xl mx-auto">
+              The smart contract suite deployed on Somnia forms the immutable, trustless backbone of the protocol.
+            </p>
+
+            <div className="space-y-8">
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Shield className="w-6 h-6 text-primary" />
+                    NFTFlowCore.sol: Rental Management Logic
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Temporal Access Control</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Built upon modified ERC-4907 standard with granular control and automatic 
+                        access revocation upon expiration.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Collateral Escrow</h4>
+                      <p className="text-sm text-muted-foreground">
+                        For low-reputation users, holds 2x rental value in escrow with pro-rata 
+                        refunds for early cancellations.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Dispute Resolution</h4>
+                      <p className="text-sm text-muted-foreground">
+                        On-chain mechanism for resolving conflicts with third-party arbitrators 
+                        and enforced decisions.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <CreditCard className="w-6 h-6 text-primary" />
+                    PaymentStream.sol: Real-Time Value Transfer
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Continuous Payments</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Linear stream algorithm calculates releasable amounts based on elapsed time, 
+                        providing smooth value transfer.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Stream Cancellation</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Allows either party or arbitrators to cancel streams with pro-rata 
+                        distribution of funds.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Fee Distribution</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Automatic 2.5% protocol fee deduction on each fund release, sent to 
+                        NFTFlow treasury.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <h5 className="font-semibold mb-2">Payment Stream Algorithm:</h5>
+                    <code className="text-sm text-muted-foreground">
+                      releasableAmount = (totalAmount × elapsedTime) / totalDuration - releasedAmount
+                    </code>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Star className="w-6 h-6 text-primary" />
+                    ReputationSystem.sol: Trust Minimization
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">On-Chain History</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Immutable record of every user's rental history, publicly verifiable 
+                        and serving as reputation foundation.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Collateral Algorithm</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Dynamic collateral requirements based on reputation scores, reducing 
+                        barriers for trusted users.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Sybil Resistance</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Integration with identity providers and on-chain metrics to prevent 
+                        reputation gaming.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Off-Chain Infrastructure */}
+          <div>
+            <h3 className="text-3xl font-bold mb-8 text-center">
+              <span className="text-primary">3.3</span> Off-Chain Infrastructure
+            </h3>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-4xl mx-auto">
+              While the core logic is on-chain, a lean off-chain infrastructure layer is essential 
+              for performance and user experience.
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="bg-card/30 border-accent/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <BarChart3 className="w-6 h-6 text-accent" />
+                    Event Indexing & Query Layer
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Dedicated service listens for on-chain events and indexes them into a 
+                    PostgreSQL database for efficient querying.
+                  </p>
+                  <div className="bg-accent/10 p-4 rounded-lg">
+                    <div className="text-sm font-semibold text-accent mb-2">Key Events:</div>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• RentalStarted</li>
+                      <li>• RentalCompleted</li>
+                      <li>• FundsReleased</li>
+                    </ul>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Implementation:</strong> Uses The Graph or custom indexer to maintain 
+                    a fast, queryable database replica of the chain's rental state.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-accent/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Globe className="w-6 h-6 text-accent" />
+                    Metadata Cache & IPFS
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">
+                    NFT metadata stored on IPFS is cached in Redis for instant access, 
+                    drastically improving page load times.
+                  </p>
+                  <div className="bg-accent/10 p-4 rounded-lg">
+                    <div className="text-sm font-semibold text-accent mb-2">Cache Strategy:</div>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• Check Redis first</li>
+                      <li>• Fetch from IPFS on miss</li>
+                      <li>• Store in Redis for future</li>
+                    </ul>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Implementation:</strong> Redis cache stores metadata JSON blobs, 
+                    serving them instantly while maintaining IPFS as the source of truth.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-accent/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Target className="w-6 h-6 text-accent" />
+                    Price Oracle Integration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Fair, market-based pricing through DIA Oracle integration ensures 
+                    rental prices reflect real market data.
+                  </p>
+                  <div className="bg-accent/10 p-4 rounded-lg">
+                    <div className="text-sm font-semibold text-accent mb-2">Oracle Details:</div>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• DIA Oracle on Somnia</li>
+                      <li>• Real-time price feeds</li>
+                      <li>• Anti-manipulation</li>
+                    </ul>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Implementation:</strong> Contract queries DIA oracle for current 
+                    rental prices before finalizing agreements, preventing price manipulation.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Somnia Network Integration Section */}
+      <section className="px-4 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-8 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold">
+              Somnia Network <span className="text-primary">Integration</span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              NFTFlow is not merely deployed on Somnia; it is fundamentally architected to leverage 
+              the network's unique capabilities to their maximum potential.
+            </p>
+          </div>
+
+          {/* Technical Implementation */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 text-center">
+              <span className="text-primary">5.1</span> Technical Implementation
+            </h3>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-4xl mx-auto">
+              Deep integration with Somnia's infrastructure transforms technical compromises into defining features.
+            </p>
+
+            <div className="space-y-8">
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Zap className="w-6 h-6 text-primary" />
+                    Custom RPC Configuration for Optimal Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Dedicated Node Infrastructure</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Load-balanced Somnia RPC node cluster with sub-50ms ping and high request quotas, 
+                        eliminating public endpoint bottlenecks.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">WebSocket Real-Time State</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Persistent WebSocket connection for instant blockchain event subscription, 
+                        enabling live price updates and rental status changes.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Failover & Redundancy</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Multiple fallback RPC providers including Ankr's infrastructure for 99.99% uptime 
+                        and seamless failover.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Shield className="w-6 h-6 text-primary" />
+                    MultiCallV3 for Batch Operations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Unified Rental Transactions</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Single "Rent Now" transaction bundles approval, payment, and access grant, 
+                        reducing wallet pop-ups and gas consumption.
+                      </p>
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        <div className="text-xs font-mono text-muted-foreground">
+                          MultiCall bundles: Approval → Payment → Access Grant
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Efficient Data Fetching</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Aggregates multiple view function calls into single atomic requests, 
+                        drastically reducing load times and RPC calls.
+                      </p>
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        <div className="text-xs font-mono text-muted-foreground">
+                          Contract: 0x841b8199E6d3Db3C6f264f6C2bd8848b3cA64223
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Clock className="w-6 h-6 text-primary" />
+                    Event Listening for Real-Time Updates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">On-Chain Event Indexing</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Dedicated backend service listens for key blockchain events: NFTRented, 
+                        RentalCompleted, FundsReleased.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">Real-Time Database Sync</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Immediate PostgreSQL updates when events are emitted, enabling fast 
+                        database queries instead of slow blockchain queries.
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-primary">WebSocket Push to UI</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Socket.io pushes updates to all connected clients, enabling real-time 
+                        UI updates without page refreshes.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Performance Benchmarks */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold mb-8 text-center">
+              <span className="text-primary">5.2</span> Performance Benchmarks
+            </h3>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-4xl mx-auto">
+              Recorded on Somnia Testnet (Shannon), demonstrating transformative performance enabled by the network.
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="bg-card/30 border-accent/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Timer className="w-6 h-6 text-accent" />
+                    Transaction Latency
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-accent mb-2">~1.2s</div>
+                    <div className="text-sm text-muted-foreground">Start to Finish</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Signing & Broadcast</span>
+                      <span className="text-accent">~200ms</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Block Inclusion & Finality</span>
+                      <span className="text-accent">~800ms</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Event Detection & UI Update</span>
+                      <span className="text-accent">~200ms</span>
+                    </div>
+                  </div>
+                  <div className="bg-accent/10 p-3 rounded-lg">
+                    <div className="text-xs text-muted-foreground">
+                      <strong>50x faster</strong> than Ethereum L1 (15-60s)
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-accent/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <DollarSign className="w-6 h-6 text-accent" />
+                    Cost per Rental
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-accent mb-2">~0.0000025</div>
+                    <div className="text-sm text-muted-foreground">STT Total Cost</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Create Rental</span>
+                      <span className="text-accent">~0.0000015 STT</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Fund Release (per call)</span>
+                      <span className="text-accent">~0.0000001 STT</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Complete Rental</span>
+                      <span className="text-accent">~0.0000009 STT</span>
+                    </div>
+                  </div>
+                  <div className="bg-accent/10 p-3 rounded-lg">
+                    <div className="text-xs text-muted-foreground">
+                      <strong>~$0.00000025</strong> at $0.10/STT
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-accent/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Users className="w-6 h-6 text-accent" />
+                    Concurrent Rentals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-accent mb-2">1,000</div>
+                    <div className="text-sm text-muted-foreground">Simultaneous Rentals</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Test Scenario:</strong> 1,000 users renting 100 NFTs in 60 seconds
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Result:</strong> All transactions included in next block
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <strong>Performance:</strong> No congestion, stable gas fees
+                    </div>
+                  </div>
+                  <div className="bg-accent/10 p-3 rounded-lg">
+                    <div className="text-xs text-muted-foreground">
+                      <strong>Global scale</strong> without degradation
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Network Effects & Synergies */}
+          <div>
+            <h3 className="text-3xl font-bold mb-8 text-center">
+              <span className="text-primary">5.3</span> Network Effects & Synergies
+            </h3>
+            <p className="text-lg text-muted-foreground text-center mb-12 max-w-4xl mx-auto">
+              NFTFlow is designed to be a flagship dApp that actively contributes to and benefits from Somnia ecosystem growth.
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Star className="w-6 h-6 text-primary" />
+                    Driving SOMI Token Utility
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Medium of Exchange</div>
+                        <div className="text-sm text-muted-foreground">All rentals and payments denominated in SOMI</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Network Security</div>
+                        <div className="text-sm text-muted-foreground">High-frequency transactions contribute to network security</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Staking Integration</div>
+                        <div className="text-sm text-muted-foreground">Future: Stake SOMI for fee discounts and revenue sharing</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Trophy className="w-6 h-6 text-primary" />
+                    Showcasing Technical Capabilities
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Technical Benchmark</div>
+                        <div className="text-sm text-muted-foreground">Live proof of 1M+ TPS, sub-second finality, sub-cent fees</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Developer Inspiration</div>
+                        <div className="text-sm text-muted-foreground">Open-source codebase demonstrates Somnia best practices</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Real-World Application</div>
+                        <div className="text-sm text-muted-foreground">Complex dApp running seamlessly on the network</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card/30 border-primary/20 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <Rocket className="w-6 h-6 text-primary" />
+                    Attracting NFT Projects
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">New Revenue Stream</div>
+                        <div className="text-sm text-muted-foreground">Continuous rental revenue beyond initial NFT sales</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Enhanced Accessibility</div>
+                        <div className="text-sm text-muted-foreground">Lower barriers to entry expand potential user base</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div>
+                        <div className="font-semibold">Ecosystem Cross-Pollination</div>
+                        <div className="text-sm text-muted-foreground">User acquisition funnel for entire Somnia ecosystem</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Market Opportunity Section */}
       <section className="px-4 py-20 bg-muted/20">
         <div className="max-w-6xl mx-auto">

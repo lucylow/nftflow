@@ -10,6 +10,8 @@ import "../interfaces/IPriceOracle.sol";
 contract MockPriceOracle is IPriceOracle {
     mapping(address => mapping(uint256 => uint256)) private prices;
     mapping(address => uint256) private floorPrices;
+    mapping(address => uint256) private averagePrices;
+    mapping(address => uint256) private lastSalePrices;
     mapping(address => mapping(uint256 => bool)) private hasPriceData;
 
     function getPricePerSecond(address nftContract, uint256 tokenId) 
@@ -51,9 +53,35 @@ contract MockPriceOracle is IPriceOracle {
         return hasPriceData[nftContract][tokenId];
     }
 
+    function getAveragePrice(address nftContract) 
+        external 
+        view 
+        override 
+        returns (uint256 averagePrice) 
+    {
+        return averagePrices[nftContract] > 0 ? averagePrices[nftContract] : 1.5e18; // 1.5 ETH default
+    }
+
+    function getLastSalePrice(address nftContract) 
+        external 
+        view 
+        override 
+        returns (uint256 lastSalePrice) 
+    {
+        return lastSalePrices[nftContract] > 0 ? lastSalePrices[nftContract] : 2e18; // 2 ETH default
+    }
+
     // Additional functions for testing
     function setFloorPrice(address nftContract, uint256 floorPrice) external {
         floorPrices[nftContract] = floorPrice;
+    }
+
+    function setAveragePrice(address nftContract, uint256 averagePrice) external {
+        averagePrices[nftContract] = averagePrice;
+    }
+
+    function setLastSalePrice(address nftContract, uint256 lastSalePrice) external {
+        lastSalePrices[nftContract] = lastSalePrice;
     }
 }
 
