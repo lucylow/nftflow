@@ -103,8 +103,8 @@ contract PaymentStream is ReentrancyGuard, Ownable, Pausable {
         _;
     }
 
-    constructor(address _treasury) {
-        treasury = _treasury;
+    constructor(address _treasury) Ownable() {
+        treasury = _treasury != address(0) ? _treasury : msg.sender;
     }
 
     /**

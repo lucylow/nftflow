@@ -10,7 +10,7 @@ describe("PaymentStream", function () {
     [sender, recipient, otherAccount] = await ethers.getSigners();
 
     const PaymentStream = await ethers.getContractFactory("PaymentStream");
-    paymentStream = await PaymentStream.deploy();
+    paymentStream = await PaymentStream.deploy(sender.address);
   });
 
   describe("Deployment", function () {

@@ -260,12 +260,12 @@ contract DynamicPricing is Ownable, ReentrancyGuard {
             return 0;
         }
         
-        try reputationSystem.getUserReputation(user) returns (ReputationSystem.UserReputation memory reputation) {
-            if (reputation.reputationScore >= 800) {
+        try reputationSystem.getReputationScore(user) returns (uint256 reputationScore) {
+            if (reputationScore >= 800) {
                 return highReputationDiscount;
-            } else if (reputation.reputationScore >= 500) {
+            } else if (reputationScore >= 500) {
                 return midReputationDiscount;
-            } else if (reputation.reputationScore >= 100) {
+            } else if (reputationScore >= 100) {
                 return lowReputationDiscount;
             }
         } catch {

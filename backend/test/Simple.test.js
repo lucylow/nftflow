@@ -4,7 +4,8 @@ const { ethers } = require("hardhat");
 describe("Simple Contract Tests", function () {
   it("Should deploy PaymentStream successfully", async function () {
     const PaymentStream = await ethers.getContractFactory("PaymentStream");
-    const paymentStream = await PaymentStream.deploy();
+    const [owner] = await ethers.getSigners();
+    const paymentStream = await PaymentStream.deploy(owner.address);
     
     expect(await paymentStream.getAddress()).to.be.properAddress;
   });
@@ -36,7 +37,8 @@ describe("Simple Contract Tests", function () {
     const priceOracle = await MockPriceOracle.deploy();
 
     const PaymentStream = await ethers.getContractFactory("PaymentStream");
-    const paymentStream = await PaymentStream.deploy();
+    const [owner] = await ethers.getSigners();
+    const paymentStream = await PaymentStream.deploy(owner.address);
 
     const ReputationSystem = await ethers.getContractFactory("ReputationSystem");
     const reputationSystem = await ReputationSystem.deploy();

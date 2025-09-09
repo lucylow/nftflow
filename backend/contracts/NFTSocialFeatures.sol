@@ -48,7 +48,7 @@ contract NFTSocialFeatures is Ownable, ReentrancyGuard {
     mapping(address => UserProfile) public userProfiles;
     mapping(bytes32 => Review[]) public nftReviews; // keccak256(nftContract, tokenId) => reviews
     mapping(bytes32 => NFTRating) public nftRatings;
-    mapping(address => FollowData) public userFollows;
+    mapping(address => FollowData) internal userFollows;
     mapping(address => bool) public registeredUsers;
     mapping(string => bool) public usernamesTaken;
     
@@ -365,7 +365,9 @@ contract NFTSocialFeatures is Ownable, ReentrancyGuard {
     /**
      * @dev Get top-rated NFTs (simplified - would need more complex logic for production)
      * @param count Number of top NFTs to return
-     * @return Array of NFT identifiers with their ratings
+     * @return contracts Array of NFT contract addresses
+     * @return tokenIds Array of token IDs
+     * @return ratings Array of average ratings
      */
     function getTopRatedNFTs(uint256 count) external view returns (
         address[] memory contracts,
@@ -386,5 +388,23 @@ contract NFTSocialFeatures is Ownable, ReentrancyGuard {
     function verifyUser(address user) external onlyOwner {
         require(registeredUsers[user], "User not registered");
         userProfiles[user].isVerified = true;
+    }
+    
+    /**
+     * @dev Get follow data for a user
+     * @param user User address
+     * @return followers Array of follower addresses
+     * @return following Array of addresses the user is following
+     * @return followerCount Number of followers
+     * @return followingCount Number of users being followed
+     */
+    function getUserFollows(address user) external view returns (
+        address[] memory followers,
+        address[] memory following,
+        uint256 followerCount,
+        uint256 followingCount
+    ) {
+        FollowData storage data = userFollows[user];
+        return (data.followersList, data.followingList, data.followersList.length, data.followingList.length);
     }
 }

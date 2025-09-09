@@ -16,9 +16,10 @@ export const CONTRACT_ADDRESSES = {
 // Network configuration
 export const NETWORK_CONFIG = {
   name: import.meta.env.VITE_NETWORK || 'somnia',
-  rpcUrl: import.meta.env.VITE_RPC_URL || 'https://testnet.somnia.network',
-  chainId: import.meta.env.VITE_NETWORK === 'hardhat' ? 1337 : 50311,
+  rpcUrl: import.meta.env.VITE_RPC_URL || 'https://dream-rpc.somnia.network/',
+  chainId: import.meta.env.VITE_NETWORK === 'hardhat' ? 1337 : 50312,
   currency: import.meta.env.VITE_NETWORK === 'hardhat' ? 'ETH' : 'STT',
+  blockExplorer: 'https://shannon-explorer.somnia.network/',
 };
 
 // Default values for testing

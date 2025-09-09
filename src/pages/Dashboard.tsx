@@ -23,6 +23,12 @@ import NFTCard from "@/components/NFTCard";
 import UserDashboard from "@/components/UserDashboard";
 import NFTManagement from "@/components/NFTManagement";
 import PaymentStreamManagement from "@/components/PaymentStreamManagement";
+import GamificationDashboard from "@/components/GamificationDashboard";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import NotificationSystem from "@/components/NotificationSystem";
+import BulkOperations from "@/components/BulkOperations";
+import MobileOptimizations from "@/components/MobileOptimizations";
+import SocialFeatures from "@/components/SocialFeatures";
 import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton, DashboardSkeleton, LoadingSpinner } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -63,7 +69,10 @@ const Dashboard = () => {
       isRented: true,
       owner: "0x1234567890abcdef",
       timeLeft: "2h 15m",
-      rarity: "Rare"
+      rarity: "Rare",
+      utilityType: "Gaming Weapon",
+      rentalStartTime: "2024-01-15T10:30:00Z",
+      totalCost: 1.25
     },
     {
       id: "2",
@@ -75,15 +84,125 @@ const Dashboard = () => {
       isRented: true,
       owner: "0x9876543210fedcba", 
       timeLeft: "45m",
-      rarity: "Epic"
+      rarity: "Epic",
+      utilityType: "Gaming Avatar",
+      rentalStartTime: "2024-01-15T14:00:00Z",
+      totalCost: 2.4
+    },
+    {
+      id: "3",
+      name: "AI Trading Bot License",
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop",
+      collection: "AI Services",
+      pricePerHour: 0.0432,
+      pricePerSecond: 0.000012,
+      isRented: true,
+      owner: "0x7777888899990000",
+      timeLeft: "1d 3h",
+      rarity: "Epic",
+      utilityType: "AI Service",
+      rentalStartTime: "2024-01-14T09:15:00Z",
+      totalCost: 1.08
+    },
+    {
+      id: "4",
+      name: "Virtual Real Estate Plot",
+      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=400&fit=crop",
+      collection: "Metaverse Land",
+      pricePerHour: 0.0288,
+      pricePerSecond: 0.000008,
+      isRented: true,
+      owner: "0x4444555566667777",
+      timeLeft: "2d 5h",
+      rarity: "Legendary",
+      utilityType: "Virtual Land",
+      rentalStartTime: "2024-01-13T16:45:00Z",
+      totalCost: 1.44
+    },
+    {
+      id: "5",
+      name: "Music Production Studio",
+      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+      collection: "Creative Tools",
+      pricePerHour: 0.0144,
+      pricePerSecond: 0.000004,
+      isRented: true,
+      owner: "0x2222333344445555",
+      timeLeft: "4h 30m",
+      rarity: "Rare",
+      utilityType: "Creative Tool",
+      rentalStartTime: "2024-01-15T12:00:00Z",
+      totalCost: 0.65
     }
   ];
 
   const recentActivity = [
-    { type: "rental", action: "Rented Cosmic Wizard #1234", time: "2 hours ago", amount: "+1.5 STT" },
-    { type: "return", action: "Returned Space Ape #456", time: "5 hours ago", amount: "-0.8 STT" },
-    { type: "rental", action: "Rented Digital Dragon #777", time: "1 day ago", amount: "+2.5 STT" },
-    { type: "earning", action: "Earned from Neon Cat #9999", time: "2 days ago", amount: "+3.2 STT" }
+    { type: "rental", action: "Rented Cosmic Wizard #1234", time: "2 hours ago", amount: "+1.5 STT", nftId: "1" },
+    { type: "return", action: "Returned Space Ape #456", time: "5 hours ago", amount: "-0.8 STT", nftId: "456" },
+    { type: "rental", action: "Rented AI Trading Bot License", time: "1 day ago", amount: "+1.08 STT", nftId: "3" },
+    { type: "earning", action: "Earned from Virtual Real Estate Plot", time: "2 days ago", amount: "+1.44 STT", nftId: "4" },
+    { type: "rental", action: "Rented Music Production Studio", time: "3 days ago", amount: "+0.65 STT", nftId: "5" },
+    { type: "return", action: "Returned Digital Dragon #777", time: "4 days ago", amount: "-2.5 STT", nftId: "777" },
+    { type: "earning", action: "Earned from Neon Cat #9999", time: "5 days ago", amount: "+3.2 STT", nftId: "9999" },
+    { type: "rental", action: "Rented Galaxy Punk #5678", time: "6 days ago", amount: "+2.4 STT", nftId: "2" },
+    { type: "return", action: "Returned Luxury Car Showroom", time: "1 week ago", amount: "-4.0 STT", nftId: "111" },
+    { type: "earning", action: "Earned from Crypto Trading Signals", time: "1 week ago", amount: "+8.0 STT", nftId: "666" }
+  ];
+
+  const userListings = [
+    {
+      id: "1",
+      name: "Digital Art Gallery Space",
+      image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
+      collection: "Virtual Galleries",
+      pricePerSecond: 0.000002,
+      isRented: false,
+      owner: "0x5555666677778888",
+      rarity: "Rare",
+      utilityType: "Art Display",
+      totalEarnings: 12.5,
+      rentalCount: 8,
+      lastRented: "2 days ago"
+    },
+    {
+      id: "2",
+      name: "Fitness Coach AI",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
+      collection: "Health & Wellness",
+      pricePerSecond: 0.000002,
+      isRented: true,
+      owner: "0x6666777788889999",
+      timeLeft: "3h 45m",
+      rarity: "Common",
+      utilityType: "Health Service",
+      totalEarnings: 8.3,
+      rentalCount: 15,
+      lastRented: "Currently rented"
+    },
+    {
+      id: "3",
+      name: "Language Learning Tutor",
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=400&fit=crop",
+      collection: "Education Services",
+      pricePerSecond: 0.0000015,
+      isRented: false,
+      owner: "0x0000111122223333",
+      rarity: "Common",
+      utilityType: "Education",
+      totalEarnings: 5.7,
+      rentalCount: 12,
+      lastRented: "1 week ago"
+    }
+  ];
+
+  const earningsHistory = [
+    { date: "2024-01-15", amount: 5.67, rentals: 3 },
+    { date: "2024-01-14", amount: 8.23, rentals: 5 },
+    { date: "2024-01-13", amount: 12.45, rentals: 7 },
+    { date: "2024-01-12", amount: 6.78, rentals: 4 },
+    { date: "2024-01-11", amount: 9.12, rentals: 6 },
+    { date: "2024-01-10", amount: 15.34, rentals: 9 },
+    { date: "2024-01-09", amount: 7.89, rentals: 5 }
   ];
 
   // Show full page skeleton on initial load
@@ -164,6 +283,24 @@ const Dashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="streams" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Payment Streams
+            </TabsTrigger>
+            <TabsTrigger value="gamification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Achievements
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Notifications
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Bulk Operations
+            </TabsTrigger>
+            <TabsTrigger value="mobile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Mobile
+            </TabsTrigger>
+            <TabsTrigger value="social" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Social
             </TabsTrigger>
           </TabsList>
 
@@ -326,45 +463,149 @@ const Dashboard = () => {
 
           <TabsContent value="earnings" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
-                  <Wallet className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">156.78 STT</p>
-                  <p className="text-slate-400 text-sm">Total Earned</p>
+                  <Wallet className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">156.78 STT</p>
+                  <p className="text-muted-foreground text-sm">Total Earned</p>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
-                  <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">23.45 STT</p>
-                  <p className="text-slate-400 text-sm">This Month</p>
+                  <TrendingUp className="w-8 h-8 text-success mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">23.45 STT</p>
+                  <p className="text-muted-foreground text-sm">This Month</p>
                 </CardContent>
               </Card>
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
-                  <Calendar className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">5.67 STT</p>
-                  <p className="text-slate-400 text-sm">Today</p>
+                  <Calendar className="w-8 h-8 text-accent mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-foreground">5.67 STT</p>
+                  <p className="text-muted-foreground text-sm">Today</p>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Earnings History Chart */}
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Earnings History (Last 7 Days)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {earningsHistory.map((day, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <div>
+                          <p className="font-medium text-foreground">{new Date(day.date).toLocaleDateString()}</p>
+                          <p className="text-sm text-muted-foreground">{day.rentals} rentals</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-success">{day.amount} STT</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top Earning NFTs */}
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Top Earning NFTs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {userListings.map((nft, index) => (
+                    <div key={nft.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                          #{index + 1}
+                        </div>
+                        <img src={nft.image} alt={nft.name} className="w-10 h-10 rounded-lg object-cover" />
+                        <div>
+                          <p className="font-medium text-foreground">{nft.name}</p>
+                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-success">{nft.totalEarnings} STT</p>
+                        <p className="text-sm text-muted-foreground">{nft.rentalCount} rentals</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="listings" className="space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center justify-between">
+                <CardTitle className="text-foreground flex items-center justify-between">
                   My Listed NFTs
-                  <Button className="bg-purple-600 hover:bg-purple-700">
+                  <Button variant="premium">
+                    <Plus className="w-4 h-4 mr-2" />
                     List New NFT
                   </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-slate-400">
-                  <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No NFTs listed yet</p>
-                  <p className="text-sm">Start earning by listing your NFTs for rent</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {userListings.map((nft) => (
+                    <Card key={nft.id} className="bg-card/30 border-border/30 backdrop-blur-sm hover:border-primary/30 transition-all">
+                      <CardContent className="p-4">
+                        <div className="aspect-square mb-4 rounded-lg overflow-hidden">
+                          <img 
+                            src={nft.image} 
+                            alt={nft.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-foreground">{nft.name}</h3>
+                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className="text-xs">
+                              {nft.rarity}
+                            </Badge>
+                            <Badge variant={nft.isRented ? "default" : "secondary"} className="text-xs">
+                              {nft.isRented ? "Rented" : "Available"}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Total Earnings:</span>
+                              <span className="font-medium text-success">{nft.totalEarnings} STT</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Rentals:</span>
+                              <span className="font-medium">{nft.rentalCount}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Last Rented:</span>
+                              <span className="font-medium">{nft.lastRented}</span>
+                            </div>
+                          </div>
+                          {nft.isRented && (
+                            <div className="mt-2 p-2 bg-primary/10 rounded text-center">
+                              <p className="text-sm text-primary font-medium">
+                                Time Left: {nft.timeLeft}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -376,6 +617,30 @@ const Dashboard = () => {
 
           <TabsContent value="streams" className="space-y-8">
             <PaymentStreamManagement />
+          </TabsContent>
+
+          <TabsContent value="gamification" className="space-y-8">
+            <GamificationDashboard />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-8">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-8">
+            <NotificationSystem />
+          </TabsContent>
+
+          <TabsContent value="bulk" className="space-y-8">
+            <BulkOperations />
+          </TabsContent>
+
+          <TabsContent value="mobile" className="space-y-8">
+            <MobileOptimizations />
+          </TabsContent>
+
+          <TabsContent value="social" className="space-y-8">
+            <SocialFeatures />
           </TabsContent>
         </Tabs>
       </div>

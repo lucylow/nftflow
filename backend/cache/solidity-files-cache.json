@@ -666,8 +666,8 @@
       ]
     },
     "/Users/llow/Documents/nftflow/backend/contracts/PaymentStream.sol": {
-      "lastModificationDate": 1757438798236,
-      "contentHash": "65838bf6334c26cfaa6cbeabd18352ce",
+      "lastModificationDate": 1757453379668,
+      "contentHash": "82fce49d1963c54631d65f54109bedb7",
       "sourceName": "contracts/PaymentStream.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -705,8 +705,8 @@
       ]
     },
     "/Users/llow/Documents/nftflow/backend/contracts/ReputationSystem.sol": {
-      "lastModificationDate": 1757429345004,
-      "contentHash": "339f2121d21399d42fcb1d403b29c8ed",
+      "lastModificationDate": 1757453371973,
+      "contentHash": "4223f4ff3cef487c38acd1a40eb04fdd",
       "sourceName": "contracts/ReputationSystem.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -742,8 +742,8 @@
       ]
     },
     "/Users/llow/Documents/nftflow/backend/contracts/MockPriceOracle.sol": {
-      "lastModificationDate": 1757438831330,
-      "contentHash": "684feb838cbd85f8fd1dfc3117d5a5d2",
+      "lastModificationDate": 1757452893101,
+      "contentHash": "572c8bcbc3866c83f9ef1173b7863f71",
       "sourceName": "contracts/MockPriceOracle.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -769,7 +769,8 @@
         }
       },
       "imports": [
-        "../interfaces/IPriceOracle.sol"
+        "./interfaces/IPriceOracle.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
       ],
       "versionPragmas": [
         "^0.8.19"
@@ -817,8 +818,8 @@
       ]
     },
     "/Users/llow/Documents/nftflow/backend/contracts/DynamicPricing.sol": {
-      "lastModificationDate": 1757439038129,
-      "contentHash": "1618baa8983eab1a48d703fb056433d7",
+      "lastModificationDate": 1757447961350,
+      "contentHash": "144367a266dbbada14b50b42d0f23f06",
       "sourceName": "contracts/DynamicPricing.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -857,8 +858,8 @@
       ]
     },
     "/Users/llow/Documents/nftflow/backend/contracts/NFTFlowCore.sol": {
-      "lastModificationDate": 1757439053091,
-      "contentHash": "8877869c7c72b2ecfc3bc1aede94b2da",
+      "lastModificationDate": 1757453923768,
+      "contentHash": "e4a8c4c50d0ddf2817a1c142fa841ac2",
       "sourceName": "contracts/NFTFlowCore.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -884,27 +885,18 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/security/Pausable.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/token/ERC721/IERC721.sol",
-        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
-        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol",
-        "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol",
-        "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol",
-        "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol",
-        "../interfaces/IERC4907.sol",
-        "../interfaces/IPriceOracle.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./interfaces/IERC4907.sol",
+        "./interfaces/IPriceOracle.sol",
         "./PaymentStream.sol",
-        "./ReputationSystem.sol",
-        "./DynamicPricing.sol"
+        "./ReputationSystem.sol"
       ],
       "versionPragmas": [
         "^0.8.19"
       ],
       "artifacts": [
-        "IDynamicPricing",
         "NFTFlowCore"
       ]
     },
@@ -1349,6 +1341,534 @@
       ],
       "artifacts": [
         "IBeaconUpgradeable"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/SomniaOptimizedFeatures.sol": {
+      "lastModificationDate": 1757445624186,
+      "contentHash": "df6043472284227173e29e5350ce7305",
+      "sourceName": "contracts/SomniaOptimizedFeatures.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "SomniaOptimizedFeatures"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/PaymentStreamSomnia.sol": {
+      "lastModificationDate": 1757453285774,
+      "contentHash": "b4bd7cd1df9f122f38127e842d7c4937",
+      "sourceName": "contracts/PaymentStreamSomnia.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/utils/math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "PaymentStreamSomnia"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol": {
+      "lastModificationDate": 1757429293288,
+      "contentHash": "f6f4fda16c536e57069af40a245c985e",
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeMath"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/NFTFlowSomniaOptimized.sol": {
+      "lastModificationDate": 1757453313514,
+      "contentHash": "6ef3f5bb82f7b2e72a39150745c2cc24",
+      "sourceName": "contracts/NFTFlowSomniaOptimized.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./interfaces/IERC4907.sol",
+        "./interfaces/IPriceOracle.sol",
+        "./PaymentStream.sol",
+        "./ReputationSystem.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "NFTFlowSomniaOptimized"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/interfaces/IERC4907.sol": {
+      "lastModificationDate": 1757446742890,
+      "contentHash": "563f1ece0f7a3d80e7adb9ce5ff840e9",
+      "sourceName": "contracts/interfaces/IERC4907.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IERC4907"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/interfaces/IPriceOracle.sol": {
+      "lastModificationDate": 1757452824708,
+      "contentHash": "f7a3cd6bfdb0333d22ea27030e6f349f",
+      "sourceName": "contracts/interfaces/IPriceOracle.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IPriceOracle"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/oracles/DIAPriceOracle.sol": {
+      "lastModificationDate": 1757453085878,
+      "contentHash": "3a64499d68895e77c4111c2ed9e61277",
+      "sourceName": "contracts/oracles/DIAPriceOracle.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "../interfaces/IPriceOracle.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "DIAPriceOracle"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/NFTFlowGasOptimized.sol": {
+      "lastModificationDate": 1757453022144,
+      "contentHash": "400da9d78444f975ecfea0b56920de61",
+      "sourceName": "contracts/NFTFlowGasOptimized.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "./utils/MultiCaller.sol",
+        "./interfaces/IERC4907.sol",
+        "./interfaces/IReputationSystem.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "NFTFlowGasOptimized"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/utils/MultiCaller.sol": {
+      "lastModificationDate": 1757453184037,
+      "contentHash": "a386ad22765f4d7a26c9ce7c46ec29a2",
+      "sourceName": "contracts/utils/MultiCaller.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/Address.sol",
+        "../interfaces/IMultiCall.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "MultiCaller"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/interfaces/IReputationSystem.sol": {
+      "lastModificationDate": 1757453063543,
+      "contentHash": "402e6b6fd258d2991ce3cc11da77910b",
+      "sourceName": "contracts/interfaces/IReputationSystem.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IReputationSystem"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/interfaces/IMultiCall.sol": {
+      "lastModificationDate": 1757447080942,
+      "contentHash": "ea8fb2d4dd34a622b93cd65d692f1264",
+      "sourceName": "contracts/interfaces/IMultiCall.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IMultiCall"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/NFTUtilityGamification.sol": {
+      "lastModificationDate": 1757445624185,
+      "contentHash": "be9876301f247a49fc9c895e74678320",
+      "sourceName": "contracts/NFTUtilityGamification.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "NFTUtilityGamification"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/NFTSocialFeatures.sol": {
+      "lastModificationDate": 1757453172563,
+      "contentHash": "d88aea11d6fc51c6dd301e4ba4bfe0b4",
+      "sourceName": "contracts/NFTSocialFeatures.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "NFTSocialFeatures"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/MockERC4907.sol": {
+      "lastModificationDate": 1757453364938,
+      "contentHash": "f2d54cc4c2dd080ab036eb2518fda9fe",
+      "sourceName": "contracts/MockERC4907.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "../interfaces/IERC4907.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "MockERC4907"
       ]
     }
   }

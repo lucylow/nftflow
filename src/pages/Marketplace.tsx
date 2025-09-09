@@ -385,7 +385,28 @@ const mockNFTs = [
   }
 ];
 
-const categories = ["All", "Gaming Utilities", "Art & Display", "Metaverse Access", "Real-World Benefits", "Try Before Buy"];
+const categories = [
+  "All", 
+  "Gaming Utilities", 
+  "AI Services", 
+  "Virtual Land", 
+  "Creative Tools", 
+  "Health & Wellness", 
+  "Virtual Showrooms", 
+  "Education", 
+  "Fashion & Style", 
+  "Financial Services", 
+  "Digital Companions", 
+  "Design Tools", 
+  "Culinary Experiences", 
+  "Wellness Retreats", 
+  "Travel Experiences", 
+  "Developer Resources", 
+  "Art & Display", 
+  "Metaverse Access", 
+  "Event Access", 
+  "Demo Access"
+];
 const sortOptions = ["Price: Low to High", "Price: High to Low", "Recently Listed", "Most Popular"];
 
 const Marketplace = () => {
