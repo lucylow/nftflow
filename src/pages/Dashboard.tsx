@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   TrendingUp, 
   Clock, 
@@ -8,16 +8,37 @@ import {
   BarChart3,
   Calendar,
   Eye,
-  Edit
+  Edit,
+  Plus,
+  Filter,
+  Download,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import NFTCard from "@/components/NFTCard";
+import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Simulate refresh
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsRefreshing(false);
+  };
 
   const userStats = [
     { label: "Total Earned", value: "156.78 STT", change: "+12.5%" },
@@ -59,7 +80,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-indigo-900 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <motion.div
@@ -67,15 +88,29 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
-              <p className="text-slate-300">Manage your NFT rentals and earnings</p>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-2">
+                Dashboard
+              </h1>
+              <p className="text-muted-foreground">Manage your NFT rentals and earnings</p>
             </div>
-            <Button variant="premium" size="lg">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="border-border text-muted-foreground hover:bg-muted/50"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button variant="premium" size="lg">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -98,85 +133,173 @@ const Dashboard = () => {
           <TabsContent value="overview" className="space-y-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {userStats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-slate-400 text-sm">{stat.label}</p>
-                          <p className="text-2xl font-bold text-white">{stat.value}</p>
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, index) => (
+                  <StatsCardSkeleton key={index} />
+                ))
+              ) : (
+                userStats.map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-muted-foreground text-sm">{stat.label}</p>
+                            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                          </div>
+                          <Badge 
+                            variant="default"
+                            className="bg-success/20 text-success border-success/30"
+                          >
+                            {stat.change}
+                          </Badge>
                         </div>
-                        <Badge 
-                          variant="default"
-                          className="bg-green-500/20 text-green-400 border-green-500/30"
-                        >
-                          {stat.change}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))
+              )}
             </div>
 
+            {/* Progress Overview */}
+            {!isLoading && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Monthly Progress
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Earnings Target</span>
+                        <span className="text-foreground font-medium">75%</span>
+                      </div>
+                      <Progress value={75} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Rental Activity</span>
+                        <span className="text-foreground font-medium">60%</span>
+                      </div>
+                      <Progress value={60} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Reputation Score</span>
+                        <span className="text-foreground font-medium">96%</span>
+                      </div>
+                      <Progress value={96} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-foreground flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      Quick Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start" size="lg">
+                      <Plus className="w-4 h-4 mr-2" />
+                      List New NFT
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="lg">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Data
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" size="lg">
+                      <Filter className="w-4 h-4 mr-2" />
+                      View Analytics
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
             {/* Active Rentals */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <Clock className="w-5 h-5" />
                   Active Rentals
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {activeRentals.map((nft) => (
-                    <NFTCard key={nft.id} nft={nft} />
-                  ))}
-                </div>
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Array.from({ length: 2 }).map((_, index) => (
+                      <NFTCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {activeRentals.map((nft) => (
+                      <NFTCard key={nft.id} nft={nft} />
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Recent Activity */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <BarChart3 className="w-5 h-5" />
                   Recent Activity
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${
-                          activity.type === 'rental' ? 'bg-green-400' :
-                          activity.type === 'return' ? 'bg-yellow-400' :
-                          'bg-purple-400'
-                        }`} />
-                        <div>
-                          <p className="text-white font-medium">{activity.action}</p>
-                          <p className="text-slate-400 text-sm">{activity.time}</p>
-                        </div>
-                      </div>
-                      <Badge 
-                        variant={activity.amount.startsWith('+') ? "default" : "secondary"}
-                        className={activity.amount.startsWith('+') ? 
-                          "bg-green-500/20 text-green-400" : 
-                          "bg-slate-600 text-slate-300"
-                        }
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <ActivitySkeleton key={index} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentActivity.map((activity, index) => (
+                      <motion.div 
+                        key={index} 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex items-center justify-between p-4 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors"
                       >
-                        {activity.amount}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${
+                            activity.type === 'rental' ? 'bg-success' :
+                            activity.type === 'return' ? 'bg-warning' :
+                            'bg-primary'
+                          }`} />
+                          <div>
+                            <p className="text-foreground font-medium">{activity.action}</p>
+                            <p className="text-muted-foreground text-sm">{activity.time}</p>
+                          </div>
+                        </div>
+                        <Badge 
+                          variant={activity.amount.startsWith('+') ? "default" : "secondary"}
+                          className={activity.amount.startsWith('+') ? 
+                            "bg-success/20 text-success" : 
+                            "bg-muted text-muted-foreground"
+                          }
+                        >
+                          {activity.amount}
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

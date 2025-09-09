@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Clock, User, DollarSign, ImageOff, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock, User, DollarSign, ImageOff, Heart, Eye, Share2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 interface NFT {
   id: string;
@@ -25,55 +27,136 @@ interface NFTCardProps {
 const NFTCard = ({ nft, onRent }: NFTCardProps) => {
   const [imageError, setImageError] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [isRenting, setIsRenting] = useState(false);
+  const { toast } = useToast();
+
+  const handleRent = async () => {
+    if (nft.isRented) return;
+    
+    setIsRenting(true);
+    try {
+      await onRent?.(nft);
+      toast({
+        title: "Rental Started",
+        description: `Successfully rented ${nft.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Rental Failed",
+        description: "Failed to start rental. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRenting(false);
+    }
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    toast({
+      title: isLiked ? "Removed from Favorites" : "Added to Favorites",
+      description: isLiked ? `${nft.name} removed from favorites` : `${nft.name} added to favorites`,
+    });
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/nft/${nft.id}`);
+    toast({
+      title: "Link Copied",
+      description: "NFT link copied to clipboard",
+    });
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="group"
     >
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm overflow-hidden hover:border-purple-500/30 transition-all duration-300 group">
+      <Card className="bg-card/50 border-border/50 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-all duration-300 group/card shadow-lg hover:shadow-xl hover:shadow-primary/10">
         {/* Image Container */}
-        <div className="aspect-square relative overflow-hidden">
+        <div className="aspect-square relative overflow-hidden bg-muted/20">
+          <AnimatePresence>
+            {isImageLoading && (
+              <motion.div
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0"
+              >
+                <Skeleton className="w-full h-full" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
           {imageError ? (
-            <div className="w-full h-full flex items-center justify-center bg-slate-700">
-              <ImageOff size={32} className="text-slate-500" />
+            <div className="w-full h-full flex items-center justify-center bg-muted/30">
+              <ImageOff size={32} className="text-muted-foreground" />
             </div>
           ) : (
             <img
               src={nft.image}
               alt={nft.name}
-              className="w-full h-full object-cover transition-transform group-hover:scale-110"
-              onError={() => setImageError(true)}
+              className={`w-full h-full object-cover transition-all duration-500 group-hover/card:scale-110 ${
+                isImageLoading ? 'opacity-0' : 'opacity-100'
+              }`}
+              onLoad={() => setIsImageLoading(false)}
+              onError={() => {
+                setImageError(true);
+                setIsImageLoading(false);
+              }}
             />
           )}
           
           {/* Overlay Controls */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors">
-            <div className="absolute top-3 left-3 right-3 flex justify-between">
-              {nft.rarity && (
-                <Badge variant="secondary" className="bg-purple-500/80 text-white">
-                  {nft.rarity}
-                </Badge>
-              )}
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsLiked(!isLiked)}
-                className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
-                  isLiked 
-                    ? 'bg-red-500/80 text-white' 
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
-              >
-                <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
-              </motion.button>
+          <div className="absolute inset-0 bg-black/0 group-hover/card:bg-black/20 transition-all duration-300">
+            <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+              <div className="flex gap-2">
+                {nft.rarity && (
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-primary/90 text-primary-foreground backdrop-blur-sm border-0"
+                  >
+                    {nft.rarity}
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="flex gap-2 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleLike}
+                  className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 ${
+                    isLiked 
+                      ? 'bg-red-500/90 text-white shadow-lg' 
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                  aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleShare}
+                  className="p-2 rounded-full backdrop-blur-sm bg-white/20 text-white hover:bg-white/30 transition-all duration-200"
+                  aria-label="Share NFT"
+                >
+                  <Share2 size={16} />
+                </motion.button>
+              </div>
             </div>
             
             {nft.isRented && (
               <div className="absolute bottom-3 right-3">
-                <Badge variant="destructive" className="bg-red-500/80">
+                <Badge 
+                  variant="destructive" 
+                  className="bg-red-500/90 text-white backdrop-blur-sm border-0"
+                >
                   Rented
                 </Badge>
               </div>
@@ -83,29 +166,31 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
 
         <CardContent className="p-4 space-y-4">
           {/* Title and Collection */}
-          <div>
-            <h3 className="font-semibold text-lg text-white truncate">{nft.name}</h3>
-            <p className="text-slate-400 text-sm">{nft.collection}</p>
+          <div className="space-y-1">
+            <h3 className="font-semibold text-lg text-foreground truncate group-hover/card:text-primary transition-colors">
+              {nft.name}
+            </h3>
+            <p className="text-muted-foreground text-sm">{nft.collection}</p>
           </div>
 
           {/* Stats */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Price/hour</span>
-              <span className="font-mono text-purple-400 font-semibold">
+              <span className="text-muted-foreground">Price/hour</span>
+              <span className="font-mono text-primary font-semibold">
                 {nft.pricePerHour} STT
               </span>
             </div>
             
             <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-1 text-slate-400">
+              <div className="flex items-center gap-1 text-muted-foreground">
                 <User size={12} />
-                <span>{nft.owner.slice(0, 6)}...{nft.owner.slice(-4)}</span>
+                <span className="font-mono">{nft.owner.slice(0, 6)}...{nft.owner.slice(-4)}</span>
               </div>
               {nft.isRented && nft.timeLeft && (
-                <div className="flex items-center gap-1 text-amber-400">
+                <div className="flex items-center gap-1 text-warning">
                   <Clock size={12} />
-                  <span>{nft.timeLeft}</span>
+                  <span className="font-medium">{nft.timeLeft}</span>
                 </div>
               )}
             </div>
@@ -113,15 +198,19 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
 
           {/* Action Button */}
           <Button
-            onClick={() => onRent?.(nft)}
-            disabled={nft.isRented}
-            className={`w-full transition-all ${
-              nft.isRented
-                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-            }`}
+            onClick={handleRent}
+            disabled={nft.isRented || isRenting}
+            variant={nft.isRented ? "secondary" : "premium"}
+            className="w-full transition-all duration-200"
           >
-            {nft.isRented ? 'Currently Rented' : 'Rent Now'}
+            {isRenting ? (
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"
+              />
+            ) : null}
+            {isRenting ? 'Starting Rental...' : nft.isRented ? 'Currently Rented' : 'Rent Now'}
           </Button>
         </CardContent>
       </Card>
