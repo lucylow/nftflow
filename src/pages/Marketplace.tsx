@@ -14,29 +14,31 @@ import { useWeb3 } from "@/contexts/Web3Context";
 import { useNFTManagement } from "@/hooks/useNFTManagement";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock data - updated to match new interface
+// Mock data - updated to match new interface with utility focus
 const mockNFTs = [
   {
     id: "1",
-    name: "Cosmic Wizard #1234",
+    name: "Legendary Dragon Sword",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-    collection: "Cosmic Wizards",
+    collection: "Epic Gaming Weapons",
     pricePerSecond: 0.000001, // 0.0036 STT per hour
     isRented: false,
     owner: "0x1234567890abcdef",
-    rarity: "Rare",
+    rarity: "Legendary",
     listingId: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12",
     nftContract: "0xMockERC721",
     tokenId: "1234",
     minDuration: 3600,
     maxDuration: 2592000,
-    collateralRequired: 1.0
+    collateralRequired: 1.0,
+    utilityType: "Gaming Weapon",
+    utilityDescription: "Unlocks exclusive dungeon raids and +50% damage boost"
   },
   {
     id: "2", 
-    name: "Galaxy Punk #5678",
+    name: "VIP Metaverse Pass",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
-    collection: "Galaxy Punks",
+    collection: "Exclusive Access",
     pricePerSecond: 0.000003, // 0.0108 STT per hour
     isRented: true,
     owner: "0x9876543210fedcba",
@@ -47,29 +49,33 @@ const mockNFTs = [
     tokenId: "5678",
     minDuration: 3600,
     maxDuration: 2592000,
-    collateralRequired: 2.0
+    collateralRequired: 2.0,
+    utilityType: "Metaverse Access",
+    utilityDescription: "Access to exclusive virtual events and premium areas"
   },
   {
     id: "3",
-    name: "Neon Cat #9999",
+    name: "Digital Art Gallery Space",
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
-    collection: "Neon Cats",
+    collection: "Virtual Galleries",
     pricePerSecond: 0.000002, // 0.0072 STT per hour
     isRented: false,
     owner: "0x5555666677778888",
-    rarity: "Common",
+    rarity: "Rare",
     listingId: "0x5555666677778888555566667777888855556666777788885555666677778888",
     nftContract: "0xMockERC721",
     tokenId: "9999",
     minDuration: 3600,
     maxDuration: 2592000,
-    collateralRequired: 0.5
+    collateralRequired: 0.5,
+    utilityType: "Art Display",
+    utilityDescription: "Showcase your art in a premium virtual gallery space"
   },
   {
     id: "4",
-    name: "Digital Dragon #777",
+    name: "Premium Gaming Avatar",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-    collection: "Digital Dragons", 
+    collection: "Elite Avatars", 
     pricePerSecond: 0.000007, // 0.0252 STT per hour
     isRented: false,
     owner: "0x1111222233334444",
@@ -79,13 +85,15 @@ const mockNFTs = [
     tokenId: "777",
     minDuration: 3600,
     maxDuration: 2592000,
-    collateralRequired: 5.0
+    collateralRequired: 5.0,
+    utilityType: "Gaming Avatar",
+    utilityDescription: "Premium avatar with exclusive abilities and cosmetics"
   },
   {
     id: "5",
-    name: "Space Ape #456",
+    name: "Concert Venue Access",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
-    collection: "Space Apes",
+    collection: "Event Spaces",
     pricePerSecond: 0.000005, // 0.018 STT per hour
     isRented: true,
     owner: "0x9999888877776666",
@@ -96,13 +104,15 @@ const mockNFTs = [
     tokenId: "456",
     minDuration: 3600,
     maxDuration: 2592000,
-    collateralRequired: 1.5
+    collateralRequired: 1.5,
+    utilityType: "Event Access",
+    utilityDescription: "Access to exclusive virtual concerts and events"
   },
   {
     id: "6",
-    name: "Quantum Robot #123",
+    name: "Try-Before-Buy Demo",
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop", 
-    collection: "Quantum Robots",
+    collection: "Demo Collection",
     pricePerSecond: 0.0000008, // 0.00288 STT per hour
     isRented: false,
     owner: "0x3333444455556666",
@@ -112,11 +122,13 @@ const mockNFTs = [
     tokenId: "123",
     minDuration: 3600,
     maxDuration: 2592000,
-    collateralRequired: 0.3
+    collateralRequired: 0.3,
+    utilityType: "Demo Access",
+    utilityDescription: "Test premium NFT features before purchasing"
   }
 ];
 
-const categories = ["All", "Gaming", "Art", "Music", "Utility", "Metaverse"];
+const categories = ["All", "Gaming Utilities", "Art & Display", "Metaverse Access", "Real-World Benefits", "Try Before Buy"];
 const sortOptions = ["Price: Low to High", "Price: High to Low", "Recently Listed", "Most Popular"];
 
 const Marketplace = () => {
@@ -204,7 +216,7 @@ const Marketplace = () => {
               </Button>
             </div>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Discover and rent premium NFTs by the second with streaming payments
+              Discover and access premium NFT utilities by the second. Transform idle assets into active utility generators with streaming payments.
             </p>
           </motion.div>
 
@@ -372,7 +384,7 @@ const Marketplace = () => {
                           <Checkbox
                             id="available"
                             checked={showOnlyAvailable}
-                            onCheckedChange={setShowOnlyAvailable}
+                            onCheckedChange={(checked) => setShowOnlyAvailable(checked === true)}
                           />
                           <label htmlFor="available" className="text-sm text-muted-foreground">
                             Show only available

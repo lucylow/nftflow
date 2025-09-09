@@ -56,6 +56,7 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
     
     address public paymentStreamContract;
     address public reputationContract;
+    address public utilityTrackerContract;
     IPriceOracle public priceOracle;
 
     // Events
@@ -96,11 +97,13 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
     constructor(
         address _priceOracle,
         address _paymentStreamContract,
-        address _reputationContract
+        address _reputationContract,
+        address _utilityTrackerContract
     ) {
         priceOracle = IPriceOracle(_priceOracle);
         paymentStreamContract = _paymentStreamContract;
         reputationContract = _reputationContract;
+        utilityTrackerContract = _utilityTrackerContract;
     }
 
     /**
@@ -237,6 +240,27 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
             IERC4907(rental.nftContract).setUser(rental.tokenId, address(0), 0);
         }
 
+        // Record utility usage for analytics
+        if (utilityTrackerContract != address(0)) {
+            uint256 duration = rental.endTime - rental.startTime;
+            uint256 utilityValue = rental.pricePerSecond * duration; // Use payment as utility value proxy
+            
+            // Call utility tracker to record usage (simplified - assumes utility type 0 for gaming)
+            (bool success, ) = utilityTrackerContract.call(
+                abi.encodeWithSignature(
+                    "recordUtilityUsage(address,uint256,address,uint256,uint256,uint256,uint256)",
+                    rental.nftContract,
+                    rental.tokenId,
+                    rental.renter,
+                    rental.startTime,
+                    rental.endTime,
+                    0, // Gaming utility type
+                    utilityValue
+                )
+            );
+            // Continue even if utility tracking fails
+        }
+
         // Reactivate listing
         bytes32 listingId = keccak256(abi.encodePacked(rental.nftContract, rental.tokenId, rental.owner));
         if (listings[listingId].owner == rental.owner) {
@@ -326,6 +350,64 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
      */
     function withdrawPlatformFees() external onlyOwner {
         payable(owner()).transfer(address(this).balance);
+    }
+
+    /**
+     * @dev Get utility-based pricing recommendation for an NFT
+     * @param nftContract Address of the NFT contract
+     * @param tokenId Token ID
+     * @param basePrice Base price per second
+     * @return Recommended price per second based on utility analytics
+     */
+    function getUtilityBasedPrice(
+        address nftContract,
+        uint256 tokenId,
+        uint256 basePrice
+    ) external view returns (uint256) {
+        if (utilityTrackerContract == address(0)) {
+            return basePrice;
+        }
+        
+        (bool success, bytes memory data) = utilityTrackerContract.staticcall(
+            abi.encodeWithSignature(
+                "getUtilityBasedPrice(address,uint256,uint256)",
+                nftContract,
+                tokenId,
+                basePrice
+            )
+        );
+        
+        if (success && data.length > 0) {
+            return abi.decode(data, (uint256));
+        }
+        
+        return basePrice;
+    }
+
+    /**
+     * @dev Check if an NFT has high utility demand
+     * @param nftContract Address of the NFT contract
+     * @param tokenId Token ID
+     * @return True if NFT has high utility demand
+     */
+    function hasHighUtilityDemand(address nftContract, uint256 tokenId) external view returns (bool) {
+        if (utilityTrackerContract == address(0)) {
+            return false;
+        }
+        
+        (bool success, bytes memory data) = utilityTrackerContract.staticcall(
+            abi.encodeWithSignature(
+                "hasHighUtilityDemand(address,uint256)",
+                nftContract,
+                tokenId
+            )
+        );
+        
+        if (success && data.length > 0) {
+            return abi.decode(data, (bool));
+        }
+        
+        return false;
     }
 }
 
