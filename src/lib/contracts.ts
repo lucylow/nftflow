@@ -34,7 +34,9 @@ export const PAYMENT_STREAM_ABI = [
   "function getStream(uint256 streamId) external view returns (tuple(address sender, address recipient, uint256 deposit, uint256 ratePerSecond, uint256 startTime, uint256 stopTime, uint256 remainingBalance, bool active))",
   "function isStreamActive(uint256 streamId) external view returns (bool)",
   "function getStreamRate(uint256 streamId) external view returns (uint256)",
-  "function getTotalStreamed(uint256 streamId) external view returns (uint256)"
+  "function getTotalStreamed(uint256 streamId) external view returns (uint256)",
+  "function getSenderStreams(address user) external view returns (uint256[] memory)",
+  "function getRecipientStreams(address user) external view returns (uint256[] memory)"
 ];
 
 export const REPUTATION_SYSTEM_ABI = [
