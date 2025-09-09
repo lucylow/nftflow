@@ -7,6 +7,8 @@ import {
   getPaymentStreamContract, 
   getReputationSystemContract,
   getMockPriceOracleContract,
+  getDynamicPricingContract,
+  getUtilityTrackerContract,
   switchToNetwork,
   NETWORKS,
   formatEther,
@@ -26,6 +28,8 @@ interface Web3ContextType {
   paymentStreamContract: ethers.Contract | null;
   reputationSystemContract: ethers.Contract | null;
   priceOracleContract: ethers.Contract | null;
+  dynamicPricingContract: ethers.Contract | null;
+  utilityTrackerContract: ethers.Contract | null;
   
   // Methods
   connectWallet: () => Promise<void>;
@@ -51,6 +55,8 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   const [paymentStreamContract, setPaymentStreamContract] = useState<ethers.Contract | null>(null);
   const [reputationSystemContract, setReputationSystemContract] = useState<ethers.Contract | null>(null);
   const [priceOracleContract, setPriceOracleContract] = useState<ethers.Contract | null>(null);
+  const [dynamicPricingContract, setDynamicPricingContract] = useState<ethers.Contract | null>(null);
+  const [utilityTrackerContract, setUtilityTrackerContract] = useState<ethers.Contract | null>(null);
 
   // Initialize contracts when connected
   const initializeContracts = async () => {
@@ -66,10 +72,32 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       const reputationSystem = await getReputationSystemContract();
       const priceOracle = await getMockPriceOracleContract();
       
+      // Only initialize these if addresses are set (not zero addresses)
+      let dynamicPricing = null;
+      let utilityTracker = null;
+      
+      if (CONTRACT_ADDRESSES.DynamicPricing !== '0x0000000000000000000000000000000000000000') {
+        try {
+          dynamicPricing = await getDynamicPricingContract();
+        } catch (error) {
+          console.warn('Failed to initialize DynamicPricing contract:', error);
+        }
+      }
+      
+      if (CONTRACT_ADDRESSES.UtilityTracker !== '0x0000000000000000000000000000000000000000') {
+        try {
+          utilityTracker = await getUtilityTrackerContract();
+        } catch (error) {
+          console.warn('Failed to initialize UtilityTracker contract:', error);
+        }
+      }
+      
       setNftFlowContract(nftFlow);
       setPaymentStreamContract(paymentStream);
       setReputationSystemContract(reputationSystem);
       setPriceOracleContract(priceOracle);
+      setDynamicPricingContract(dynamicPricing);
+      setUtilityTrackerContract(utilityTracker);
     } catch (error) {
       console.error('Failed to initialize contracts:', error);
       // Don't throw error - allow wallet connection without contracts
@@ -136,6 +164,8 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     setPaymentStreamContract(null);
     setReputationSystemContract(null);
     setPriceOracleContract(null);
+    setDynamicPricingContract(null);
+    setUtilityTrackerContract(null);
   };
 
   // Switch network
@@ -233,6 +263,8 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     paymentStreamContract,
     reputationSystemContract,
     priceOracleContract,
+    dynamicPricingContract,
+    utilityTrackerContract,
     connectWallet,
     disconnectWallet,
     switchNetwork,

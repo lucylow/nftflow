@@ -26,7 +26,8 @@ export const usePaymentStream = () => {
     recipient: string,
     startTime: number,
     stopTime: number,
-    depositAmount: string
+    depositAmount: string,
+    nftContract?: string
   ) => {
     if (!paymentStreamContract || !account) {
       throw new Error('Contract not initialized or wallet not connected');
@@ -38,6 +39,7 @@ export const usePaymentStream = () => {
         recipient,
         startTime,
         stopTime,
+        nftContract || '0x0000000000000000000000000000000000000000', // Default to zero address if not provided
         { value: parseEther(depositAmount) }
       );
 
@@ -256,12 +258,104 @@ export const usePaymentStream = () => {
     }
   }, [paymentStreamContract, account]);
 
+  // Finalize stream
+  const finalizeStream = useCallback(async (streamId: string) => {
+    if (!paymentStreamContract || !account) {
+      throw new Error('Contract not initialized or wallet not connected');
+    }
+
+    setIsLoading(true);
+    try {
+      const tx = await paymentStreamContract.finalizeStream(streamId);
+      await tx.wait();
+      
+      toast({
+        title: "Stream Finalized",
+        description: "Payment stream has been finalized successfully",
+      });
+
+      return tx;
+    } catch (error: any) {
+      console.error('Failed to finalize stream:', error);
+      toast({
+        title: "Finalization Failed",
+        description: error.message || "Failed to finalize stream",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [paymentStreamContract, account, toast]);
+
+  // Release funds automatically
+  const releaseFunds = useCallback(async (streamId: string) => {
+    if (!paymentStreamContract || !account) {
+      throw new Error('Contract not initialized or wallet not connected');
+    }
+
+    setIsLoading(true);
+    try {
+      const tx = await paymentStreamContract.releaseFunds(streamId);
+      await tx.wait();
+      
+      toast({
+        title: "Funds Released",
+        description: "Funds have been released from the stream",
+      });
+
+      return tx;
+    } catch (error: any) {
+      console.error('Failed to release funds:', error);
+      toast({
+        title: "Release Failed",
+        description: error.message || "Failed to release funds",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [paymentStreamContract, account, toast]);
+
+  // Get stream details (enhanced version)
+  const getStreamDetails = useCallback(async (streamId: string) => {
+    if (!paymentStreamContract) {
+      return null;
+    }
+
+    try {
+      const stream = await paymentStreamContract.getStreamDetails(streamId);
+      return {
+        sender: stream.sender,
+        recipient: stream.recipient,
+        deposit: formatEther(stream.deposit),
+        ratePerSecond: formatEther(stream.ratePerSecond),
+        startTime: stream.startTime.toString(),
+        stopTime: stream.stopTime.toString(),
+        remainingBalance: formatEther(stream.remainingBalance),
+        totalWithdrawn: formatEther(stream.totalWithdrawn),
+        active: stream.active,
+        finalized: stream.finalized,
+        platformFeeAmount: formatEther(stream.platformFeeAmount),
+        creatorRoyaltyAmount: formatEther(stream.creatorRoyaltyAmount),
+        creatorAddress: stream.creatorAddress,
+      };
+    } catch (error) {
+      console.error('Failed to get stream details:', error);
+      return null;
+    }
+  }, [paymentStreamContract]);
+
   return {
     isLoading,
     createStream,
     withdrawFromStream,
     cancelStream,
+    finalizeStream,
+    releaseFunds,
     getStream,
+    getStreamDetails,
     getStreamBalance,
     isStreamActive,
     getStreamRate,

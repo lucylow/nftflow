@@ -3,6 +3,8 @@ import { ethers } from 'ethers';
 import { useWeb3 } from '@/contexts/Web3Context';
 import { parseEther, formatEther } from '@/lib/web3';
 import { useToast } from '@/hooks/use-toast';
+import { useDynamicPricing } from './useDynamicPricing';
+import { useUtilityTracker } from './useUtilityTracker';
 
 // Types
 export interface RentalListing {
@@ -33,6 +35,8 @@ export const useNFTFlow = () => {
   const { nftFlowContract, account } = useWeb3();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { getDynamicPrice, getComprehensivePricing } = useDynamicPricing();
+  const { getUtilityBasedPrice, hasHighUtilityDemand } = useUtilityTracker();
 
   // List NFT for rental
   const listForRental = useCallback(async (
@@ -294,6 +298,61 @@ export const useNFTFlow = () => {
     }
   }, [nftFlowContract]);
 
+  // Get dynamic price for listing
+  const getDynamicPriceForListing = useCallback(async (
+    nftContract: string,
+    tokenId: string,
+    basePrice: string
+  ): Promise<string> => {
+    try {
+      return await getDynamicPrice(nftContract, tokenId, basePrice);
+    } catch (error) {
+      console.error('Failed to get dynamic price:', error);
+      return basePrice; // Fallback to base price
+    }
+  }, [getDynamicPrice]);
+
+  // Get utility-based price for listing
+  const getUtilityBasedPriceForListing = useCallback(async (
+    nftContract: string,
+    tokenId: string,
+    basePrice: string
+  ): Promise<string> => {
+    try {
+      return await getUtilityBasedPrice(nftContract, tokenId, basePrice);
+    } catch (error) {
+      console.error('Failed to get utility-based price:', error);
+      return basePrice; // Fallback to base price
+    }
+  }, [getUtilityBasedPrice]);
+
+  // Check if NFT has high utility demand
+  const checkHighUtilityDemand = useCallback(async (
+    nftContract: string,
+    tokenId: string
+  ): Promise<boolean> => {
+    try {
+      return await hasHighUtilityDemand(nftContract, tokenId);
+    } catch (error) {
+      console.error('Failed to check utility demand:', error);
+      return false;
+    }
+  }, [hasHighUtilityDemand]);
+
+  // Get comprehensive pricing information
+  const getComprehensivePricingInfo = useCallback(async (
+    nftContract: string,
+    tokenId: string,
+    basePrice: string
+  ) => {
+    try {
+      return await getComprehensivePricing(nftContract, tokenId, basePrice);
+    } catch (error) {
+      console.error('Failed to get comprehensive pricing:', error);
+      return null;
+    }
+  }, [getComprehensivePricing]);
+
   return {
     isLoading,
     listForRental,
@@ -305,5 +364,9 @@ export const useNFTFlow = () => {
     getListing,
     getUserCollateralBalance,
     getPlatformFeePercentage,
+    getDynamicPriceForListing,
+    getUtilityBasedPriceForListing,
+    checkHighUtilityDemand,
+    getComprehensivePricingInfo,
   };
 };

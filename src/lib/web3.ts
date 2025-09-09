@@ -5,7 +5,9 @@ import {
   PAYMENT_STREAM_ABI, 
   REPUTATION_SYSTEM_ABI, 
   MOCK_PRICE_ORACLE_ABI, 
-  MOCK_ERC721_ABI 
+  MOCK_ERC721_ABI,
+  DYNAMIC_PRICING_ABI,
+  UTILITY_TRACKER_ABI
 } from './contracts';
 
 // Network configuration
@@ -31,7 +33,9 @@ export {
   PAYMENT_STREAM_ABI, 
   REPUTATION_SYSTEM_ABI, 
   MOCK_PRICE_ORACLE_ABI, 
-  MOCK_ERC721_ABI 
+  MOCK_ERC721_ABI,
+  DYNAMIC_PRICING_ABI,
+  UTILITY_TRACKER_ABI
 };
 
 // Web3 provider setup
@@ -72,6 +76,16 @@ export const getMockPriceOracleContract = async () => {
 export const getMockERC721Contract = async (address: string) => {
   const signer = await getSigner();
   return new ethers.Contract(address, MOCK_ERC721_ABI, signer);
+};
+
+export const getDynamicPricingContract = async () => {
+  const signer = await getSigner();
+  return new ethers.Contract(CONTRACT_ADDRESSES.DynamicPricing, DYNAMIC_PRICING_ABI, signer);
+};
+
+export const getUtilityTrackerContract = async () => {
+  const signer = await getSigner();
+  return new ethers.Contract(CONTRACT_ADDRESSES.UtilityTracker, UTILITY_TRACKER_ABI, signer);
 };
 
 // Utility functions
