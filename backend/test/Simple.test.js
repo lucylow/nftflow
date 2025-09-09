@@ -41,12 +41,16 @@ describe("Simple Contract Tests", function () {
     const ReputationSystem = await ethers.getContractFactory("ReputationSystem");
     const reputationSystem = await ReputationSystem.deploy();
 
+    const UtilityTracker = await ethers.getContractFactory("UtilityTracker");
+    const utilityTracker = await UtilityTracker.deploy();
+
     // Deploy NFTFlow
     const NFTFlow = await ethers.getContractFactory("NFTFlow");
     const nftFlow = await NFTFlow.deploy(
       await priceOracle.getAddress(),
       await paymentStream.getAddress(),
-      await reputationSystem.getAddress()
+      await reputationSystem.getAddress(),
+      await utilityTracker.getAddress()
     );
 
     expect(await nftFlow.getAddress()).to.be.properAddress;

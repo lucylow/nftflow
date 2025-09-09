@@ -24,11 +24,17 @@ describe("NFTFlow", function () {
     reputationSystem = await ReputationSystem.deploy();
 
     // Deploy NFTFlow
+    // Deploy UtilityTracker
+    const UtilityTracker = await ethers.getContractFactory("UtilityTracker");
+    const utilityTracker = await UtilityTracker.deploy();
+    await utilityTracker.waitForDeployment();
+
     const NFTFlow = await ethers.getContractFactory("NFTFlow");
     nftFlow = await NFTFlow.deploy(
       await priceOracle.getAddress(),
       await paymentStream.getAddress(),
-      await reputationSystem.getAddress()
+      await reputationSystem.getAddress(),
+      await utilityTracker.getAddress()
     );
 
     // Authorize NFTFlow in ReputationSystem

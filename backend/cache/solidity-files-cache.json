@@ -479,8 +479,8 @@
       ]
     },
     "/Users/llow/Documents/nftflow/backend/contracts/NFTFlow.sol": {
-      "lastModificationDate": 1757429449778,
-      "contentHash": "77b053861250321d96582a692e4a44b6",
+      "lastModificationDate": 1757433463124,
+      "contentHash": "62954c8cae6e421948c73d8ed0340e9c",
       "sourceName": "contracts/NFTFlow.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -775,6 +775,44 @@
       ],
       "artifacts": [
         "MockPriceOracle"
+      ]
+    },
+    "/Users/llow/Documents/nftflow/backend/contracts/UtilityTracker.sol": {
+      "lastModificationDate": 1757433463127,
+      "contentHash": "beb3183ed2071c8d1257a09becd879ae",
+      "sourceName": "contracts/UtilityTracker.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "UtilityTracker"
       ]
     }
   }

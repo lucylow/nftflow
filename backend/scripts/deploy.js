@@ -32,20 +32,29 @@ async function main() {
   const reputationSystemAddress = await reputationSystem.getAddress();
   console.log("ReputationSystem deployed to:", reputationSystemAddress);
 
+  // Deploy UtilityTracker
+  console.log("\n4. Deploying UtilityTracker...");
+  const UtilityTracker = await ethers.getContractFactory("UtilityTracker");
+  const utilityTracker = await UtilityTracker.deploy();
+  await utilityTracker.waitForDeployment();
+  const utilityTrackerAddress = await utilityTracker.getAddress();
+  console.log("UtilityTracker deployed to:", utilityTrackerAddress);
+
   // Deploy NFTFlow with dependencies
-  console.log("\n4. Deploying NFTFlow...");
+  console.log("\n5. Deploying NFTFlow...");
   const NFTFlow = await ethers.getContractFactory("NFTFlow");
   const nftFlow = await NFTFlow.deploy(
     priceOracleAddress,
     paymentStreamAddress,
-    reputationSystemAddress
+    reputationSystemAddress,
+    utilityTrackerAddress
   );
   await nftFlow.waitForDeployment();
   const nftFlowAddress = await nftFlow.getAddress();
   console.log("NFTFlow deployed to:", nftFlowAddress);
 
   // Deploy MockERC721 for testing
-  console.log("\n5. Deploying MockERC721...");
+  console.log("\n6. Deploying MockERC721...");
   const MockERC721 = await ethers.getContractFactory("MockERC721");
   const mockERC721 = await MockERC721.deploy("Test NFT Collection", "TNC");
   await mockERC721.waitForDeployment();
@@ -53,12 +62,12 @@ async function main() {
   console.log("MockERC721 deployed to:", mockERC721Address);
 
   // Authorize NFTFlow contract in ReputationSystem
-  console.log("\n6. Authorizing NFTFlow in ReputationSystem...");
+  console.log("\n7. Authorizing NFTFlow in ReputationSystem...");
   await reputationSystem.addAuthorizedContract(nftFlowAddress);
   console.log("NFTFlow authorized in ReputationSystem");
 
   // Set up some test data
-  console.log("\n7. Setting up test data...");
+  console.log("\n8. Setting up test data...");
   
   // Mint some test NFTs
   await mockERC721.safeMint(await deployer.getAddress());
@@ -91,6 +100,7 @@ async function main() {
   console.log("MockPriceOracle:", priceOracleAddress);
   console.log("PaymentStream:", paymentStreamAddress);
   console.log("ReputationSystem:", reputationSystemAddress);
+  console.log("UtilityTracker:", utilityTrackerAddress);
   console.log("NFTFlow:", nftFlowAddress);
   console.log("MockERC721:", mockERC721Address);
 
