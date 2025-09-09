@@ -54,6 +54,14 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   // Initialize contracts when connected
   const initializeContracts = async () => {
     try {
+      // Check if contract addresses are set (not zero addresses)
+      const { CONTRACT_ADDRESSES } = await import('@/config/contracts');
+      
+      if (CONTRACT_ADDRESSES.NFTFlow === '0x0000000000000000000000000000000000000000') {
+        console.warn('Contract addresses not set. Please deploy contracts first.');
+        return;
+      }
+
       const nftFlow = await getNFTFlowContract();
       const paymentStream = await getPaymentStreamContract();
       const reputationSystem = await getReputationSystemContract();
@@ -65,13 +73,14 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       setPriceOracleContract(priceOracle);
     } catch (error) {
       console.error('Failed to initialize contracts:', error);
+      // Don't throw error - allow wallet connection without contracts
     }
   };
 
   // Connect wallet
   const connectWallet = async () => {
     if (typeof window === 'undefined' || !window.ethereum) {
-      throw new Error('MetaMask not installed');
+      throw new Error('MetaMask not installed. Please install MetaMask to connect your wallet.');
     }
 
     setIsConnecting(true);
@@ -82,7 +91,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       });
 
       if (accounts.length === 0) {
-        throw new Error('No accounts found');
+        throw new Error('No accounts found. Please unlock your MetaMask wallet.');
       }
 
       const provider = getProvider();
@@ -94,15 +103,25 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       setChainId(Number(network.chainId));
       setIsConnected(true);
       
-      // Initialize contracts
+      // Initialize contracts (this won't fail the connection if contracts aren't deployed)
       await initializeContracts();
       
       // Get initial balance
       await refreshBalance();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to connect wallet:', error);
-      throw error;
+      
+      // Provide more specific error messages
+      if (error.code === 4001) {
+        throw new Error('Connection rejected. Please approve the connection in MetaMask.');
+      } else if (error.code === -32002) {
+        throw new Error('Connection request already pending. Please check MetaMask.');
+      } else if (error.message?.includes('User denied')) {
+        throw new Error('Connection denied. Please try again and approve the connection.');
+      } else {
+        throw new Error(error.message || 'Failed to connect wallet. Please try again.');
+      }
     } finally {
       setIsConnecting(false);
     }

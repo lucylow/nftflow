@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "./interfaces/IERC4907.sol";
-import "./interfaces/IPriceOracle.sol";
+import "../interfaces/IERC4907.sol";
+import "../interfaces/IPriceOracle.sol";
 
 /**
  * @title NFTFlow
