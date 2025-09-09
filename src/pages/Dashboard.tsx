@@ -21,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import NFTCard from "@/components/NFTCard";
 import UserDashboard from "@/components/UserDashboard";
+import NFTManagement from "@/components/NFTManagement";
+import PaymentStreamManagement from "@/components/PaymentStreamManagement";
 import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
@@ -128,6 +130,12 @@ const Dashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="listings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               My Listings
+            </TabsTrigger>
+            <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              NFT Management
+            </TabsTrigger>
+            <TabsTrigger value="streams" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Payment Streams
             </TabsTrigger>
           </TabsList>
 
@@ -332,6 +340,14 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="nfts" className="space-y-8">
+            <NFTManagement />
+          </TabsContent>
+
+          <TabsContent value="streams" className="space-y-8">
+            <PaymentStreamManagement />
           </TabsContent>
         </Tabs>
       </div>

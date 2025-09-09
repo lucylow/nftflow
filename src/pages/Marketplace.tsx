@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, Grid, List, TrendingUp, Clock, SlidersHorizontal, X } from "lucide-react";
+import { Search, Filter, Grid, List, TrendingUp, Clock, SlidersHorizontal, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,9 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import NFTCard from "@/components/NFTCard";
 import { NFTCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeleton";
+import { useWeb3 } from "@/contexts/Web3Context";
+import { useNFTManagement } from "@/hooks/useNFTManagement";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data - updated to match new interface
 const mockNFTs = [
@@ -117,21 +120,56 @@ const categories = ["All", "Gaming", "Art", "Music", "Utility", "Metaverse"];
 const sortOptions = ["Price: Low to High", "Price: High to Low", "Recently Listed", "Most Popular"];
 
 const Marketplace = () => {
+  const { isConnected } = useWeb3();
+  const { getAvailableNFTs } = useNFTManagement();
+  const { toast } = useToast();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSort, setSelectedSort] = useState("Recently Listed");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 5]);
   const [selectedRarities, setSelectedRarities] = useState<string[]>([]);
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const [nfts, setNfts] = useState<any[]>([]);
 
-  // Simulate loading
+  // Load NFTs from contracts
+  const loadNFTs = async () => {
+    if (!isConnected) {
+      setNfts(mockNFTs);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const availableNFTs = await getAvailableNFTs();
+      setNfts(availableNFTs);
+    } catch (error) {
+      console.error('Failed to load NFTs:', error);
+      toast({
+        title: "Failed to Load NFTs",
+        description: "Using mock data instead",
+        variant: "destructive",
+      });
+      setNfts(mockNFTs);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Refresh NFTs
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadNFTs();
+    setIsRefreshing(false);
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    loadNFTs();
+  }, [isConnected]);
 
   const stats = [
     { label: "Total Volume", value: "1,137 STT", trend: "+12%" },
@@ -151,9 +189,20 @@ const Marketplace = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-4">
-              NFT Rental Marketplace
-            </h1>
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                NFT Rental Marketplace
+              </h1>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="shrink-0"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Discover and rent premium NFTs by the second with streaming payments
             </p>

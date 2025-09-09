@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Upload, ImageIcon, DollarSign, Clock, Info, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { useNFTFlow } from "@/hooks/useNFTFlow";
+import { useNFTManagement } from "@/hooks/useNFTManagement";
 import { useToast } from "@/hooks/use-toast";
+import { CONTRACT_ADDRESSES } from "@/config/contracts";
 
 const Create = () => {
   const { isConnected, account } = useWeb3();
   const { listForRental, isLoading } = useNFTFlow();
+  const { mintNFT, getUserNFTs, approveNFTFlow, isLoading: isMinting } = useNFTManagement();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -24,13 +27,58 @@ const Create = () => {
     minDuration: "",
     maxDuration: "",
     collateralRequired: "",
-    nftContract: "",
+    nftContract: CONTRACT_ADDRESSES.MockERC721,
     tokenId: "",
     image: null,
     collection: "",
     attributes: []
   });
 
+  const [userNFTs, setUserNFTs] = useState<any[]>([]);
+  const [showMintForm, setShowMintForm] = useState(false);
+  const [mintFormData, setMintFormData] = useState({
+    name: "",
+    description: "",
+    image: "",
+    attributes: []
+  });
+
+  // Load user's NFTs
+  const loadUserNFTs = async () => {
+    if (!isConnected) return;
+    
+    try {
+      const nfts = await getUserNFTs();
+      setUserNFTs(nfts);
+    } catch (error) {
+      console.error('Failed to load user NFTs:', error);
+    }
+  };
+
+  // Handle minting a new NFT
+  const handleMint = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isConnected) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to mint an NFT",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await mintNFT(mintFormData);
+      setMintFormData({ name: "", description: "", image: "", attributes: [] });
+      setShowMintForm(false);
+      await loadUserNFTs(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to mint NFT:", error);
+    }
+  };
+
+  // Handle listing NFT for rental
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -38,6 +86,15 @@ const Create = () => {
       toast({
         title: "Wallet Not Connected",
         description: "Please connect your wallet to list an NFT",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.tokenId) {
+      toast({
+        title: "Token ID Required",
+        description: "Please select an NFT to list",
         variant: "destructive",
       });
       return;
@@ -61,16 +118,23 @@ const Create = () => {
         minDuration: "",
         maxDuration: "",
         collateralRequired: "",
-        nftContract: "",
+        nftContract: CONTRACT_ADDRESSES.MockERC721,
         tokenId: "",
         image: null,
         collection: "",
         attributes: []
       });
+      
+      await loadUserNFTs(); // Refresh the list
     } catch (error) {
       console.error("Failed to list NFT:", error);
     }
   };
+
+  // Load user NFTs on component mount
+  useEffect(() => {
+    loadUserNFTs();
+  }, [isConnected]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
