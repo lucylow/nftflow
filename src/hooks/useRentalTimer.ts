@@ -98,15 +98,57 @@ export function useMultipleRentalTimers(rentals: Array<{
   endTime: number;
   startTime: number;
 }>): Record<string, RentalTimerState> {
+  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
+
+  // Update current time periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Math.floor(Date.now() / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const timerStates: Record<string, RentalTimerState> = {};
 
   rentals.forEach(rental => {
-    const timerState = useRentalTimer({
-      endTime: rental.endTime,
-      startTime: rental.startTime
-    });
+    const { endTime, startTime } = rental;
     
-    timerStates[rental.id] = timerState;
+    if (!endTime || !startTime) {
+      timerStates[rental.id] = {
+        timeLeft: 0,
+        progress: 0,
+        isActive: false,
+        isExpired: true,
+        formattedTime: '00:00:00'
+      };
+      return;
+    }
+
+    const totalDuration = endTime - startTime;
+    const elapsedTime = Math.max(0, currentTime - startTime);
+    const remainingTime = Math.max(0, endTime - currentTime);
+    
+    const progress = totalDuration > 0 ? (elapsedTime / totalDuration) * 100 : 0;
+    const isActive = currentTime >= startTime && currentTime < endTime;
+    const isExpired = currentTime >= endTime;
+
+    // Format time as HH:MM:SS
+    const formatTime = (seconds: number): string => {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    timerStates[rental.id] = {
+      timeLeft: remainingTime,
+      progress: Math.min(progress, 100),
+      isActive,
+      isExpired,
+      formattedTime: formatTime(remainingTime)
+    };
   });
 
   return timerStates;

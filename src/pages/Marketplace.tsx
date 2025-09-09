@@ -552,11 +552,12 @@ const Marketplace = () => {
       case "Price: High to Low":
         filtered.sort((a, b) => b.pricePerSecond - a.pricePerSecond);
         break;
-      case "Most Popular":
+      case "Most Popular": {
         // Sort by rarity (Legendary > Epic > Rare > Common)
         const rarityOrder = { "Legendary": 4, "Epic": 3, "Rare": 2, "Common": 1 };
         filtered.sort((a, b) => (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0));
         break;
+      }
       case "Recently Listed":
       default:
         // Keep original order (most recent first)

@@ -35,7 +35,17 @@ const UserDashboard = ({ className }: UserDashboardProps) => {
   const { getSenderStreams, getRecipientStreams } = usePaymentStream();
 
   const [collateralBalance, setCollateralBalance] = useState('0');
-  const [reputation, setReputation] = useState<any>(null);
+  const [reputation, setReputation] = useState<{
+    reputationScore: number;
+    totalRentals: number;
+    successfulRentals: number;
+    successRate: number;
+    tier: number;
+    requiresCollateral: boolean;
+    collateralMultiplier: number;
+    isWhitelisted: boolean;
+    isBlacklisted: boolean;
+  } | null>(null);
   const [successRate, setSuccessRate] = useState(0);
   const [achievements, setAchievements] = useState<number[]>([]);
   const [senderStreams, setSenderStreams] = useState<string[]>([]);
@@ -50,6 +60,14 @@ const UserDashboard = ({ className }: UserDashboardProps) => {
 
     const loadUserData = async () => {
       try {
+        // Check if all functions are available
+        if (!getUserCollateralBalance || !getUserReputation || !getSuccessRate || 
+            !getUserAchievements || !getSenderStreams || !getRecipientStreams) {
+          console.error('One or more required functions are not available');
+          setIsLoading(false);
+          return;
+        }
+
         const [
           collateral,
           userReputation,

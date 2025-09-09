@@ -219,6 +219,55 @@ export const useReputationSystem = () => {
     return [];
   }, []);
 
+  // Get user reputation data (for compatibility with UserDashboard)
+  const getUserReputation = useCallback(async () => {
+    if (!reputationData) {
+      await loadReputationData();
+    }
+    return reputationData ? {
+      reputationScore: reputationData.score,
+      totalRentals: reputationData.totalRentals,
+      successfulRentals: reputationData.successfulRentals,
+      successRate: reputationData.successRate,
+      tier: reputationData.tier,
+      requiresCollateral: reputationData.requiresCollateral,
+      collateralMultiplier: reputationData.collateralMultiplier,
+      isWhitelisted: reputationData.isWhitelisted,
+      isBlacklisted: reputationData.isBlacklisted
+    } : null;
+  }, [reputationData, loadReputationData]);
+
+  // Get success rate (for compatibility with UserDashboard)
+  const getSuccessRate = useCallback(async () => {
+    if (!reputationData) {
+      await loadReputationData();
+    }
+    return reputationData ? reputationData.successRate : 0;
+  }, [reputationData, loadReputationData]);
+
+  // Get user achievements (placeholder for future implementation)
+  const getUserAchievements = useCallback(async () => {
+    // This would fetch user achievements from the contract
+    // For now, return empty array
+    return [];
+  }, []);
+
+  // Get reputation tier name (for compatibility with UserDashboard)
+  const getReputationTier = useCallback((score: number) => {
+    for (let i = REPUTATION_TIERS.length - 1; i >= 0; i--) {
+      if (score >= REPUTATION_TIERS[i].threshold) {
+        return REPUTATION_TIERS[i].name;
+      }
+    }
+    return REPUTATION_TIERS[0].name;
+  }, []);
+
+  // Get reputation color (for compatibility with UserDashboard)
+  const getReputationColor = useCallback((tier: string) => {
+    const tierData = REPUTATION_TIERS.find(t => t.name === tier);
+    return tierData ? tierData.color : 'red';
+  }, []);
+
   return {
     reputationData,
     isLoading,
@@ -233,6 +282,11 @@ export const useReputationSystem = () => {
     simulateReputationGain,
     getReputationHistory,
     getReputationLeaderboard,
+    getUserReputation,
+    getSuccessRate,
+    getUserAchievements,
+    getReputationTier,
+    getReputationColor,
     tiers: REPUTATION_TIERS
   };
 };

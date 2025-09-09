@@ -656,7 +656,7 @@ class SomniaEventListenerService {
     // Update high frequency event analytics
     const today = new Date().toISOString().split('T')[0];
     await this.redis.hincrby(`analytics:${today}`, 'hf_events', 1);
-    await this.redis.hincrby(`analytics:${today}`, 'hf_event_participants`, data.participantCount);
+    await this.redis.hincrby(`analytics:${today}`, 'hf_event_participants', data.participantCount);
   }
 
   async destroy() {

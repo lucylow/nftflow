@@ -134,17 +134,18 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
           accounts = await window.ethereum.request({
             method: 'eth_requestAccounts',
           });
-        } catch (requestError: any) {
+        } catch (requestError: unknown) {
           // Handle specific MetaMask errors
-          if (requestError.code === 4001) {
+          const error = requestError as { code?: number; message?: string };
+          if (error.code === 4001) {
             throw new Error('Connection rejected. Please approve the connection in MetaMask.');
-          } else if (requestError.code === -32002) {
+          } else if (error.code === -32002) {
             throw new Error('Connection request already pending. Please check MetaMask and try again.');
-          } else if (requestError.code === -32603) {
+          } else if (error.code === -32603) {
             throw new Error('Internal MetaMask error. Please refresh the page and try again.');
-          } else if (requestError.message?.includes('User denied') || requestError.message?.includes('denied')) {
+          } else if (error.message?.includes('User denied') || error.message?.includes('denied')) {
             throw new Error('Connection denied. Please try again and approve the connection.');
-          } else if (requestError.message?.includes('locked') || requestError.message?.includes('unlock')) {
+          } else if (error.message?.includes('locked') || error.message?.includes('unlock')) {
             throw new Error('MetaMask is locked. Please unlock your wallet and try again.');
           } else {
             throw new Error('Failed to connect to MetaMask. Please ensure MetaMask is unlocked and try again.');
@@ -174,11 +175,11 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       // Get initial balance
       await refreshBalance();
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to connect wallet:', error);
       
       // Re-throw the error with proper message
-      if (error.message) {
+      if (error instanceof Error && error.message) {
         throw error;
       } else {
         throw new Error('Failed to connect wallet. Please ensure MetaMask is properly installed and unlocked.');
