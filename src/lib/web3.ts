@@ -20,7 +20,7 @@ export const NETWORKS = {
   },
   somniaTestnet: {
     chainId: 50312,
-    name: 'Somnia Devnet',
+    name: 'Somnia Testnet',
     rpcUrl: 'https://dream-rpc.somnia.network/',
     currency: 'STT',
     blockExplorerUrl: 'https://shannon-explorer.somnia.network/'
@@ -108,50 +108,67 @@ export const parseUnits = (value: string, decimals: number = 18) => {
 
 // Network switching
 export const switchToNetwork = async (chainId: number) => {
-  if (typeof window !== 'undefined' && window.ethereum) {
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${chainId.toString(16)}` }],
-      });
-    } catch (switchError: any) {
-      // This error code indicates that the chain has not been added to MetaMask
-      if (switchError.code === 4902) {
-        const network = Object.values(NETWORKS).find(n => n.chainId === chainId);
-        if (network) {
-          try {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: `0x${chainId.toString(16)}`,
-                chainName: network.name,
-                rpcUrls: [network.rpcUrl],
-                nativeCurrency: {
-                  name: network.currency,
-                  symbol: network.currency,
-                  decimals: 18,
-                },
-                blockExplorerUrls: network.blockExplorerUrl ? [network.blockExplorerUrl] : undefined,
-              }],
-            });
-          } catch (addError: any) {
-            if (addError.code === 4001) {
-              throw new Error('Network addition rejected. Please approve adding the Somnia network in MetaMask.');
-            } else {
-              throw new Error(`Failed to add Somnia network: ${addError.message}`);
-            }
-          }
-        } else {
-          throw new Error(`Network configuration not found for chain ID ${chainId}`);
-        }
-      } else if (switchError.code === 4001) {
-        throw new Error('Network switch rejected. Please approve the network switch in MetaMask.');
-      } else {
-        throw new Error(`Failed to switch network: ${switchError.message}`);
-      }
-    }
-  } else {
+  if (!isMetaMaskInstalled()) {
     throw new Error('MetaMask not available. Please install MetaMask to switch networks.');
+  }
+
+  const network = Object.values(NETWORKS).find(n => n.chainId === chainId);
+  if (!network) {
+    throw new Error(`Network configuration not found for chain ID ${chainId}`);
+  }
+
+  try {
+    // First, try to switch to the network
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: `0x${chainId.toString(16)}` }],
+    });
+    
+    // Verify the switch was successful
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const networkInfo = await provider.getNetwork();
+    if (Number(networkInfo.chainId) !== chainId) {
+      throw new Error(`Failed to switch to network ${network.name}. Current chain ID: ${networkInfo.chainId}`);
+    }
+    
+  } catch (switchError: any) {
+    // This error code indicates that the chain has not been added to MetaMask
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: `0x${chainId.toString(16)}`,
+            chainName: network.name,
+            rpcUrls: [network.rpcUrl],
+            nativeCurrency: {
+              name: network.currency,
+              symbol: network.currency,
+              decimals: 18,
+            },
+            blockExplorerUrls: network.blockExplorerUrl ? [network.blockExplorerUrl] : undefined,
+          }],
+        });
+        
+        // Verify the network was added and switched successfully
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const networkInfo = await provider.getNetwork();
+        if (Number(networkInfo.chainId) !== chainId) {
+          throw new Error(`Failed to switch to ${network.name} after adding. Current chain ID: ${networkInfo.chainId}`);
+        }
+        
+      } catch (addError: any) {
+        if (addError.code === 4001) {
+          throw new Error('Network addition rejected. Please approve adding the Somnia network in MetaMask.');
+        } else {
+          throw new Error(`Failed to add ${network.name} network: ${addError.message}`);
+        }
+      }
+    } else if (switchError.code === 4001) {
+      throw new Error('Network switch rejected. Please approve the network switch in MetaMask.');
+    } else {
+      throw new Error(`Failed to switch to ${network.name}: ${switchError.message}`);
+    }
   }
 };
 
@@ -184,6 +201,49 @@ export const getMetaMaskAccount = async (): Promise<string | null> => {
     return accounts && accounts.length > 0 ? accounts[0] : null;
   } catch (error) {
     console.warn('Failed to get MetaMask account:', error);
+    return null;
+  }
+};
+
+// Ensure user is connected to Somnia network
+export const ensureSomniaNetwork = async (): Promise<void> => {
+  if (!isMetaMaskInstalled()) {
+    throw new Error('MetaMask not available. Please install MetaMask to connect to Somnia network.');
+  }
+
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    const currentChainId = Number(network.chainId);
+    
+    // If not on Somnia testnet, switch to it
+    if (currentChainId !== 50312) {
+      console.log(`Current network: ${currentChainId}, switching to Somnia Testnet (50312)`);
+      await switchToNetwork(50312);
+    }
+  } catch (error) {
+    console.error('Failed to ensure Somnia network:', error);
+    throw error;
+  }
+};
+
+// Get current network info
+export const getCurrentNetwork = async () => {
+  if (!isMetaMaskInstalled()) return null;
+  
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    const chainId = Number(network.chainId);
+    
+    return {
+      chainId,
+      name: network.name,
+      isSomnia: chainId === 50312,
+      networkConfig: Object.values(NETWORKS).find(n => n.chainId === chainId)
+    };
+  } catch (error) {
+    console.error('Failed to get current network:', error);
     return null;
   }
 };

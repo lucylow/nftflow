@@ -20,8 +20,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useWeb3 } from "@/contexts/Web3Context";
+import { runFullWalletTest } from "@/utils/walletTest";
+import { useState } from "react";
 
 const Index = () => {
+  const { isConnected, account, chainId } = useWeb3();
+  const [testResults, setTestResults] = useState<any>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
+  const handleWalletTest = async () => {
+    setIsTesting(true);
+    try {
+      const results = await runFullWalletTest();
+      setTestResults(results);
+    } catch (error) {
+      console.error('Test failed:', error);
+    } finally {
+      setIsTesting(false);
+    }
+  };
   const features = [
     {
       icon: <Zap className="w-6 h-6" />,
@@ -201,6 +219,60 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Wallet Debug Section - Remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <section className="px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-slate-800/50 border-slate-700/50">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold mb-4 text-white">🔧 Wallet Connection Debug</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="text-slate-400">Connected:</span>
+                      <span className={`ml-2 ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                        {isConnected ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400">Account:</span>
+                      <span className="ml-2 text-slate-300 font-mono">
+                        {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'None'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400">Network:</span>
+                      <span className={`ml-2 ${chainId === 50312 ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {chainId === 50312 ? 'Somnia Testnet' : `Chain ${chainId}`}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleWalletTest}
+                    disabled={isTesting}
+                    variant="outline"
+                    size="sm"
+                    className="border-slate-600 text-slate-300"
+                  >
+                    {isTesting ? 'Testing...' : 'Run Wallet Test'}
+                  </Button>
+                  
+                  {testResults && (
+                    <div className="mt-4 p-4 bg-slate-900/50 rounded-lg">
+                      <h4 className="font-semibold mb-2 text-white">Test Results:</h4>
+                      <pre className="text-xs text-slate-300 overflow-auto">
+                        {JSON.stringify(testResults, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="px-4 py-16 md:py-20">

@@ -53,12 +53,14 @@ describe("NFTFlow Advanced Features Integration", function () {
       const pricePerSecond = ethers.parseEther("0.0001");
       const duration = 3600;
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Measure gas usage
       const tx = await nftFlow.connect(tenant).rentNFT(
         mockNFT.target,
         1,
-        duration,
+        expires,
+        totalPrice,
         { value: totalPrice }
       );
       
@@ -83,10 +85,11 @@ describe("NFTFlow Advanced Features Integration", function () {
       const pricePerSecond = ethers.parseEther("0.0001");
       const duration = 3600;
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Create multiple rentals
-      const tx1 = await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
-      const tx2 = await nftFlow.connect(other).rentNFT(mockNFT.target, 2, duration, { value: totalPrice });
+      const tx1 = await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
+      const tx2 = await nftFlow.connect(other).rentNFT(mockNFT.target, 2, expires, totalPrice, { value: totalPrice });
       
       const receipt1 = await tx1.wait();
       const receipt2 = await tx2.wait();
@@ -106,13 +109,14 @@ describe("NFTFlow Advanced Features Integration", function () {
       const pricePerSecond = ethers.parseEther("0.0001");
       const duration = 3600;
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Check initial reputation
       const initialStats = await reputationSystem.getRentalStats(tenant.address);
       expect(initialStats.totalRentals).to.equal(0);
       
       // Create and complete rental
-      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
+      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
       await time.increase(duration + 1);
       await nftFlow.completeRental(mockNFT.target, 1);
       
@@ -231,11 +235,12 @@ describe("NFTFlow Advanced Features Integration", function () {
       const pricePerSecond = ethers.parseEther("0.0001");
       const duration = 3600;
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       const ownerBalanceBefore = await ethers.provider.getBalance(owner.address);
       
       // Create rental
-      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
+      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
       
       // Check protocol fee was collected
       const contractBalance = await ethers.provider.getBalance(nftFlow.target);
@@ -272,9 +277,10 @@ describe("NFTFlow Advanced Features Integration", function () {
       const pricePerSecond = ethers.parseEther("0.0001");
       const duration = 3600;
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Create rental
-      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
+      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
       
       // Fast forward past expiration + recovery period
       await time.increase(duration + 8 * 24 * 60 * 60); // 8 days
@@ -294,9 +300,10 @@ describe("NFTFlow Advanced Features Integration", function () {
       const pricePerSecond = ethers.parseEther("0.0001");
       const duration = 3600;
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Create rental
-      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
+      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
       
       // Fast forward past expiration but before recovery period
       await time.increase(duration + 6 * 24 * 60 * 60); // 6 days
@@ -322,11 +329,11 @@ describe("NFTFlow Advanced Features Integration", function () {
       
       await expect(
         nftFlow.connect(tenant).setProtocolFeePercentage(100)
-      ).to.be.revertedWithCustomError(nftFlow, "OwnableUnauthorizedAccount");
+      ).to.be.revertedWith("Ownable: caller is not the owner");
       
       await expect(
         reputationSystem.connect(tenant).setRentalContract(tenant.address)
-      ).to.be.revertedWithCustomError(reputationSystem, "OwnableUnauthorizedAccount");
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should prevent unauthorized price setting", async function () {
@@ -357,8 +364,9 @@ describe("NFTFlow Advanced Features Integration", function () {
       const duration = 3600;
       const pricePerSecond = ethers.parseEther("0.000001");
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
-      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
+      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
       
       // Verify rental state
       const rental = await nftFlow.rentals(mockNFT.target, 1);
@@ -395,10 +403,11 @@ describe("NFTFlow Advanced Features Integration", function () {
       const duration = 3600;
       const pricePerSecond = ethers.parseEther("0.0001");
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Both users should be able to rent
-      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
-      await nftFlow.connect(other).rentNFT(mockNFT.target, 2, duration, { value: totalPrice });
+      await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
+      await nftFlow.connect(other).rentNFT(mockNFT.target, 2, expires, totalPrice, { value: totalPrice });
       
       // Verify both rentals were created
       const rental1 = await nftFlow.rentals(mockNFT.target, 1);
@@ -429,9 +438,10 @@ describe("NFTFlow Advanced Features Integration", function () {
       const duration = 3600;
       const pricePerSecond = ethers.parseEther("0.000001");
       const totalPrice = pricePerSecond * BigInt(duration);
+      const expires = Math.floor(Date.now() / 1000) + duration;
       
       // Measure gas for rental creation
-      const rentalTx = await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, duration, { value: totalPrice });
+      const rentalTx = await nftFlow.connect(tenant).rentNFT(mockNFT.target, 1, expires, totalPrice, { value: totalPrice });
       const rentalReceipt = await rentalTx.wait();
       
       // Measure gas for rental completion

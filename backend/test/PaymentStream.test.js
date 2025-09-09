@@ -34,6 +34,7 @@ describe("PaymentStream", function () {
           recipient.address,
           startTime,
           stopTime,
+          "0x0000000000000000000000000000000000000000", // nftContract
           { value: deposit }
         )
       ).to.emit(paymentStream, "StreamCreated")
@@ -50,6 +51,7 @@ describe("PaymentStream", function () {
           "0x0000000000000000000000000000000000000000",
           startTime,
           stopTime,
+          "0x0000000000000000000000000000000000000000", // nftContract
           { value: deposit }
         )
       ).to.be.revertedWith("Invalid recipient");
@@ -65,6 +67,7 @@ describe("PaymentStream", function () {
           sender.address,
           startTime,
           stopTime,
+          "0x0000000000000000000000000000000000000000", // nftContract
           { value: deposit }
         )
       ).to.be.revertedWith("Cannot stream to self");
@@ -79,6 +82,7 @@ describe("PaymentStream", function () {
           recipient.address,
           startTime,
           stopTime,
+          "0x0000000000000000000000000000000000000000", // nftContract
           { value: 0 }
         )
       ).to.be.revertedWith("Deposit must be greater than 0");
@@ -94,6 +98,7 @@ describe("PaymentStream", function () {
           recipient.address,
           startTime,
           stopTime,
+          "0x0000000000000000000000000000000000000000", // nftContract
           { value: deposit }
         )
       ).to.be.revertedWith("Start time in the past");
@@ -109,6 +114,7 @@ describe("PaymentStream", function () {
           recipient.address,
           startTime,
           stopTime,
+          "0x0000000000000000000000000000000000000000", // nftContract
           { value: deposit }
         )
       ).to.be.revertedWith("Stop time before start time");
@@ -127,6 +133,7 @@ describe("PaymentStream", function () {
         recipient.address,
         startTime,
         stopTime,
+        "0x0000000000000000000000000000000000000000", // nftContract
         { value: deposit }
       );
 
@@ -171,6 +178,7 @@ describe("PaymentStream", function () {
         recipient.address,
         startTime,
         stopTime,
+        "0x0000000000000000000000000000000000000000", // nftContract
         { value: deposit }
       );
 
@@ -218,6 +226,7 @@ describe("PaymentStream", function () {
         recipient.address,
         startTime,
         stopTime,
+        "0x0000000000000000000000000000000000000000", // nftContract
         { value: deposit }
       );
 
@@ -265,6 +274,7 @@ describe("PaymentStream", function () {
         recipient.address,
         startTime,
         stopTime,
+        "0x0000000000000000000000000000000000000000", // nftContract
         { value: deposit }
       );
 

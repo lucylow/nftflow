@@ -15,7 +15,9 @@ import {
   CONTRACT_ADDRESSES,
   isMetaMaskInstalled,
   isMetaMaskConnected,
-  getMetaMaskAccount
+  getMetaMaskAccount,
+  ensureSomniaNetwork,
+  getCurrentNetwork
 } from '@/lib/web3';
 
 interface Web3ContextType {
@@ -154,6 +156,9 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         throw new Error('No accounts found. Please create an account in MetaMask or unlock your wallet.');
       }
 
+      // Ensure we're on the Somnia network
+      await ensureSomniaNetwork();
+
       const provider = getProvider();
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
@@ -234,6 +239,13 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         if (isConnected) {
           const account = await getMetaMaskAccount();
           if (account) {
+            // Check current network and switch to Somnia if needed
+            const currentNetwork = await getCurrentNetwork();
+            if (!currentNetwork?.isSomnia) {
+              console.log('Not on Somnia network, switching...');
+              await ensureSomniaNetwork();
+            }
+            
             const provider = getProvider();
             const signer = await provider.getSigner();
             const address = await signer.getAddress();
