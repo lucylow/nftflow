@@ -641,6 +641,12 @@ const Upload = () => {
                     variant="outline" 
                     className="flex-1"
                     disabled={!isConnected}
+                    onClick={() => {
+                      toast({
+                        title: "Save as Draft",
+                        description: "Draft saving feature coming soon!",
+                      });
+                    }}
                   >
                     Save as Draft
                   </Button>

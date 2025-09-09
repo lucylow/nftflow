@@ -23,12 +23,14 @@ import NFTCard from "@/components/NFTCard";
 import UserDashboard from "@/components/UserDashboard";
 import NFTManagement from "@/components/NFTManagement";
 import PaymentStreamManagement from "@/components/PaymentStreamManagement";
-import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton } from "@/components/ui/skeleton";
+import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton, DashboardSkeleton, LoadingSpinner } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
 
   // Simulate loading
   useEffect(() => {
@@ -84,6 +86,17 @@ const Dashboard = () => {
     { type: "earning", action: "Earned from Neon Cat #9999", time: "2 days ago", amount: "+3.2 STT" }
   ];
 
+  // Show full page skeleton on initial load
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <DashboardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -108,10 +121,23 @@ const Dashboard = () => {
                 disabled={isRefreshing}
                 className="border-border text-muted-foreground hover:bg-muted/50"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? (
+                  <LoadingSpinner size="sm" className="mr-2" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
                 Refresh
               </Button>
-              <Button variant="premium" size="lg">
+              <Button 
+                variant="premium" 
+                size="lg"
+                onClick={() => {
+                  toast({
+                    title: "Settings",
+                    description: "Settings panel opened",
+                  });
+                }}
+              >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>

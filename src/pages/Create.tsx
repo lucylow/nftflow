@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Upload, ImageIcon, DollarSign, Clock, Info, AlertCircle } from "lucide-react";
+import { Upload, ImageIcon, DollarSign, Clock, Info, AlertCircle, Zap, Shield, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { useNFTFlow } from "@/hooks/useNFTFlow";
 import { useNFTManagement } from "@/hooks/useNFTManagement";
 import { useToast } from "@/hooks/use-toast";
 import { CONTRACT_ADDRESSES } from "@/config/contracts";
+import { FormSkeleton, LoadingSpinner } from "@/components/ui/skeleton";
 
 const Create = () => {
   const { isConnected, account } = useWeb3();
@@ -346,7 +347,16 @@ const Create = () => {
                     <p className="text-sm text-muted-foreground mb-4">
                       Drag and drop or click to upload
                     </p>
-                    <Button variant="outline" className="mb-2">
+                    <Button 
+                      variant="outline" 
+                      className="mb-2"
+                      onClick={() => {
+                        toast({
+                          title: "File Upload",
+                          description: "File upload feature coming soon!",
+                        });
+                      }}
+                    >
                       Choose File
                     </Button>
                     <p className="text-xs text-muted-foreground">
@@ -389,15 +399,30 @@ const Create = () => {
               variant="outline" 
               className="flex-1"
               disabled={!isConnected}
+              onClick={() => {
+                toast({
+                  title: "Save as Draft",
+                  description: "Draft saving feature coming soon!",
+                });
+              }}
             >
               Save as Draft
             </Button>
             <Button 
               type="submit" 
-              className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 relative overflow-hidden group"
               disabled={!isConnected || isLoading}
             >
-              {isLoading ? "Listing NFT..." : "List NFT for Rent"}
+              {isLoading ? (
+                <LoadingSpinner size="sm" className="mr-2" />
+              ) : (
+                <Zap className="w-4 h-4 mr-2" />
+              )}
+              <span className="relative z-10">
+                {isLoading ? "Listing NFT..." : "List NFT for Rent"}
+              </span>
+              {/* Shimmer effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             </Button>
           </div>
         </form>

@@ -18,10 +18,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 const NFTDetail = () => {
   const { id } = useParams();
   const [isLiked, setIsLiked] = useState(false);
+  const { toast } = useToast();
   
   // Mock NFT data - in real app, fetch based on ID
   const nft = {
@@ -104,10 +106,24 @@ const NFTDetail = () => {
               >
                 <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast({
+                    title: "Link Copied",
+                    description: "NFT link copied to clipboard",
+                  });
+                }}
+              >
                 <Share2 className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => window.open(`https://etherscan.io/address/${nft.owner}`, '_blank')}
+              >
                 <ExternalLink className="w-4 h-4" />
               </Button>
             </div>

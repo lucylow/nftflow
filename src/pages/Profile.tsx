@@ -115,7 +115,11 @@ const Profile = () => {
                     <Button variant="ghost" size="sm" onClick={copyAddress}>
                       <Copy className="w-3 h-3" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => window.open(`https://etherscan.io/address/${userProfile.address}`, '_blank')}
+                    >
                       <ExternalLink className="w-3 h-3" />
                     </Button>
                   </div>
@@ -123,11 +127,29 @@ const Profile = () => {
                   <p className="text-muted-foreground mb-4">{userProfile.bio}</p>
                   
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        toast({
+                          title: "Edit Profile",
+                          description: "Profile editing feature coming soon!",
+                        });
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Profile
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        toast({
+                          title: "Settings",
+                          description: "Settings panel opened",
+                        });
+                      }}
+                    >
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
                     </Button>

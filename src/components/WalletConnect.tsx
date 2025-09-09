@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { Wallet, User, LogOut, Copy, ExternalLink } from "lucide-react";
+import { Wallet, User, LogOut, Copy, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useWeb3 } from "@/contexts/Web3Context";
+import { LoadingSpinner } from "@/components/ui/skeleton";
 
 const WalletConnect = () => {
   const { 
@@ -71,11 +72,7 @@ const WalletConnect = () => {
         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
       >
         {isConnecting ? (
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"
-          />
+          <LoadingSpinner size="sm" className="mr-2 text-white" />
         ) : (
           <Wallet className="w-4 h-4 mr-2" />
         )}

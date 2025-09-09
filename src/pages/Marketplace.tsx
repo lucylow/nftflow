@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, Grid, List, TrendingUp, Clock, SlidersHorizontal, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import NFTCard from "@/components/NFTCard";
-import { NFTCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeleton";
+import { NFTCardSkeleton, StatsCardSkeleton, MarketplaceSkeleton, LoadingSpinner } from "@/components/ui/skeleton";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { useNFTManagement } from "@/hooks/useNFTManagement";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +125,263 @@ const mockNFTs = [
     collateralRequired: 0.3,
     utilityType: "Demo Access",
     utilityDescription: "Test premium NFT features before purchasing"
+  },
+  {
+    id: "7",
+    name: "AI Trading Bot License",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop",
+    collection: "AI Services",
+    pricePerSecond: 0.000012, // 0.0432 STT per hour
+    isRented: false,
+    owner: "0x7777888899990000",
+    rarity: "Epic",
+    listingId: "0x7777888899990000777788889999000077778888999900007777888899990000",
+    nftContract: "0xMockERC721",
+    tokenId: "888",
+    minDuration: 7200,
+    maxDuration: 604800,
+    collateralRequired: 10.0,
+    utilityType: "AI Service",
+    utilityDescription: "Access to advanced AI trading algorithms and market analysis"
+  },
+  {
+    id: "8",
+    name: "Virtual Real Estate Plot",
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=400&fit=crop",
+    collection: "Metaverse Land",
+    pricePerSecond: 0.000008, // 0.0288 STT per hour
+    isRented: true,
+    owner: "0x4444555566667777",
+    timeLeft: "1d 3h",
+    rarity: "Legendary",
+    listingId: "0x4444555566667777444455556666777744445555666677774444555566667777",
+    nftContract: "0xMockERC721",
+    tokenId: "555",
+    minDuration: 86400,
+    maxDuration: 2592000,
+    collateralRequired: 15.0,
+    utilityType: "Virtual Land",
+    utilityDescription: "Prime location in the metaverse with development rights"
+  },
+  {
+    id: "9",
+    name: "Music Production Studio",
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+    collection: "Creative Tools",
+    pricePerSecond: 0.000004, // 0.0144 STT per hour
+    isRented: false,
+    owner: "0x2222333344445555",
+    rarity: "Rare",
+    listingId: "0x2222333344445555222233334444555522223333444455552222333344445555",
+    nftContract: "0xMockERC721",
+    tokenId: "333",
+    minDuration: 3600,
+    maxDuration: 604800,
+    collateralRequired: 3.0,
+    utilityType: "Creative Tool",
+    utilityDescription: "Professional music production software and virtual instruments"
+  },
+  {
+    id: "10",
+    name: "Fitness Coach AI",
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
+    collection: "Health & Wellness",
+    pricePerSecond: 0.000002, // 0.0072 STT per hour
+    isRented: false,
+    owner: "0x6666777788889999",
+    rarity: "Common",
+    listingId: "0x6666777788889999666677778888999966667777888899996666777788889999",
+    nftContract: "0xMockERC721",
+    tokenId: "222",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 1.0,
+    utilityType: "Health Service",
+    utilityDescription: "Personalized fitness coaching and workout plans"
+  },
+  {
+    id: "11",
+    name: "Luxury Car Showroom",
+    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=400&fit=crop",
+    collection: "Virtual Showrooms",
+    pricePerSecond: 0.000006, // 0.0216 STT per hour
+    isRented: true,
+    owner: "0x8888999900001111",
+    timeLeft: "6h 30m",
+    rarity: "Epic",
+    listingId: "0x8888999900001111888899990000111188889999000011118888999900001111",
+    nftContract: "0xMockERC721",
+    tokenId: "111",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 4.0,
+    utilityType: "Virtual Showroom",
+    utilityDescription: "Exclusive access to luxury car collection and test drives"
+  },
+  {
+    id: "12",
+    name: "Language Learning Tutor",
+    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=400&fit=crop",
+    collection: "Education Services",
+    pricePerSecond: 0.0000015, // 0.0054 STT per hour
+    isRented: false,
+    owner: "0x0000111122223333",
+    rarity: "Common",
+    listingId: "0x0000111122223333000011112222333300001111222233330000111122223333",
+    nftContract: "0xMockERC721",
+    tokenId: "999",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 0.5,
+    utilityType: "Education",
+    utilityDescription: "AI-powered language learning with native speaker simulation"
+  },
+  {
+    id: "13",
+    name: "Virtual Fashion Designer",
+    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop",
+    collection: "Fashion & Style",
+    pricePerSecond: 0.000003, // 0.0108 STT per hour
+    isRented: false,
+    owner: "0x1111222233334444",
+    rarity: "Rare",
+    listingId: "0x1111222233334444111122223333444411112222333344441111222233334444",
+    nftContract: "0xMockERC721",
+    tokenId: "777",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 2.0,
+    utilityType: "Fashion Design",
+    utilityDescription: "Create custom virtual clothing and accessories"
+  },
+  {
+    id: "14",
+    name: "Crypto Trading Signals",
+    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=400&fit=crop",
+    collection: "Financial Services",
+    pricePerSecond: 0.000009, // 0.0324 STT per hour
+    isRented: true,
+    owner: "0x5555666677778888",
+    timeLeft: "12h 45m",
+    rarity: "Epic",
+    listingId: "0x5555666677778888555566667777888855556666777788885555666677778888",
+    nftContract: "0xMockERC721",
+    tokenId: "666",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 8.0,
+    utilityType: "Financial Service",
+    utilityDescription: "Real-time crypto trading signals and market analysis"
+  },
+  {
+    id: "15",
+    name: "Virtual Pet Companion",
+    image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=400&fit=crop",
+    collection: "Digital Companions",
+    pricePerSecond: 0.000001, // 0.0036 STT per hour
+    isRented: false,
+    owner: "0x9999000011112222",
+    rarity: "Common",
+    listingId: "0x9999000011112222999900001111222299990000111122229999000011112222",
+    nftContract: "0xMockERC721",
+    tokenId: "444",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 0.2,
+    utilityType: "Digital Companion",
+    utilityDescription: "AI-powered virtual pet with emotional intelligence"
+  },
+  {
+    id: "16",
+    name: "3D Modeling Workshop",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop",
+    collection: "Design Tools",
+    pricePerSecond: 0.000005, // 0.018 STT per hour
+    isRented: false,
+    owner: "0x3333444455556666",
+    rarity: "Rare",
+    listingId: "0x3333444455556666333344445555666633334444555566663333444455556666",
+    nftContract: "0xMockERC721",
+    tokenId: "333",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 3.0,
+    utilityType: "Design Tool",
+    utilityDescription: "Professional 3D modeling software and tutorials"
+  },
+  {
+    id: "17",
+    name: "Virtual Restaurant Kitchen",
+    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
+    collection: "Culinary Experiences",
+    pricePerSecond: 0.000004, // 0.0144 STT per hour
+    isRented: true,
+    owner: "0x7777888899990000",
+    timeLeft: "3h 20m",
+    rarity: "Rare",
+    listingId: "0x7777888899990000777788889999000077778888999900007777888899990000",
+    nftContract: "0xMockERC721",
+    tokenId: "222",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 2.5,
+    utilityType: "Culinary Experience",
+    utilityDescription: "Virtual cooking classes with celebrity chefs"
+  },
+  {
+    id: "18",
+    name: "Meditation & Wellness Space",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop",
+    collection: "Wellness Retreats",
+    pricePerSecond: 0.000002, // 0.0072 STT per hour
+    isRented: false,
+    owner: "0x4444555566667777",
+    rarity: "Common",
+    listingId: "0x4444555566667777444455556666777744445555666677774444555566667777",
+    nftContract: "0xMockERC721",
+    tokenId: "111",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 1.0,
+    utilityType: "Wellness Service",
+    utilityDescription: "Guided meditation and mindfulness sessions"
+  },
+  {
+    id: "19",
+    name: "Virtual Reality Travel",
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=400&fit=crop",
+    collection: "Travel Experiences",
+    pricePerSecond: 0.000006, // 0.0216 STT per hour
+    isRented: false,
+    owner: "0x2222333344445555",
+    rarity: "Epic",
+    listingId: "0x2222333344445555222233334444555522223333444455552222333344445555",
+    nftContract: "0xMockERC721",
+    tokenId: "888",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 4.0,
+    utilityType: "Travel Experience",
+    utilityDescription: "Immersive VR travel to exotic destinations"
+  },
+  {
+    id: "20",
+    name: "Blockchain Developer Tools",
+    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=400&fit=crop",
+    collection: "Developer Resources",
+    pricePerSecond: 0.000008, // 0.0288 STT per hour
+    isRented: true,
+    owner: "0x6666777788889999",
+    timeLeft: "8h 15m",
+    rarity: "Legendary",
+    listingId: "0x6666777788889999666677778888999966667777888899996666777788889999",
+    nftContract: "0xMockERC721",
+    tokenId: "777",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 6.0,
+    utilityType: "Developer Tool",
+    utilityDescription: "Advanced blockchain development environment and tools"
   }
 ];
 
@@ -146,7 +403,11 @@ const Marketplace = () => {
   const [priceRange, setPriceRange] = useState([0, 5]);
   const [selectedRarities, setSelectedRarities] = useState<string[]>([]);
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const [selectedUtilityTypes, setSelectedUtilityTypes] = useState<string[]>([]);
+  const [durationRange, setDurationRange] = useState([3600, 2592000]); // 1 hour to 30 days
+  const [collateralRange, setCollateralRange] = useState([0, 10]);
   const [nfts, setNfts] = useState<any[]>([]);
+  const [filteredNFTs, setFilteredNFTs] = useState<any[]>([]);
 
   // Load NFTs from contracts
   const loadNFTs = async () => {
@@ -179,9 +440,99 @@ const Marketplace = () => {
     setIsRefreshing(false);
   };
 
+  // Filter NFTs based on current filters
+  const applyFilters = useCallback(() => {
+    let filtered = [...nfts];
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(nft => 
+        nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nft.collection.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        nft.utilityType.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter(nft => {
+        switch (selectedCategory) {
+          case "Gaming Utilities":
+            return nft.utilityType === "Gaming Weapon" || nft.utilityType === "Gaming Avatar";
+          case "Art & Display":
+            return nft.utilityType === "Art Display";
+          case "Metaverse Access":
+            return nft.utilityType === "Metaverse Access" || nft.utilityType === "Event Access";
+          case "Real-World Benefits":
+            return nft.utilityType === "Event Access";
+          case "Try Before Buy":
+            return nft.utilityType === "Demo Access";
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Price range filter
+    filtered = filtered.filter(nft => {
+      const pricePerHour = nft.pricePerSecond * 3600;
+      return pricePerHour >= priceRange[0] && pricePerHour <= priceRange[1];
+    });
+
+    // Rarity filter
+    if (selectedRarities.length > 0) {
+      filtered = filtered.filter(nft => selectedRarities.includes(nft.rarity));
+    }
+
+    // Utility type filter
+    if (selectedUtilityTypes.length > 0) {
+      filtered = filtered.filter(nft => selectedUtilityTypes.includes(nft.utilityType));
+    }
+
+    // Duration range filter
+    filtered = filtered.filter(nft => 
+      nft.minDuration >= durationRange[0] && nft.maxDuration <= durationRange[1]
+    );
+
+    // Collateral range filter
+    filtered = filtered.filter(nft => 
+      nft.collateralRequired >= collateralRange[0] && nft.collateralRequired <= collateralRange[1]
+    );
+
+    // Availability filter
+    if (showOnlyAvailable) {
+      filtered = filtered.filter(nft => !nft.isRented);
+    }
+
+    // Sort filter
+    switch (selectedSort) {
+      case "Price: Low to High":
+        filtered.sort((a, b) => a.pricePerSecond - b.pricePerSecond);
+        break;
+      case "Price: High to Low":
+        filtered.sort((a, b) => b.pricePerSecond - a.pricePerSecond);
+        break;
+      case "Most Popular":
+        // Sort by rarity (Legendary > Epic > Rare > Common)
+        const rarityOrder = { "Legendary": 4, "Epic": 3, "Rare": 2, "Common": 1 };
+        filtered.sort((a, b) => (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0));
+        break;
+      case "Recently Listed":
+      default:
+        // Keep original order (most recent first)
+        break;
+    }
+
+    setFilteredNFTs(filtered);
+  }, [nfts, searchTerm, selectedCategory, selectedSort, priceRange, selectedRarities, selectedUtilityTypes, durationRange, collateralRange, showOnlyAvailable]);
+
   useEffect(() => {
     loadNFTs();
   }, [isConnected]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const stats = [
     { label: "Total Volume", value: "1,137 STT", trend: "+12%" },
@@ -190,6 +541,17 @@ const Marketplace = () => {
   ];
 
   const rarities = ["Common", "Rare", "Epic", "Legendary"];
+
+  // Show full page skeleton on initial load
+  if (isLoading && nfts.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <MarketplaceSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
@@ -212,7 +574,11 @@ const Marketplace = () => {
                 disabled={isRefreshing}
                 className="shrink-0"
               >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? (
+                  <LoadingSpinner size="sm" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
               </Button>
             </div>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -234,7 +600,7 @@ const Marketplace = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-card/50 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                  <Card className="bg-card/50 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 group">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
@@ -331,10 +697,10 @@ const Marketplace = () => {
                   transition={{ duration: 0.3 }}
                   className="mt-6 pt-6 border-t border-border overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Price Range */}
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-foreground">Price Range (STT)</label>
+                      <label className="text-sm font-medium text-foreground">Price Range (STT/hour)</label>
                       <div className="px-3">
                         <Slider
                           value={priceRange}
@@ -351,10 +717,75 @@ const Marketplace = () => {
                       </div>
                     </div>
 
+                    {/* Duration Range */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Duration Range</label>
+                      <div className="px-3">
+                        <Slider
+                          value={[durationRange[0] / 3600, durationRange[1] / 3600]}
+                          onValueChange={(value) => setDurationRange([value[0] * 3600, value[1] * 3600])}
+                          max={720} // 30 days in hours
+                          min={1} // 1 hour
+                          step={1}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                          <span>{Math.round(durationRange[0] / 3600)}h</span>
+                          <span>{Math.round(durationRange[1] / 3600)}h</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Collateral Range */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Collateral Range (STT)</label>
+                      <div className="px-3">
+                        <Slider
+                          value={collateralRange}
+                          onValueChange={setCollateralRange}
+                          max={10}
+                          min={0}
+                          step={0.1}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                          <span>{collateralRange[0]} STT</span>
+                          <span>{collateralRange[1]} STT</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Utility Types */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-foreground">Utility Types</label>
+                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                        {["Gaming Weapon", "Gaming Avatar", "Metaverse Access", "Art Display", "Event Access", "Demo Access"].map((utilityType) => (
+                          <div key={utilityType} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={utilityType}
+                              checked={selectedUtilityTypes.includes(utilityType)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedUtilityTypes([...selectedUtilityTypes, utilityType]);
+                                } else {
+                                  setSelectedUtilityTypes(selectedUtilityTypes.filter(t => t !== utilityType));
+                                }
+                              }}
+                            />
+                            <label htmlFor={utilityType} className="text-sm text-muted-foreground">
+                              {utilityType}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     {/* Rarity Filter */}
                     <div className="space-y-3">
                       <label className="text-sm font-medium text-foreground">Rarity</label>
-                      <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {rarities.map((rarity) => (
                           <div key={rarity} className="flex items-center space-x-2">
                             <Checkbox
@@ -399,14 +830,37 @@ const Marketplace = () => {
           </CardContent>
         </Card>
 
+        {/* Results Counter */}
+        {!isLoading && (
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-muted-foreground">
+              Showing {filteredNFTs.length} of {nfts.length} NFTs
+            </p>
+            <div className="flex items-center gap-2">
+              <Select value={selectedSort} onValueChange={setSelectedSort}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         {/* NFT Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {isLoading ? (
             Array.from({ length: 8 }).map((_, index) => (
               <NFTCardSkeleton key={index} />
             ))
-          ) : (
-            mockNFTs.map((nft, index) => (
+          ) : filteredNFTs.length > 0 ? (
+            filteredNFTs.map((nft, index) => (
               <motion.div
                 key={nft.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -423,6 +877,14 @@ const Marketplace = () => {
                 />
               </motion.div>
             ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <div className="text-muted-foreground">
+                <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No NFTs found</h3>
+                <p className="text-sm">Try adjusting your filters or search terms</p>
+              </div>
+            </div>
           )}
         </div>
 
@@ -432,6 +894,13 @@ const Marketplace = () => {
             <Button 
               variant="outline" 
               className="border-primary/50 text-primary hover:bg-primary/10"
+              onClick={() => {
+                toast({
+                  title: "Load More",
+                  description: "Loading more NFTs...",
+                });
+                // In a real implementation, this would load more NFTs from the API
+              }}
             >
               Load More NFTs
             </Button>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, User, DollarSign, ImageOff, Heart, Eye, Share2, MoreVertical } from "lucide-react";
+import { Clock, User, DollarSign, ImageOff, Heart, Eye, Share2, MoreVertical, Zap, Timer, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useWeb3 } from "@/contexts/Web3Context";
 import { useNFTFlow } from "@/hooks/useNFTFlow";
+import { LoadingSpinner } from "@/components/ui/skeleton";
 
 interface NFT {
   id: string;
@@ -225,23 +226,46 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
           </div>
 
           {/* Action Button */}
-          <Button
-            onClick={handleRent}
-            disabled={nft.isRented || isRenting || isLoading || !isConnected}
-            variant={nft.isRented ? "secondary" : "premium"}
-            className="w-full transition-all duration-200"
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            {isRenting || isLoading ? (
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"
-              />
-            ) : null}
-            {isRenting || isLoading ? 'Starting Rental...' : 
-             !isConnected ? 'Connect Wallet' :
-             nft.isRented ? 'Currently Rented' : 'Rent Now'}
-          </Button>
+            <Button
+              onClick={handleRent}
+              disabled={nft.isRented || isRenting || isLoading || !isConnected}
+              variant={nft.isRented ? "secondary" : "premium"}
+              className="w-full transition-all duration-200 relative overflow-hidden group"
+            >
+              {isRenting || isLoading ? (
+                <LoadingSpinner size="sm" className="mr-2" />
+              ) : (
+                <Zap className="w-4 h-4 mr-2" />
+              )}
+              
+              <span className="relative z-10">
+                {isRenting || isLoading ? 'Starting Rental...' : 
+                 !isConnected ? 'Connect Wallet' :
+                 nft.isRented ? 'Currently Rented' : 'Rent Now'}
+              </span>
+              
+              {/* Shimmer effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            </Button>
+          </motion.div>
+
+          {/* Additional Info */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Timer className="w-3 h-3" />
+              <span>Instant access</span>
+            </div>
+            {nft.collateralRequired && (
+              <div className="flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                <span>{nft.collateralRequired} STT collateral</span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </motion.div>
