@@ -1,26 +1,75 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Upload, ImageIcon, DollarSign, Clock, Info } from "lucide-react";
+import { Upload, ImageIcon, DollarSign, Clock, Info, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useWeb3 } from "@/contexts/Web3Context";
+import { useNFTFlow } from "@/hooks/useNFTFlow";
+import { useToast } from "@/hooks/use-toast";
 
 const Create = () => {
+  const { isConnected, account } = useWeb3();
+  const { listForRental, isLoading } = useNFTFlow();
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    pricePerHour: "",
+    pricePerSecond: "",
+    minDuration: "",
+    maxDuration: "",
+    collateralRequired: "",
+    nftContract: "",
+    tokenId: "",
     image: null,
     collection: "",
     attributes: []
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating NFT listing:", formData);
+    
+    if (!isConnected) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to list an NFT",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await listForRental(
+        formData.nftContract,
+        formData.tokenId,
+        formData.pricePerSecond,
+        formData.minDuration,
+        formData.maxDuration,
+        formData.collateralRequired
+      );
+      
+      // Reset form
+      setFormData({
+        name: "",
+        description: "",
+        pricePerSecond: "",
+        minDuration: "",
+        maxDuration: "",
+        collateralRequired: "",
+        nftContract: "",
+        tokenId: "",
+        image: null,
+        collection: "",
+        attributes: []
+      });
+    } catch (error) {
+      console.error("Failed to list NFT:", error);
+    }
   };
 
   return (
@@ -39,6 +88,15 @@ const Create = () => {
           </p>
         </motion.div>
 
+        {!isConnected && (
+          <Alert className="mb-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Please connect your wallet to list an NFT for rental.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Basic Info */}
@@ -47,12 +105,40 @@ const Create = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Info className="w-5 h-5 text-primary" />
-                    Basic Information
+                    NFT Contract Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="name">NFT Name</Label>
+                    <Label htmlFor="nftContract">NFT Contract Address</Label>
+                    <Input
+                      id="nftContract"
+                      placeholder="0x..."
+                      value={formData.nftContract}
+                      onChange={(e) => setFormData({...formData, nftContract: e.target.value})}
+                      disabled={!isConnected}
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Address of the NFT contract
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="tokenId">Token ID</Label>
+                    <Input
+                      id="tokenId"
+                      placeholder="1234"
+                      value={formData.tokenId}
+                      onChange={(e) => setFormData({...formData, tokenId: e.target.value})}
+                      disabled={!isConnected}
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      The specific token ID to list
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="name">NFT Name (Optional)</Label>
                     <Input
                       id="name"
                       placeholder="e.g. Cosmic Wizard #1234"
@@ -62,7 +148,7 @@ const Create = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="collection">Collection</Label>
+                    <Label htmlFor="collection">Collection (Optional)</Label>
                     <Input
                       id="collection"
                       placeholder="e.g. Cosmic Wizards"
@@ -72,7 +158,7 @@ const Create = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">Description (Optional)</Label>
                     <Textarea
                       id="description"
                       placeholder="Describe your NFT and what makes it special..."
@@ -88,22 +174,71 @@ const Create = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <DollarSign className="w-5 h-5 text-success" />
-                    Rental Pricing
+                    Rental Pricing & Duration
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="price">Price per Hour (STT)</Label>
+                    <Label htmlFor="pricePerSecond">Price per Second (STT)</Label>
                     <Input
-                      id="price"
+                      id="pricePerSecond"
                       type="number"
-                      step="0.01"
-                      placeholder="0.5"
-                      value={formData.pricePerHour}
-                      onChange={(e) => setFormData({...formData, pricePerHour: e.target.value})}
+                      step="0.000001"
+                      placeholder="0.000001"
+                      value={formData.pricePerSecond}
+                      onChange={(e) => setFormData({...formData, pricePerSecond: e.target.value})}
+                      disabled={!isConnected}
                     />
                     <p className="text-sm text-muted-foreground mt-1">
-                      Recommended: 0.1 - 2.0 STT per hour
+                      Recommended: 0.000001 - 0.00001 STT per second
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="minDuration">Minimum Duration (seconds)</Label>
+                      <Input
+                        id="minDuration"
+                        type="number"
+                        placeholder="3600"
+                        value={formData.minDuration}
+                        onChange={(e) => setFormData({...formData, minDuration: e.target.value})}
+                        disabled={!isConnected}
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Minimum rental time (1 hour = 3600 seconds)
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="maxDuration">Maximum Duration (seconds)</Label>
+                      <Input
+                        id="maxDuration"
+                        type="number"
+                        placeholder="2592000"
+                        value={formData.maxDuration}
+                        onChange={(e) => setFormData({...formData, maxDuration: e.target.value})}
+                        disabled={!isConnected}
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Maximum rental time (30 days = 2,592,000 seconds)
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="collateralRequired">Collateral Required (STT)</Label>
+                    <Input
+                      id="collateralRequired"
+                      type="number"
+                      step="0.01"
+                      placeholder="1.0"
+                      value={formData.collateralRequired}
+                      onChange={(e) => setFormData({...formData, collateralRequired: e.target.value})}
+                      disabled={!isConnected}
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Security deposit required from renters
                     </p>
                   </div>
                   
@@ -111,19 +246,19 @@ const Create = () => {
                     <div className="text-center p-2 bg-muted rounded-lg">
                       <div className="text-sm text-muted-foreground">1 Hour</div>
                       <div className="font-semibold text-success">
-                        {formData.pricePerHour || "0"} STT
+                        {formData.pricePerSecond ? (parseFloat(formData.pricePerSecond) * 3600).toFixed(6) : "0"} STT
                       </div>
                     </div>
                     <div className="text-center p-2 bg-muted rounded-lg">
                       <div className="text-sm text-muted-foreground">1 Day</div>
                       <div className="font-semibold text-success">
-                        {(parseFloat(formData.pricePerHour || "0") * 24).toFixed(2)} STT
+                        {formData.pricePerSecond ? (parseFloat(formData.pricePerSecond) * 86400).toFixed(6) : "0"} STT
                       </div>
                     </div>
                     <div className="text-center p-2 bg-muted rounded-lg">
                       <div className="text-sm text-muted-foreground">1 Week</div>
                       <div className="font-semibold text-success">
-                        {(parseFloat(formData.pricePerHour || "0") * 24 * 7).toFixed(2)} STT
+                        {formData.pricePerSecond ? (parseFloat(formData.pricePerSecond) * 604800).toFixed(6) : "0"} STT
                       </div>
                     </div>
                   </div>
@@ -175,7 +310,7 @@ const Create = () => {
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="bg-success/10 text-success">
                         <Clock className="w-3 h-3 mr-1" />
-                        {formData.pricePerHour || "0"} STT/hour
+                        {formData.pricePerSecond || "0"} STT/second
                       </Badge>
                     </div>
                   </div>
@@ -185,14 +320,20 @@ const Create = () => {
           </div>
 
           <div className="flex gap-4 pt-6 border-t">
-            <Button type="button" variant="outline" className="flex-1">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1"
+              disabled={!isConnected}
+            >
               Save as Draft
             </Button>
             <Button 
               type="submit" 
               className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              disabled={!isConnected || isLoading}
             >
-              List NFT for Rent
+              {isLoading ? "Listing NFT..." : "List NFT for Rent"}
             </Button>
           </div>
         </form>

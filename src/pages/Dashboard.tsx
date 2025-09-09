@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import NFTCard from "@/components/NFTCard";
+import UserDashboard from "@/components/UserDashboard";
 import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton } from "@/components/ui/skeleton";
 
 const Dashboard = () => {
@@ -131,40 +132,8 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, index) => (
-                  <StatsCardSkeleton key={index} />
-                ))
-              ) : (
-                userStats.map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="bg-card/50 border-border/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-muted-foreground text-sm">{stat.label}</p>
-                            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                          </div>
-                          <Badge 
-                            variant="default"
-                            className="bg-success/20 text-success border-success/30"
-                          >
-                            {stat.change}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))
-              )}
-            </div>
+            {/* User Dashboard Component */}
+            <UserDashboard />
 
             {/* Progress Overview */}
             {!isLoading && (

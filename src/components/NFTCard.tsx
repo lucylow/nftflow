@@ -6,17 +6,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useWeb3 } from "@/contexts/Web3Context";
+import { useNFTFlow } from "@/hooks/useNFTFlow";
 
 interface NFT {
   id: string;
   name: string;
   image: string;
   collection: string;
-  pricePerHour: number;
+  pricePerSecond: number;
   isRented: boolean;
   owner: string;
   timeLeft?: string;
   rarity?: string;
+  listingId?: string;
+  nftContract?: string;
+  tokenId?: string;
+  minDuration?: number;
+  maxDuration?: number;
+  collateralRequired?: number;
 }
 
 interface NFTCardProps {
@@ -30,23 +38,36 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isRenting, setIsRenting] = useState(false);
   const { toast } = useToast();
+  const { isConnected } = useWeb3();
+  const { rentNFT, isLoading } = useNFTFlow();
 
   const handleRent = async () => {
-    if (nft.isRented) return;
+    if (nft.isRented || !isConnected) return;
+    
+    if (!nft.listingId) {
+      toast({
+        title: "Invalid Listing",
+        description: "This NFT listing is not available for rental",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsRenting(true);
     try {
-      await onRent?.(nft);
+      // For now, rent for 1 hour (3600 seconds) as default
+      const duration = "3600";
+      const totalCost = (nft.pricePerSecond * 3600).toString();
+      const collateralAmount = nft.collateralRequired?.toString() || "0";
+      
+      await rentNFT(nft.listingId, duration, totalCost, collateralAmount);
+      
       toast({
         title: "Rental Started",
-        description: `Successfully rented ${nft.name}`,
+        description: `Successfully rented ${nft.name} for 1 hour`,
       });
     } catch (error) {
-      toast({
-        title: "Rental Failed",
-        description: "Failed to start rental. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Rental failed:", error);
     } finally {
       setIsRenting(false);
     }
@@ -176,9 +197,16 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
           {/* Stats */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Price/second</span>
+              <span className="font-mono text-primary font-semibold">
+                {nft.pricePerSecond.toFixed(6)} STT
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Price/hour</span>
               <span className="font-mono text-primary font-semibold">
-                {nft.pricePerHour} STT
+                {(nft.pricePerSecond * 3600).toFixed(6)} STT
               </span>
             </div>
             
@@ -199,18 +227,20 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
           {/* Action Button */}
           <Button
             onClick={handleRent}
-            disabled={nft.isRented || isRenting}
+            disabled={nft.isRented || isRenting || isLoading || !isConnected}
             variant={nft.isRented ? "secondary" : "premium"}
             className="w-full transition-all duration-200"
           >
-            {isRenting ? (
+            {isRenting || isLoading ? (
               <motion.div 
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 className="w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"
               />
             ) : null}
-            {isRenting ? 'Starting Rental...' : nft.isRented ? 'Currently Rented' : 'Rent Now'}
+            {isRenting || isLoading ? 'Starting Rental...' : 
+             !isConnected ? 'Connect Wallet' :
+             nft.isRented ? 'Currently Rented' : 'Rent Now'}
           </Button>
         </CardContent>
       </Card>

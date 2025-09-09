@@ -1,32 +1,37 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Wallet, User, LogOut, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useWeb3 } from "@/contexts/Web3Context";
 
-// Mock wallet connection state
 const WalletConnect = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [address] = useState("0x1234...5678");
-  const [balance] = useState("1,234.56");
+  const { 
+    isConnected, 
+    isConnecting, 
+    account, 
+    balance, 
+    chainId,
+    connectWallet, 
+    disconnectWallet,
+    switchNetwork 
+  } = useWeb3();
   const { toast } = useToast();
 
   const handleConnect = async () => {
-    setIsConnecting(true);
-    // Simulate connection delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsConnected(true);
-    setIsConnecting(false);
-    toast({
-      title: "Wallet Connected",
-      description: "Successfully connected to MetaMask",
-    });
+    try {
+      await connectWallet();
+    } catch (error: any) {
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect wallet",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDisconnect = () => {
-    setIsConnected(false);
+    disconnectWallet();
     toast({
       title: "Wallet Disconnected",
       description: "MetaMask disconnected",
@@ -34,11 +39,26 @@ const WalletConnect = () => {
   };
 
   const copyAddress = () => {
-    navigator.clipboard.writeText("0x1234567890abcdef1234567890abcdef12345678");
-    toast({
-      title: "Address Copied",
-      description: "Wallet address copied to clipboard",
-    });
+    if (account) {
+      navigator.clipboard.writeText(account);
+      toast({
+        title: "Address Copied",
+        description: "Wallet address copied to clipboard",
+      });
+    }
+  };
+
+  const handleSwitchNetwork = async () => {
+    try {
+      // Switch to Somnia testnet
+      await switchNetwork(50311);
+    } catch (error: any) {
+      toast({
+        title: "Network Switch Failed",
+        description: error.message || "Failed to switch network",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!isConnected) {
@@ -70,7 +90,9 @@ const WalletConnect = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm">
               <User className="w-4 h-4 text-purple-400" />
-              <span className="font-mono text-slate-300">{address}</span>
+              <span className="font-mono text-slate-300">
+                {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : ''}
+              </span>
               <button 
                 onClick={copyAddress}
                 className="p-1 hover:bg-slate-600 rounded transition-colors"
@@ -79,7 +101,7 @@ const WalletConnect = () => {
               </button>
             </div>
             <div className="text-xs text-slate-400">
-              {balance} STT
+              {balance ? `${parseFloat(balance).toFixed(4)} STT` : '0 STT'}
             </div>
           </div>
         </CardContent>
@@ -89,7 +111,9 @@ const WalletConnect = () => {
         <Button 
           variant="outline" 
           size="sm"
-          className="border-slate-600 text-slate-300"
+          onClick={handleSwitchNetwork}
+          className="border-slate-600 text-slate-300 hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-400"
+          title="Switch to Somnia Testnet"
         >
           <ExternalLink className="w-4 h-4" />
         </Button>

@@ -11,69 +11,105 @@ import { Checkbox } from "@/components/ui/checkbox";
 import NFTCard from "@/components/NFTCard";
 import { NFTCardSkeleton, StatsCardSkeleton } from "@/components/ui/skeleton";
 
-// Mock data
+// Mock data - updated to match new interface
 const mockNFTs = [
   {
     id: "1",
     name: "Cosmic Wizard #1234",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
     collection: "Cosmic Wizards",
-    pricePerHour: 0.5,
+    pricePerSecond: 0.000001, // 0.0036 STT per hour
     isRented: false,
     owner: "0x1234567890abcdef",
-    rarity: "Rare"
+    rarity: "Rare",
+    listingId: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12",
+    nftContract: "0xMockERC721",
+    tokenId: "1234",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 1.0
   },
   {
     id: "2", 
     name: "Galaxy Punk #5678",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
     collection: "Galaxy Punks",
-    pricePerHour: 1.2,
+    pricePerSecond: 0.000003, // 0.0108 STT per hour
     isRented: true,
     owner: "0x9876543210fedcba",
     timeLeft: "2h 15m",
-    rarity: "Epic"
+    rarity: "Epic",
+    listingId: "0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba98",
+    nftContract: "0xMockERC721",
+    tokenId: "5678",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 2.0
   },
   {
     id: "3",
     name: "Neon Cat #9999",
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
     collection: "Neon Cats",
-    pricePerHour: 0.8,
+    pricePerSecond: 0.000002, // 0.0072 STT per hour
     isRented: false,
     owner: "0x5555666677778888",
-    rarity: "Common"
+    rarity: "Common",
+    listingId: "0x5555666677778888555566667777888855556666777788885555666677778888",
+    nftContract: "0xMockERC721",
+    tokenId: "9999",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 0.5
   },
   {
     id: "4",
     name: "Digital Dragon #777",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
     collection: "Digital Dragons", 
-    pricePerHour: 2.5,
+    pricePerSecond: 0.000007, // 0.0252 STT per hour
     isRented: false,
     owner: "0x1111222233334444",
-    rarity: "Legendary"
+    rarity: "Legendary",
+    listingId: "0x1111222233334444111122223333444411112222333344441111222233334444",
+    nftContract: "0xMockERC721",
+    tokenId: "777",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 5.0
   },
   {
     id: "5",
     name: "Space Ape #456",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
     collection: "Space Apes",
-    pricePerHour: 1.8,
+    pricePerSecond: 0.000005, // 0.018 STT per hour
     isRented: true,
     owner: "0x9999888877776666",
     timeLeft: "45m",
-    rarity: "Rare"
+    rarity: "Rare",
+    listingId: "0x9999888877776666999988887777666699998888777766669999888877776666",
+    nftContract: "0xMockERC721",
+    tokenId: "456",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 1.5
   },
   {
     id: "6",
     name: "Quantum Robot #123",
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop", 
     collection: "Quantum Robots",
-    pricePerHour: 0.3,
+    pricePerSecond: 0.0000008, // 0.00288 STT per hour
     isRented: false,
     owner: "0x3333444455556666",
-    rarity: "Common"
+    rarity: "Common",
+    listingId: "0x3333444455556666333344445555666633334444555566663333444455556666",
+    nftContract: "0xMockERC721",
+    tokenId: "123",
+    minDuration: 3600,
+    maxDuration: 2592000,
+    collateralRequired: 0.3
   }
 ];
 
