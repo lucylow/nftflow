@@ -14,6 +14,7 @@
 NFTFlow unlocks the $200B+ NFT market by enabling **micro-rentals** of digital assets. Rent high-value NFTs by the second with real-time payment streaming, powered by Somnia Network's sub-second finality and sub-cent transaction fees.
 
 **Live Demo:** [https://nftflow.lovable.app](https://nftflow.lovable.app/)
+
 **Video Demo:** [YouTube Walkthrough](https://youtube.com/demo)
 
 ## 🚀 Unique Value Proposition
