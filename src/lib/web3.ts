@@ -19,10 +19,11 @@ export const NETWORKS = {
     currency: 'ETH'
   },
   somniaTestnet: {
-    chainId: 50311,
-    name: 'Somnia Testnet',
-    rpcUrl: 'https://testnet.somnia.network',
-    currency: 'STT'
+    chainId: 50312,
+    name: 'Somnia Devnet',
+    rpcUrl: 'https://dream-rpc.somnia.network/',
+    currency: 'STT',
+    blockExplorerUrl: 'https://shannon-explorer.somnia.network/'
   }
 };
 

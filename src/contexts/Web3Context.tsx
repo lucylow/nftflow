@@ -112,13 +112,19 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
 
     setIsConnecting(true);
     try {
-      // Request account access
+      // Check if MetaMask is unlocked
+      const isUnlocked = await window.ethereum._metamask?.isUnlocked?.();
+      if (isUnlocked === false) {
+        throw new Error('MetaMask is locked. Please unlock your MetaMask wallet and try again.');
+      }
+
+      // Request account access with better error handling
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
       });
 
-      if (accounts.length === 0) {
-        throw new Error('No accounts found. Please unlock your MetaMask wallet.');
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found. Please create an account in MetaMask or unlock your wallet.');
       }
 
       const provider = getProvider();
@@ -143,11 +149,15 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       if (error.code === 4001) {
         throw new Error('Connection rejected. Please approve the connection in MetaMask.');
       } else if (error.code === -32002) {
-        throw new Error('Connection request already pending. Please check MetaMask.');
+        throw new Error('Connection request already pending. Please check MetaMask and try again.');
+      } else if (error.code === -32603) {
+        throw new Error('Internal MetaMask error. Please refresh the page and try again.');
       } else if (error.message?.includes('User denied')) {
         throw new Error('Connection denied. Please try again and approve the connection.');
+      } else if (error.message?.includes('unlock')) {
+        throw new Error('MetaMask is locked. Please unlock your wallet and try again.');
       } else {
-        throw new Error(error.message || 'Failed to connect wallet. Please try again.');
+        throw new Error(error.message || 'Failed to connect wallet. Please ensure MetaMask is properly installed and try again.');
       }
     } finally {
       setIsConnecting(false);
