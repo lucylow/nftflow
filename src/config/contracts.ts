@@ -13,10 +13,10 @@ export const CONTRACT_ADDRESSES = {
 
 // Network configuration
 export const NETWORK_CONFIG = {
-  name: process.env.REACT_APP_NETWORK || 'hardhat',
-  rpcUrl: process.env.REACT_APP_RPC_URL || 'http://localhost:8545',
-  chainId: process.env.REACT_APP_NETWORK === 'somnia' ? 50311 : 1337,
-  currency: process.env.REACT_APP_NETWORK === 'somnia' ? 'STT' : 'ETH',
+  name: import.meta.env.VITE_NETWORK || 'somnia',
+  rpcUrl: import.meta.env.VITE_RPC_URL || 'https://testnet.somnia.network',
+  chainId: import.meta.env.VITE_NETWORK === 'hardhat' ? 1337 : 50311,
+  currency: import.meta.env.VITE_NETWORK === 'hardhat' ? 'ETH' : 'STT',
 };
 
 // Default values for testing
