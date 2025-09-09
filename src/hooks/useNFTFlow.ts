@@ -57,8 +57,8 @@ export const useNFTFlow = () => {
         nftContract,
         tokenId,
         parseEther(pricePerSecond),
-        minDuration,
-        maxDuration,
+        BigInt(minDuration),
+        BigInt(maxDuration),
         parseEther(collateralRequired)
       );
 
@@ -100,7 +100,7 @@ export const useNFTFlow = () => {
       
       const tx = await nftFlowContract.rentNFT(
         listingId,
-        duration,
+        BigInt(duration),
         { value: totalPayment }
       );
 

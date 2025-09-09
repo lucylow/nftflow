@@ -48,7 +48,6 @@ interface RentalMarketplaceProps {
 export function RentalMarketplace({ className }: RentalMarketplaceProps) {
   const { account } = useWeb3();
   const { 
-    availableNFTs, 
     rentNFT, 
     isLoading, 
     error 
@@ -137,10 +136,10 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
       const totalAmount = totalPrice + collateral;
       
       await rentNFT(
-        nft.nftContract,
-        nft.tokenId,
-        rentalDuration,
-        parseEther(totalAmount.toString())
+        nft.id, // listingId
+        rentalDuration.toString(),
+        totalPrice.toString(),
+        collateral.toString()
       );
       
       // Success feedback

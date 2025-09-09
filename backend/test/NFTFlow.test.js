@@ -29,13 +29,8 @@ describe("NFTFlow", function () {
     const utilityTracker = await UtilityTracker.deploy();
     await utilityTracker.waitForDeployment();
 
-    const NFTFlow = await ethers.getContractFactory("NFTFlow");
-    nftFlow = await NFTFlow.deploy(
-      await priceOracle.getAddress(),
-      await paymentStream.getAddress(),
-      await reputationSystem.getAddress(),
-      await utilityTracker.getAddress()
-    );
+    const NFTFlow = await ethers.getContractFactory("NFTFlowGasOptimized");
+    nftFlow = await NFTFlow.deploy(await reputationSystem.getAddress());
 
     // Authorize NFTFlow in ReputationSystem
     await reputationSystem.addAuthorizedContract(await nftFlow.getAddress());

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Upload, ImageIcon, DollarSign, Clock, Info, AlertCircle, Zap, Shield, Timer } from "lucide-react";
+import { Upload, ImageIcon, DollarSign, Clock, Info, AlertCircle, Zap, Shield, Timer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,11 @@ const Create = () => {
   const { listForRental, isLoading } = useNFTFlow();
   const { mintNFT, getUserNFTs, approveNFTFlow, isLoading: isMinting } = useNFTManagement();
   const { toast } = useToast();
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -43,6 +48,75 @@ const Create = () => {
     image: "",
     attributes: []
   });
+
+  // Handle file upload
+  const handleFileUpload = useCallback((file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an image file (JPG, PNG, GIF, WebP)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Clean up previous file URL to prevent memory leaks
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setUploadedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setFormData(prev => ({ ...prev, image: url }));
+    
+    toast({
+      title: "File Uploaded",
+      description: `${file.name} has been uploaded successfully`,
+    });
+  }, [toast, previewUrl]);
+
+  // Handle drag and drop
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  }, [handleFileUpload]);
+
+  // Handle file input change
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0]);
+    }
+  };
+
+  // Handle file input click
+  const handleFileInputClick = () => {
+    fileInputRef.current?.click();
+  };
 
   // Load user's NFTs
   const loadUserNFTs = async () => {
@@ -136,6 +210,15 @@ const Create = () => {
   useEffect(() => {
     loadUserNFTs();
   }, [isConnected]);
+
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
@@ -341,7 +424,17 @@ const Create = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="border-2 border-dashed border-primary/20 rounded-lg p-8 text-center hover:border-primary/40 transition-colors">
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      dragActive 
+                        ? "border-primary bg-primary/5" 
+                        : "border-primary/20 hover:border-primary/40"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
                     <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="font-semibold mb-2">Upload NFT Image</h3>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -350,19 +443,51 @@ const Create = () => {
                     <Button 
                       variant="outline" 
                       className="mb-2"
-                      onClick={() => {
-                        toast({
-                          title: "File Upload",
-                          description: "File upload feature coming soon!",
-                        });
-                      }}
+                      onClick={handleFileInputClick}
+                      disabled={!isConnected}
                     >
                       Choose File
                     </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                    />
                     <p className="text-xs text-muted-foreground">
-                      Supports JPG, PNG, GIF up to 10MB
+                      Supports JPG, PNG, GIF, WebP up to 10MB
                     </p>
                   </div>
+
+                  {uploadedFile && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 p-4 bg-muted/50 rounded-lg"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{uploadedFile.name}</span>
+                          <Badge variant="secondary">
+                            {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                          </Badge>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setUploadedFile(null);
+                            setPreviewUrl("");
+                            setFormData(prev => ({ ...prev, image: null }));
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -371,8 +496,16 @@ const Create = () => {
                   <CardTitle>Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-                    <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                    {previewUrl ? (
+                      <img 
+                        src={previewUrl} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                    )}
                   </div>
                   <div className="mt-4 space-y-2">
                     <h3 className="font-semibold">

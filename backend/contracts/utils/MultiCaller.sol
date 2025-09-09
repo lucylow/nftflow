@@ -22,8 +22,8 @@ contract MultiCaller {
      */
     function multiCall(IMultiCall.Call[] memory calls) public returns (bytes[] memory results) {
         // Execute all calls using Somnia's MultiCallV3
-        ( , results) = IMultiCall(MULTICALL_V3).aggregate(calls);
-        return results;
+        (, bytes[] memory returnData) = IMultiCall(MULTICALL_V3).aggregate(calls);
+        return returnData;
     }
     
     /**

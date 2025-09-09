@@ -440,7 +440,26 @@ const Marketplace = () => {
 
     try {
       const availableNFTs = await getAvailableNFTs();
-      setNfts(availableNFTs);
+      // Transform NFTData to match marketplace interface
+      const transformedNFTs = availableNFTs.map((nft, index) => ({
+        id: nft.tokenId,
+        name: nft.name,
+        image: nft.image,
+        collection: nft.collection,
+        pricePerSecond: parseFloat(nft.pricePerSecond || "0.000001"),
+        isRented: false,
+        owner: nft.owner,
+        rarity: nft.attributes?.find(attr => attr.trait_type === "Rarity")?.value || "Common",
+        listingId: nft.listingId || `0x${index.toString().padStart(64, '0')}`,
+        nftContract: "0xMockERC721",
+        tokenId: nft.tokenId,
+        minDuration: parseInt(nft.minDuration || "3600"),
+        maxDuration: parseInt(nft.maxDuration || "2592000"),
+        collateralRequired: parseFloat(nft.collateralRequired || "0.1"),
+        utilityType: "Gaming Weapon", // Default utility type
+        utilityDescription: nft.description || "A unique NFT with special utility"
+      }));
+      setNfts(transformedNFTs);
     } catch (error) {
       console.error('Failed to load NFTs:', error);
       toast({
