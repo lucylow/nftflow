@@ -9,7 +9,8 @@ import {
   getMockPriceOracleContract,
   switchToNetwork,
   NETWORKS,
-  formatEther
+  formatEther,
+  CONTRACT_ADDRESSES
 } from '@/lib/web3';
 
 interface Web3ContextType {
@@ -55,8 +56,6 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   const initializeContracts = async () => {
     try {
       // Check if contract addresses are set (not zero addresses)
-      const { CONTRACT_ADDRESSES } = await import('@/config/contracts');
-      
       if (CONTRACT_ADDRESSES.NFTFlow === '0x0000000000000000000000000000000000000000') {
         console.warn('Contract addresses not set. Please deploy contracts first.');
         return;

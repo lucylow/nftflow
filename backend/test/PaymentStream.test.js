@@ -25,7 +25,7 @@ describe("PaymentStream", function () {
 
   describe("Stream Creation", function () {
     it("Should create a stream successfully", async function () {
-      const deposit = ethers.utils.parseEther("1.0");
+      const deposit = ethers.parseEther("1.0");
       const startTime = (await time.latest()) + 100;
       const stopTime = startTime + 3600; // 1 hour
 
@@ -37,17 +37,17 @@ describe("PaymentStream", function () {
           { value: deposit }
         )
       ).to.emit(paymentStream, "StreamCreated")
-        .withArgs(0, sender.address, recipient.address, deposit, deposit / 3600, startTime, stopTime);
+        .withArgs(0, sender.address, recipient.address, deposit, deposit / BigInt(3600), startTime, stopTime);
     });
 
     it("Should reject stream to zero address", async function () {
-      const deposit = ethers.utils.parseEther("1.0");
+      const deposit = ethers.parseEther("1.0");
       const startTime = (await time.latest()) + 100;
       const stopTime = startTime + 3600;
 
       await expect(
         paymentStream.connect(sender).createStream(
-          ethers.constants.AddressZero,
+          "0x0000000000000000000000000000000000000000",
           startTime,
           stopTime,
           { value: deposit }
@@ -56,7 +56,7 @@ describe("PaymentStream", function () {
     });
 
     it("Should reject stream to self", async function () {
-      const deposit = ethers.utils.parseEther("1.0");
+      const deposit = ethers.parseEther("1.0");
       const startTime = (await time.latest()) + 100;
       const stopTime = startTime + 3600;
 
@@ -85,7 +85,7 @@ describe("PaymentStream", function () {
     });
 
     it("Should reject stream with past start time", async function () {
-      const deposit = ethers.utils.parseEther("1.0");
+      const deposit = ethers.parseEther("1.0");
       const startTime = (await time.latest()) - 100; // Past time
       const stopTime = startTime + 3600;
 
@@ -100,7 +100,7 @@ describe("PaymentStream", function () {
     });
 
     it("Should reject stream with stop time before start time", async function () {
-      const deposit = ethers.utils.parseEther("1.0");
+      const deposit = ethers.parseEther("1.0");
       const startTime = (await time.latest()) + 3600;
       const stopTime = startTime - 100; // Before start time
 
@@ -117,7 +117,7 @@ describe("PaymentStream", function () {
 
   describe("Balance Calculation", function () {
     let streamId;
-    const deposit = ethers.utils.parseEther("1.0");
+    const deposit = ethers.parseEther("1.0");
 
     beforeEach(async function () {
       const startTime = (await time.latest()) + 100;
@@ -147,7 +147,7 @@ describe("PaymentStream", function () {
       const expectedBalance = deposit.div(2); // Half the deposit after half the time
       
       // Allow for small rounding differences
-      expect(balance).to.be.closeTo(expectedBalance, ethers.utils.parseEther("0.01"));
+      expect(balance).to.be.closeTo(expectedBalance, ethers.parseEther("0.01"));
     });
 
     it("Should return full remaining balance after stream ends", async function () {
@@ -161,7 +161,7 @@ describe("PaymentStream", function () {
 
   describe("Withdrawals", function () {
     let streamId;
-    const deposit = ethers.utils.parseEther("1.0");
+    const deposit = ethers.parseEther("1.0");
 
     beforeEach(async function () {
       const startTime = (await time.latest()) + 100;
@@ -198,7 +198,7 @@ describe("PaymentStream", function () {
 
     it("Should reject withdrawal of more than available", async function () {
       const availableBalance = await paymentStream.balanceOf(streamId);
-      const excessiveAmount = availableBalance.add(ethers.utils.parseEther("0.1"));
+      const excessiveAmount = availableBalance.add(ethers.parseEther("0.1"));
 
       await expect(
         paymentStream.connect(recipient).withdrawFromStream(streamId, excessiveAmount)
@@ -208,7 +208,7 @@ describe("PaymentStream", function () {
 
   describe("Stream Cancellation", function () {
     let streamId;
-    const deposit = ethers.utils.parseEther("1.0");
+    const deposit = ethers.parseEther("1.0");
 
     beforeEach(async function () {
       const startTime = (await time.latest()) + 100;
@@ -257,7 +257,7 @@ describe("PaymentStream", function () {
     let streamId;
 
     beforeEach(async function () {
-      const deposit = ethers.utils.parseEther("1.0");
+      const deposit = ethers.parseEther("1.0");
       const startTime = (await time.latest()) + 100;
       const stopTime = startTime + 3600;
 
@@ -277,7 +277,7 @@ describe("PaymentStream", function () {
       
       expect(stream.sender).to.equal(sender.address);
       expect(stream.recipient).to.equal(recipient.address);
-      expect(stream.deposit).to.equal(ethers.utils.parseEther("1.0"));
+      expect(stream.deposit).to.equal(ethers.parseEther("1.0"));
       expect(stream.active).to.be.true;
     });
 

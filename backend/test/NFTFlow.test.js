@@ -26,22 +26,22 @@ describe("NFTFlow", function () {
     // Deploy NFTFlow
     const NFTFlow = await ethers.getContractFactory("NFTFlow");
     nftFlow = await NFTFlow.deploy(
-      priceOracle.address,
-      paymentStream.address,
-      reputationSystem.address
+      await priceOracle.getAddress(),
+      await paymentStream.getAddress(),
+      await reputationSystem.getAddress()
     );
 
     // Authorize NFTFlow in ReputationSystem
-    await reputationSystem.addAuthorizedContract(nftFlow.address);
+    await reputationSystem.addAuthorizedContract(await nftFlow.getAddress());
 
     // Mint NFT to nftOwner
-    await mockNFT.mint(nftOwner.address, 1);
-    await mockNFT.connect(nftOwner).setApprovalForAll(nftFlow.address, true);
+    await mockNFT.mint(await nftOwner.getAddress(), 1);
+    await mockNFT.connect(nftOwner).setApprovalForAll(await nftFlow.getAddress(), true);
   });
 
   describe("Deployment", function () {
     it("Should set the right owner", async function () {
-      expect(await nftFlow.owner()).to.equal(owner.address);
+      expect(await nftFlow.owner()).to.equal(await owner.getAddress());
     });
 
     it("Should set the correct contract addresses", async function () {
@@ -53,10 +53,10 @@ describe("NFTFlow", function () {
 
   describe("Listing NFTs", function () {
     it("Should allow NFT owner to list for rental", async function () {
-      const pricePerSecond = ethers.utils.parseEther("0.001");
+      const pricePerSecond = ethers.parseEther("0.001");
       const minDuration = 3600; // 1 hour
       const maxDuration = 86400; // 1 day
-      const collateral = ethers.utils.parseEther("0.1");
+      const collateral = ethers.parseEther("0.1");
 
       await expect(
         nftFlow.connect(nftOwner).listForRental(
@@ -71,10 +71,10 @@ describe("NFTFlow", function () {
     });
 
     it("Should reject listing from non-owner", async function () {
-      const pricePerSecond = ethers.utils.parseEther("0.001");
+      const pricePerSecond = ethers.parseEther("0.001");
       const minDuration = 3600;
       const maxDuration = 86400;
-      const collateral = ethers.utils.parseEther("0.1");
+      const collateral = ethers.parseEther("0.1");
 
       await expect(
         nftFlow.connect(renter).listForRental(
@@ -89,10 +89,10 @@ describe("NFTFlow", function () {
     });
 
     it("Should reject invalid duration ranges", async function () {
-      const pricePerSecond = ethers.utils.parseEther("0.001");
+      const pricePerSecond = ethers.parseEther("0.001");
       const minDuration = 86400; // 1 day
       const maxDuration = 3600; // 1 hour (invalid: min > max)
-      const collateral = ethers.utils.parseEther("0.1");
+      const collateral = ethers.parseEther("0.1");
 
       await expect(
         nftFlow.connect(nftOwner).listForRental(
@@ -111,10 +111,10 @@ describe("NFTFlow", function () {
     let listingId;
 
     beforeEach(async function () {
-      const pricePerSecond = ethers.utils.parseEther("0.001");
+      const pricePerSecond = ethers.parseEther("0.001");
       const minDuration = 3600;
       const maxDuration = 86400;
-      const collateral = ethers.utils.parseEther("0.1");
+      const collateral = ethers.parseEther("0.1");
 
       const tx = await nftFlow.connect(nftOwner).listForRental(
         mockNFT.address,
@@ -132,9 +132,9 @@ describe("NFTFlow", function () {
 
     it("Should allow renting with sufficient payment", async function () {
       const duration = 3600; // 1 hour
-      const pricePerSecond = ethers.utils.parseEther("0.001");
+      const pricePerSecond = ethers.parseEther("0.001");
       const totalCost = pricePerSecond.mul(duration);
-      const collateral = ethers.utils.parseEther("0.1");
+      const collateral = ethers.parseEther("0.1");
       const totalPayment = totalCost.add(collateral);
 
       await expect(
@@ -146,7 +146,7 @@ describe("NFTFlow", function () {
 
     it("Should reject rental with insufficient payment", async function () {
       const duration = 3600;
-      const insufficientPayment = ethers.utils.parseEther("0.01");
+      const insufficientPayment = ethers.parseEther("0.01");
 
       await expect(
         nftFlow.connect(renter).rentNFT(listingId, duration, {
@@ -157,9 +157,9 @@ describe("NFTFlow", function () {
 
     it("Should reject rental duration outside allowed range", async function () {
       const shortDuration = 1800; // 30 minutes (too short)
-      const pricePerSecond = ethers.utils.parseEther("0.001");
+      const pricePerSecond = ethers.parseEther("0.001");
       const totalCost = pricePerSecond.mul(shortDuration);
-      const collateral = ethers.utils.parseEther("0.1");
+      const collateral = ethers.parseEther("0.1");
 
       await expect(
         nftFlow.connect(renter).rentNFT(shortDuration, duration, {
@@ -171,7 +171,7 @@ describe("NFTFlow", function () {
 
   describe("Collateral Management", function () {
     it("Should allow users to deposit collateral", async function () {
-      const depositAmount = ethers.utils.parseEther("1.0");
+      const depositAmount = ethers.parseEther("1.0");
 
       await expect(
         nftFlow.connect(renter).depositCollateral({
@@ -185,8 +185,8 @@ describe("NFTFlow", function () {
     });
 
     it("Should allow users to withdraw collateral", async function () {
-      const depositAmount = ethers.utils.parseEther("1.0");
-      const withdrawAmount = ethers.utils.parseEther("0.5");
+      const depositAmount = ethers.parseEther("1.0");
+      const withdrawAmount = ethers.parseEther("0.5");
 
       // Deposit first
       await nftFlow.connect(renter).depositCollateral({
@@ -204,8 +204,8 @@ describe("NFTFlow", function () {
     });
 
     it("Should reject withdrawal of more than available balance", async function () {
-      const depositAmount = ethers.utils.parseEther("1.0");
-      const excessiveWithdraw = ethers.utils.parseEther("2.0");
+      const depositAmount = ethers.parseEther("1.0");
+      const excessiveWithdraw = ethers.parseEther("2.0");
 
       await nftFlow.connect(renter).depositCollateral({
         value: depositAmount
@@ -245,7 +245,7 @@ describe("NFTFlow", function () {
       // Simulate some platform fees in the contract
       await owner.sendTransaction({
         to: nftFlow.address,
-        value: ethers.utils.parseEther("1.0")
+        value: ethers.parseEther("1.0")
       });
 
       await nftFlow.withdrawPlatformFees();
