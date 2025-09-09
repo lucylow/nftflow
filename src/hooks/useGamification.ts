@@ -80,7 +80,7 @@ export const useGamification = () => {
       if (!address) return [];
 
       const achievements = await gamificationContract.getUserAchievements(address);
-      return achievements.map((achievement: any) => Number(achievement));
+      return achievements.map((achievement: string) => Number(achievement));
     } catch (error) {
       console.error('Failed to get user achievements:', error);
       return [];
@@ -135,7 +135,7 @@ export const useGamification = () => {
     try {
       const entries = await gamificationContract.getTopLeaderboard(count);
       
-      return entries.map((entry: any) => ({
+      return entries.map((entry: { user: string; points: string; rank: string }) => ({
         user: entry.user,
         points: Number(ethers.formatEther(entry.points)),
         rank: Number(entry.rank)
@@ -176,11 +176,11 @@ export const useGamification = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to record rental:', error);
       toast({
         title: "Recording Failed",
-        description: error.message || "Failed to record rental",
+        description: error instanceof Error ? error.message : "Failed to record rental",
         variant: "destructive",
       });
       throw error;

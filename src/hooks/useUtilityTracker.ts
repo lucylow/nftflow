@@ -63,11 +63,11 @@ export const useUtilityTracker = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to record utility usage:', error);
       toast({
         title: "Recording Failed",
-        description: error.message || "Failed to record utility usage",
+        description: error instanceof Error ? error.message : "Failed to record utility usage",
         variant: "destructive",
       });
       throw error;
@@ -192,7 +192,7 @@ export const useUtilityTracker = () => {
 
     try {
       const history = await utilityTrackerContract.getUserUtilityHistory(user);
-      return history.map((id: any) => Number(id));
+      return history.map((id: string) => Number(id));
     } catch (error) {
       console.error('Failed to get user utility history:', error);
       return [];

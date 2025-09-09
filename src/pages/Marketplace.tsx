@@ -19,6 +19,7 @@ const mockNFTs = [
   {
     id: "1",
     name: "Legendary Dragon Sword",
+    description: "A powerful weapon that unlocks exclusive dungeon raids and provides +50% damage boost",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
     collection: "Epic Gaming Weapons",
     pricePerSecond: 0.000001, // 0.0036 STT per hour
@@ -37,6 +38,7 @@ const mockNFTs = [
   {
     id: "2", 
     name: "VIP Metaverse Pass",
+    description: "Exclusive access to premium metaverse events and VIP areas",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
     collection: "Exclusive Access",
     pricePerSecond: 0.000003, // 0.0108 STT per hour
@@ -56,6 +58,7 @@ const mockNFTs = [
   {
     id: "3",
     name: "Digital Art Gallery Space",
+    description: "A premium virtual gallery space for showcasing digital art and NFTs",
     image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
     collection: "Virtual Galleries",
     pricePerSecond: 0.000002, // 0.0072 STT per hour
@@ -74,6 +77,7 @@ const mockNFTs = [
   {
     id: "4",
     name: "Premium Gaming Avatar",
+    description: "An elite gaming avatar with exclusive abilities, cosmetics, and special powers",
     image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
     collection: "Elite Avatars", 
     pricePerSecond: 0.000007, // 0.0252 STT per hour
@@ -92,6 +96,7 @@ const mockNFTs = [
   {
     id: "5",
     name: "Concert Venue Access",
+    description: "Exclusive access to premium virtual concert venues and live events",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
     collection: "Event Spaces",
     pricePerSecond: 0.000005, // 0.018 STT per hour
@@ -427,8 +432,27 @@ const Marketplace = () => {
   const [selectedUtilityTypes, setSelectedUtilityTypes] = useState<string[]>([]);
   const [durationRange, setDurationRange] = useState([3600, 2592000]); // 1 hour to 30 days
   const [collateralRange, setCollateralRange] = useState([0, 10]);
-  const [nfts, setNfts] = useState<any[]>([]);
-  const [filteredNFTs, setFilteredNFTs] = useState<any[]>([]);
+  const [nfts, setNfts] = useState<{
+    id: string;
+    name: string;
+    description?: string;
+    image: string;
+    collection: string;
+    pricePerSecond: number;
+    isRented: boolean;
+    owner: string;
+    rarity: string;
+    utilityType: string;
+    listingId?: string;
+    nftContract?: string;
+    tokenId?: string;
+    minDuration?: number;
+    maxDuration?: number;
+    collateralRequired?: number;
+    utilityDescription?: string;
+    timeLeft?: string;
+  }[]>([]);
+  const [filteredNFTs, setFilteredNFTs] = useState<typeof nfts>([]);
 
   // Load NFTs from contracts
   const loadNFTs = async () => {
@@ -444,12 +468,13 @@ const Marketplace = () => {
       const transformedNFTs = availableNFTs.map((nft, index) => ({
         id: nft.tokenId,
         name: nft.name,
+        description: nft.description || "A unique NFT with special utility",
         image: nft.image,
         collection: nft.collection,
         pricePerSecond: parseFloat(nft.pricePerSecond || "0.000001"),
         isRented: false,
         owner: nft.owner,
-        rarity: nft.attributes?.find(attr => attr.trait_type === "Rarity")?.value || "Common",
+        rarity: String(nft.attributes?.find(attr => attr.trait_type === "Rarity")?.value || "Common"),
         listingId: nft.listingId || `0x${index.toString().padStart(64, '0')}`,
         nftContract: "0xMockERC721",
         tokenId: nft.tokenId,

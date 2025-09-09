@@ -157,7 +157,7 @@ class SomniaService {
     }
   }
 
-  async handleNewRental(rentalData: any, event: ethers.Log) {
+  async handleNewRental(rentalData: Record<string, unknown>, event: ethers.Log) {
     // Use Somnia's high throughput for immediate database updates
     const rental: RentalEvent = {
       rentalId: rentalData.rentalId,
@@ -183,7 +183,7 @@ class SomniaService {
     console.log(`🎯 New rental processed: ${rental.rentalId}`);
   }
 
-  async handleRentalCompletion(rentalData: any, event: ethers.Log) {
+  async handleRentalCompletion(rentalData: Record<string, unknown>, event: ethers.Log) {
     const rentalId = rentalData.rentalId;
     const finalAmount = formatEther(rentalData.finalAmount);
     
@@ -193,7 +193,7 @@ class SomniaService {
     console.log(`✅ Rental completed: ${rentalId}`);
   }
 
-  async handleRentalCancellation(rentalData: any, event: ethers.Log) {
+  async handleRentalCancellation(rentalData: Record<string, unknown>, event: ethers.Log) {
     const rentalId = rentalData.rentalId;
     const refundAmount = formatEther(rentalData.refundAmount);
     
@@ -203,7 +203,7 @@ class SomniaService {
     console.log(`❌ Rental cancelled: ${rentalId}`);
   }
 
-  async handlePaymentStreamUpdate(rentalData: any, event: ethers.Log) {
+  async handlePaymentStreamUpdate(rentalData: Record<string, unknown>, event: ethers.Log) {
     const rentalId = rentalData.rentalId;
     const releasedAmount = formatEther(rentalData.releasedAmount);
     

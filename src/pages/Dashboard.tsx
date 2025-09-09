@@ -16,7 +16,7 @@ import {
   Trophy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -25,7 +25,6 @@ import UserDashboard from "@/components/UserDashboard";
 import NFTManagement from "@/components/NFTManagement";
 import PaymentStreamManagement from "@/components/PaymentStreamManagement";
 import GamificationDashboard from "@/components/GamificationDashboard";
-import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import NotificationSystem from "@/components/NotificationSystem";
 import BulkOperations from "@/components/BulkOperations";
 import MobileOptimizations from "@/components/MobileOptimizations";
@@ -270,14 +269,11 @@ const Dashboard = () => {
             <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="rentals" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              My Rentals
+            <TabsTrigger value="my-nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              My NFTs
             </TabsTrigger>
             <TabsTrigger value="earnings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Earnings
-            </TabsTrigger>
-            <TabsTrigger value="listings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              My Listings
             </TabsTrigger>
             <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               NFT Management
@@ -287,9 +283,6 @@ const Dashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="gamification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Achievements
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Analytics
             </TabsTrigger>
             <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Notifications
@@ -447,15 +440,87 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="rentals" className="space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+          <TabsContent value="my-nfts" className="space-y-6">
+            {/* Active Rentals Section */}
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Current Rentals</CardTitle>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Current Rentals
+                </CardTitle>
+                <CardDescription>NFTs you are currently renting</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {activeRentals.map((nft) => (
                     <NFTCard key={nft.id} nft={nft} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* My Listings Section */}
+            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Edit className="w-5 h-5" />
+                    My Listed NFTs
+                  </div>
+                  <Button variant="premium">
+                    <Plus className="w-4 h-4 mr-2" />
+                    List New NFT
+                  </Button>
+                </CardTitle>
+                <CardDescription>NFTs you have listed for rental</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {userListings.map((nft) => (
+                    <Card key={nft.id} className="bg-card/30 border-border/30 backdrop-blur-sm hover:border-primary/30 transition-all">
+                      <CardContent className="p-4">
+                        <div className="aspect-square mb-4 rounded-lg overflow-hidden">
+                          <img 
+                            src={nft.image} 
+                            alt={nft.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-foreground">{nft.name}</h3>
+                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                          <div className="flex items-center justify-between">
+                            <Badge variant="outline" className="text-xs">
+                              {nft.rarity}
+                            </Badge>
+                            <Badge variant={nft.isRented ? "default" : "secondary"} className="text-xs">
+                              {nft.isRented ? "Rented" : "Available"}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Total Earnings:</span>
+                              <span className="font-medium text-success">{nft.totalEarnings} STT</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Rentals:</span>
+                              <span className="font-medium">{nft.rentalCount}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Last Rented:</span>
+                              <span className="font-medium">{nft.lastRented}</span>
+                            </div>
+                          </div>
+                          {nft.isRented && (
+                            <div className="mt-2 p-2 bg-primary/10 rounded text-center">
+                              <p className="text-sm text-primary font-medium">
+                                Time Left: {nft.timeLeft}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </CardContent>
@@ -548,69 +613,6 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="listings" className="space-y-6">
-            <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-foreground flex items-center justify-between">
-                  My Listed NFTs
-                  <Button variant="premium">
-                    <Plus className="w-4 h-4 mr-2" />
-                    List New NFT
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userListings.map((nft) => (
-                    <Card key={nft.id} className="bg-card/30 border-border/30 backdrop-blur-sm hover:border-primary/30 transition-all">
-                      <CardContent className="p-4">
-                        <div className="aspect-square mb-4 rounded-lg overflow-hidden">
-                          <img 
-                            src={nft.image} 
-                            alt={nft.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-semibold text-foreground">{nft.name}</h3>
-                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">
-                              {nft.rarity}
-                            </Badge>
-                            <Badge variant={nft.isRented ? "default" : "secondary"} className="text-xs">
-                              {nft.isRented ? "Rented" : "Available"}
-                            </Badge>
-                          </div>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Total Earnings:</span>
-                              <span className="font-medium text-success">{nft.totalEarnings} STT</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Rentals:</span>
-                              <span className="font-medium">{nft.rentalCount}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Last Rented:</span>
-                              <span className="font-medium">{nft.lastRented}</span>
-                            </div>
-                          </div>
-                          {nft.isRented && (
-                            <div className="mt-2 p-2 bg-primary/10 rounded text-center">
-                              <p className="text-sm text-primary font-medium">
-                                Time Left: {nft.timeLeft}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="nfts" className="space-y-8">
             <NFTManagement />
@@ -624,9 +626,6 @@ const Dashboard = () => {
             <GamificationDashboard />
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-8">
-            <AnalyticsDashboard />
-          </TabsContent>
 
           <TabsContent value="notifications" className="space-y-8">
             <NotificationSystem />

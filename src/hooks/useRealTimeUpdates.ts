@@ -46,24 +46,24 @@ export const useRealTimeUpdates = (options: RealTimeUpdateOptions = {}) => {
   useEffect(() => {
     if (!enableRentalUpdates || !isConnected) return;
 
-    const unsubscribeRentalCreated = webSocketService.subscribe('rental-created', (data: any) => {
+    const unsubscribeRentalCreated = webSocketService.subscribe('rental-created', (data: unknown) => {
       console.log('Rental created:', data);
       
-      if (enableNotifications && data.tenant === account) {
+      if (enableNotifications && (data as { tenant?: string }).tenant === account) {
         toast({
           title: "Rental Started",
-          description: `Your rental of NFT #${data.tokenId} has begun`,
+          description: `Your rental of NFT #${(data as { tokenId?: string }).tokenId} has begun`,
         });
       }
     });
 
-    const unsubscribeRentalCompleted = webSocketService.subscribe('rental-completed', (data: any) => {
+    const unsubscribeRentalCompleted = webSocketService.subscribe('rental-completed', (data: unknown) => {
       console.log('Rental completed:', data);
       
-      if (enableNotifications && (data.tenant === account || data.lender === account)) {
+      if (enableNotifications && ((data as { tenant?: string }).tenant === account || (data as { lender?: string }).lender === account)) {
         toast({
           title: "Rental Completed",
-          description: `Rental of NFT #${data.tokenId} has ended`,
+          description: `Rental of NFT #${(data as { tokenId?: string }).tokenId} has ended`,
         });
       }
     });
@@ -80,13 +80,13 @@ export const useRealTimeUpdates = (options: RealTimeUpdateOptions = {}) => {
   useEffect(() => {
     if (!enablePaymentUpdates || !isConnected) return;
 
-    const unsubscribePaymentReceived = webSocketService.subscribe('funds-released', (data: any) => {
+    const unsubscribePaymentReceived = webSocketService.subscribe('funds-released', (data: unknown) => {
       console.log('Payment received:', data);
       
       if (enableNotifications) {
         toast({
           title: "Payment Received",
-          description: `Received ${data.amount} STT from payment stream`,
+          description: `Received ${(data as { amount?: string }).amount} STT from payment stream`,
         });
       }
     });
@@ -102,13 +102,13 @@ export const useRealTimeUpdates = (options: RealTimeUpdateOptions = {}) => {
   useEffect(() => {
     if (!enableReputationUpdates || !isConnected) return;
 
-    const unsubscribeReputationUpdated = webSocketService.subscribe('reputation-updated', (data: any) => {
+    const unsubscribeReputationUpdated = webSocketService.subscribe('reputation-updated', (data: unknown) => {
       console.log('Reputation updated:', data);
       
-      if (enableNotifications && data.user === account && parseInt(data.newScore) >= 750) {
+      if (enableNotifications && (data as { user?: string }).user === account && parseInt((data as { newScore?: string }).newScore || '0') >= 750) {
         toast({
           title: "Reputation Milestone",
-          description: `Congratulations! You've reached ${data.newScore} reputation points`,
+          description: `Congratulations! You've reached ${(data as { newScore?: string }).newScore} reputation points`,
         });
       }
     });
@@ -134,7 +134,7 @@ export const useRealTimeUpdates = (options: RealTimeUpdateOptions = {}) => {
   }, []);
 
   // Manual subscription method for custom events
-  const subscribe = useCallback((eventType: string, callback: Function) => {
+  const subscribe = useCallback((eventType: string, callback: (...args: unknown[]) => void) => {
     const unsubscribe = webSocketService.subscribe(eventType, callback);
     subscriptionsRef.current.push(unsubscribe);
     return unsubscribe;

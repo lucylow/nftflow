@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   User, 
@@ -24,12 +24,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useWeb3 } from "@/contexts/Web3Context";
 
 const Profile = () => {
   const { toast } = useToast();
+  const { isConnected, account, balance } = useWeb3();
   const [userProfile, setUserProfile] = useState({
     username: "CosmicTrader",
-    address: "0x1234567890abcdef1234567890abcdef12345678",
+    address: account || "0x1234567890abcdef1234567890abcdef12345678",
     avatar: "/placeholder-avatar.jpg",
     bio: "NFT enthusiast and active renter on NFTFlow. Love exploring new collections!",
     joinDate: "2024-01-01",
@@ -43,6 +45,16 @@ const Profile = () => {
     rental: true,
     offers: true
   });
+
+  // Update user profile when account changes
+  useEffect(() => {
+    if (account) {
+      setUserProfile(prev => ({
+        ...prev,
+        address: account
+      }));
+    }
+  }, [account]);
 
   const userStats = [
     { label: "Total Rentals", value: "47", icon: Activity },
@@ -100,6 +112,28 @@ const Profile = () => {
       description: "Wallet address copied to clipboard",
     });
   };
+
+  // Show connect wallet message if not connected
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+            <CardContent className="p-8 text-center">
+              <User className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Connect Your Wallet</h2>
+              <p className="text-muted-foreground mb-6">
+                Please connect your wallet to view your profile and access all features.
+              </p>
+              <Button onClick={() => window.location.href = '/'}>
+                Go to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
@@ -369,7 +403,7 @@ const Profile = () => {
             <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
+                  <User className="w-5 h-5" />
                   Social Presence
                 </CardTitle>
               </CardHeader>

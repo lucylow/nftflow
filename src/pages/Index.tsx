@@ -26,7 +26,17 @@ import { useState } from "react";
 
 const Index = () => {
   const { isConnected, account, chainId } = useWeb3();
-  const [testResults, setTestResults] = useState<any>(null);
+  const [testResults, setTestResults] = useState<{
+    connectionTest: {
+      metaMaskInstalled: boolean;
+      metaMaskConnected: boolean;
+      account: string | null;
+      currentNetwork: { chainId: number; name: string } | null;
+      isSomniaNetwork: boolean;
+      errors: string[];
+    };
+    allTestsPassed: boolean;
+  } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
   const handleWalletTest = async () => {

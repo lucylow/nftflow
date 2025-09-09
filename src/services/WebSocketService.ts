@@ -30,7 +30,7 @@ interface PaymentEvent {
 class WebSocketService {
   private provider: ethers.BrowserProvider | null = null;
   private contract: ethers.Contract | null = null;
-  private subscriptions: Map<string, Set<Function>> = new Map();
+  private subscriptions: Map<string, Set<(...args: unknown[]) => void>> = new Map();
   private reconnectAttempts: number = 0;
   private config: WebSocketConfig;
   private reconnectTimer: NodeJS.Timeout | null = null;
@@ -82,7 +82,7 @@ class WebSocketService {
       tenant: string,
       expires: bigint,
       price: bigint,
-      event: any
+      event: unknown
     ) => {
       this.handleRentalCreated({
         nftContract,
@@ -102,7 +102,7 @@ class WebSocketService {
       tokenId: bigint,
       lender: string,
       tenant: string,
-      event: any
+      event: unknown
     ) => {
       this.handleRentalCompleted({
         nftContract,
@@ -117,7 +117,7 @@ class WebSocketService {
     this.contract.on('FundsReleased', (
       streamId: string,
       amount: bigint,
-      event: any
+      event: unknown
     ) => {
       this.handleFundsReleased({
         streamId,
@@ -131,7 +131,7 @@ class WebSocketService {
       user: string,
       newScore: bigint,
       success: boolean,
-      event: any
+      event: unknown
     ) => {
       this.handleReputationUpdated({
         user,
@@ -164,7 +164,7 @@ class WebSocketService {
   }
 
   // Handle rental completion event
-  private handleRentalCompleted(rentalData: any): void {
+  private handleRentalCompleted(rentalData: Record<string, unknown>): void {
     // Update UI in real-time
     this.emitToSubscribers('rental-completed', rentalData);
     
@@ -199,7 +199,7 @@ class WebSocketService {
   }
 
   // Handle reputation update event
-  private handleReputationUpdated(reputationData: any): void {
+  private handleReputationUpdated(reputationData: Record<string, unknown>): void {
     // Update UI in real-time
     this.emitToSubscribers('reputation-updated', reputationData);
     
@@ -215,7 +215,7 @@ class WebSocketService {
   }
 
   // Subscribe to real-time events
-  subscribe(eventType: string, callback: Function): () => void {
+  subscribe(eventType: string, callback: (...args: unknown[]) => void): () => void {
     if (!this.subscriptions.has(eventType)) {
       this.subscriptions.set(eventType, new Set());
     }
@@ -230,7 +230,7 @@ class WebSocketService {
   }
 
   // Emit events to all subscribers
-  private emitToSubscribers(eventType: string, data: any): void {
+  private emitToSubscribers(eventType: string, data: unknown): void {
     if (this.subscriptions.has(eventType)) {
       this.subscriptions.get(eventType)!.forEach(callback => {
         try {

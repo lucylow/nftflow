@@ -131,9 +131,9 @@ export const switchToNetwork = async (chainId: number) => {
       throw new Error(`Failed to switch to network ${network.name}. Current chain ID: ${networkInfo.chainId}`);
     }
     
-  } catch (switchError: any) {
+  } catch (switchError: unknown) {
     // This error code indicates that the chain has not been added to MetaMask
-    if (switchError.code === 4902) {
+    if ((switchError as { code?: number }).code === 4902) {
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
@@ -157,17 +157,17 @@ export const switchToNetwork = async (chainId: number) => {
           throw new Error(`Failed to switch to ${network.name} after adding. Current chain ID: ${networkInfo.chainId}`);
         }
         
-      } catch (addError: any) {
-        if (addError.code === 4001) {
+      } catch (addError: unknown) {
+        if ((addError as { code?: number }).code === 4001) {
           throw new Error('Network addition rejected. Please approve adding the Somnia network in MetaMask.');
         } else {
-          throw new Error(`Failed to add ${network.name} network: ${addError.message}`);
+          throw new Error(`Failed to add ${network.name} network: ${addError instanceof Error ? addError.message : 'Unknown error'}`);
         }
       }
-    } else if (switchError.code === 4001) {
+    } else if ((switchError as { code?: number }).code === 4001) {
       throw new Error('Network switch rejected. Please approve the network switch in MetaMask.');
     } else {
-      throw new Error(`Failed to switch to ${network.name}: ${switchError.message}`);
+      throw new Error(`Failed to switch to ${network.name}: ${switchError instanceof Error ? switchError.message : 'Unknown error'}`);
     }
   }
 };
@@ -251,6 +251,10 @@ export const getCurrentNetwork = async () => {
 // Declare window.ethereum type
 declare global {
   interface Window {
-    ethereum?: any;
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+      on: (event: string, callback: (...args: unknown[]) => void) => void;
+      removeListener: (event: string, callback: (...args: unknown[]) => void) => void;
+    };
   }
 }

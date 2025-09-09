@@ -72,11 +72,11 @@ export const useNFTManagement = () => {
       });
 
       return { tx, tokenId };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to mint NFT:', error);
       toast({
         title: "Minting Failed",
-        description: error.message || "Failed to mint NFT",
+        description: error instanceof Error ? error.message : "Failed to mint NFT",
         variant: "destructive",
       });
       throw error;
@@ -193,11 +193,11 @@ export const useNFTManagement = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to approve NFTFlow:', error);
       toast({
         title: "Approval Failed",
-        description: error.message || "Failed to approve NFTFlow",
+        description: error instanceof Error ? error.message : "Failed to approve NFTFlow",
         variant: "destructive",
       });
       throw error;

@@ -51,11 +51,11 @@ export const usePaymentStream = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to create stream:', error);
       toast({
         title: "Stream Creation Failed",
-        description: error.message || "Failed to create payment stream",
+        description: error instanceof Error ? error.message : "Failed to create payment stream",
         variant: "destructive",
       });
       throw error;
@@ -92,11 +92,11 @@ export const usePaymentStream = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to withdraw from stream:', error);
       toast({
         title: "Withdrawal Failed",
-        description: error.message || "Failed to withdraw from stream",
+        description: error instanceof Error ? error.message : "Failed to withdraw from stream",
         variant: "destructive",
       });
       throw error;
@@ -122,11 +122,11 @@ export const usePaymentStream = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to cancel stream:', error);
       toast({
         title: "Cancellation Failed",
-        description: error.message || "Failed to cancel stream",
+        description: error instanceof Error ? error.message : "Failed to cancel stream",
         variant: "destructive",
       });
       throw error;
@@ -231,7 +231,7 @@ export const usePaymentStream = () => {
 
     try {
       const streams = await paymentStreamContract.getSenderStreams(address);
-      return streams.map((id: any) => id.toString());
+      return streams.map((id: string) => id.toString());
     } catch (error) {
       console.error('Failed to get sender streams:', error);
       return [];
@@ -251,7 +251,7 @@ export const usePaymentStream = () => {
 
     try {
       const streams = await paymentStreamContract.getRecipientStreams(address);
-      return streams.map((id: any) => id.toString());
+      return streams.map((id: string) => id.toString());
     } catch (error) {
       console.error('Failed to get recipient streams:', error);
       return [];
@@ -275,11 +275,11 @@ export const usePaymentStream = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to finalize stream:', error);
       toast({
         title: "Finalization Failed",
-        description: error.message || "Failed to finalize stream",
+        description: error instanceof Error ? error.message : "Failed to finalize stream",
         variant: "destructive",
       });
       throw error;
@@ -305,11 +305,11 @@ export const usePaymentStream = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to release funds:', error);
       toast({
         title: "Release Failed",
-        description: error.message || "Failed to release funds",
+        description: error instanceof Error ? error.message : "Failed to release funds",
         variant: "destructive",
       });
       throw error;

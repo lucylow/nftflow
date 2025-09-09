@@ -44,7 +44,7 @@ interface BulkOperation {
   type: 'rent' | 'list' | 'unlist' | 'update_price' | 'delete';
   status: 'pending' | 'processing' | 'completed' | 'failed';
   nftIds: string[];
-  parameters?: any;
+  parameters?: Record<string, unknown>;
   createdAt: Date;
   completedAt?: Date;
   error?: string;
@@ -57,7 +57,7 @@ const BulkOperations: React.FC = () => {
   const [bulkOperations, setBulkOperations] = useState<BulkOperation[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [operationType, setOperationType] = useState<'rent' | 'list' | 'unlist' | 'update_price' | 'delete'>('rent');
-  const [operationParams, setOperationParams] = useState<any>({});
+  const [operationParams, setOperationParams] = useState<Record<string, unknown>>({});
 
   // Mock NFT data for demonstration
   const mockNFTs: NFTItem[] = [

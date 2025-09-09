@@ -40,7 +40,18 @@ const Create = () => {
     attributes: []
   });
 
-  const [userNFTs, setUserNFTs] = useState<any[]>([]);
+  const [userNFTs, setUserNFTs] = useState<{
+    id: string;
+    name: string;
+    description: string;
+    image: string;
+    collection: string;
+    pricePerSecond: number;
+    isRented: boolean;
+    owner: string;
+    rarity: string;
+    utilityType: string;
+  }[]>([]);
   const [showMintForm, setShowMintForm] = useState(false);
   const [mintFormData, setMintFormData] = useState({
     name: "",

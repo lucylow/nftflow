@@ -13,7 +13,7 @@ export const testWalletConnection = async () => {
     metaMaskInstalled: false,
     metaMaskConnected: false,
     account: null as string | null,
-    currentNetwork: null as any,
+    currentNetwork: null as { chainId: number; name: string } | null,
     isSomniaNetwork: false,
     errors: [] as string[]
   };
@@ -65,9 +65,9 @@ export const testWalletConnection = async () => {
 
     return results;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Wallet test error:', error);
-    results.errors.push(error.message || 'Unknown error');
+    results.errors.push(error instanceof Error ? error.message : 'Unknown error');
     return results;
   }
 };
@@ -85,9 +85,9 @@ export const testSomniaNetworkSwitch = async () => {
       console.log('❌ Failed to switch to Somnia network');
       return { success: false, network };
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Network switch error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 };
 

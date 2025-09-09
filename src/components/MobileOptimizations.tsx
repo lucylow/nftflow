@@ -71,7 +71,7 @@ const MobileOptimizations: React.FC = () => {
     };
   }, []);
 
-  const updateSetting = (key: keyof MobileSettings, value: any) => {
+  const updateSetting = (key: keyof MobileSettings, value: string | number | boolean) => {
     setMobileSettings(prev => ({ ...prev, [key]: value }));
     
     // Apply settings to document

@@ -233,11 +233,11 @@ export const useDynamicPricing = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to update pricing data:', error);
       toast({
         title: "Update Failed",
-        description: error.message || "Failed to update pricing data",
+        description: error instanceof Error ? error.message : "Failed to update pricing data",
         variant: "destructive",
       });
       throw error;
@@ -263,11 +263,11 @@ export const useDynamicPricing = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to update collection pricing:', error);
       toast({
         title: "Update Failed",
-        description: error.message || "Failed to update collection pricing",
+        description: error instanceof Error ? error.message : "Failed to update collection pricing",
         variant: "destructive",
       });
       throw error;

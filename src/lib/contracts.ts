@@ -78,19 +78,35 @@ export const PAYMENT_STREAM_ABI = [
 
 export const REPUTATION_SYSTEM_ABI = [
   // Events
-  "event ReputationUpdated(address indexed user, uint256 oldScore, uint256 newScore, bool success)",
-  "event AchievementUnlocked(address indexed user, uint256 indexed achievementId, string achievementName)",
-  "event UserBlacklisted(address indexed user, bool blacklisted)",
+  "event ReputationUpdated(address indexed user, uint256 newScore, bool success)",
+  "event UserWhitelisted(address indexed user)",
+  "event UserBlacklisted(address indexed user)",
+  "event CollateralMultiplierUpdated(address indexed user, uint256 multiplier)",
+  "event AchievementUnlocked(address indexed user, uint256 indexed achievementId, string name)",
   
   // Functions
   "function updateReputation(address user, bool success) external",
+  "function requiresCollateral(address user) external view returns (bool)",
   "function getCollateralMultiplier(address user) external view returns (uint256)",
-  "function getUserReputation(address user) external view returns (tuple(uint256 totalRentals, uint256 successfulRentals, uint256 reputationScore, uint256 lastUpdated, bool blacklisted))",
+  "function getReputationScore(address user) external view returns (uint256)",
+  "function getRentalStats(address user) external view returns (uint256 totalRentals, uint256 successfulRentals, uint256 successRate)",
+  "function getReputationData(address user) external view returns (tuple(uint256 score, uint256 totalRentals, uint256 successfulRentals, uint256 lastUpdate, bool isWhitelisted, bool isBlacklisted, uint256 collateralMultiplier))",
+  "function getReputationTier(address user) external view returns (uint256)",
+  "function whitelistUser(address user) external",
+  "function blacklistUser(address user) external",
+  "function removeUserFromLists(address user) external",
+  "function setReputationScore(address user, uint256 score) external",
+  "function getUserReputation(address user) external view returns (uint256)",
   "function getSuccessRate(address user) external view returns (uint256)",
-  "function hasAchievement(address user, uint256 achievementId) external view returns (bool)",
-  "function getAchievement(uint256 achievementId) external view returns (tuple(string name, string description, uint256 requirement, uint256 rewardPoints, bool active))",
+  "function hasAchievement(address user, uint256 achievementIndex) external view returns (bool)",
   "function getUserAchievements(address user) external view returns (uint256[])",
-  "function getTotalAchievements() external view returns (uint256)"
+  "function getTotalAchievements() external view returns (uint256)",
+  "function getAchievement(uint256 index) external view returns (string memory name, uint256 requiredRentals)",
+  "function createAchievement(string memory name, uint256 requiredRentals) external",
+  "function setUserBlacklisted(address user, bool blacklisted) external",
+  "function addAuthorizedContract(address _contract) external",
+  "function removeAuthorizedContract(address _contract) external",
+  "function setRentalContract(address _rentalContract) external"
 ];
 
 export const MOCK_PRICE_ORACLE_ABI = [

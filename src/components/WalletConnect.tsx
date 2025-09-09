@@ -37,10 +37,10 @@ const WalletConnect = () => {
         title: "Wallet Connected",
         description: "Successfully connected to MetaMask",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Connection Failed",
-        description: error.message || "Failed to connect wallet",
+        description: error instanceof Error ? error.message : "Failed to connect wallet",
         variant: "destructive",
       });
     }
@@ -72,10 +72,10 @@ const WalletConnect = () => {
         title: "Network Switched",
         description: "Successfully connected to Somnia Testnet",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Network Switch Failed",
-        description: error.message || "Failed to switch network",
+        description: error instanceof Error ? error.message : "Failed to switch network",
         variant: "destructive",
       });
     }

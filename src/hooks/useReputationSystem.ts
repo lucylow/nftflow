@@ -71,38 +71,27 @@ export const useReputationSystem = () => {
 
     setIsLoading(true);
     try {
-      const [
-        score,
-        totalRentals,
-        successfulRentals,
-        successRate,
-        tier,
-        requiresCollateral,
-        collateralMultiplier,
-        isWhitelisted,
-        isBlacklisted
-      ] = await Promise.all([
-        reputationSystemContract.getReputationScore(account),
-        reputationSystemContract.getRentalStats(account).then((stats: any) => stats.totalRentals),
-        reputationSystemContract.getRentalStats(account).then((stats: any) => stats.successfulRentals),
-        reputationSystemContract.getRentalStats(account).then((stats: any) => stats.successRate),
+      // Get reputation data in a single call
+      const reputationData = await reputationSystemContract.getReputationData(account);
+      
+      // Get additional data
+      const [tier, requiresCollateral, collateralMultiplier] = await Promise.all([
         reputationSystemContract.getReputationTier(account),
         reputationSystemContract.requiresCollateral(account),
-        reputationSystemContract.getCollateralMultiplier(account),
-        reputationSystemContract.getReputationData(account).then((data: any) => data.isWhitelisted),
-        reputationSystemContract.getReputationData(account).then((data: any) => data.isBlacklisted)
+        reputationSystemContract.getCollateralMultiplier(account)
       ]);
 
       setReputationData({
-        score: Number(score),
-        totalRentals: Number(totalRentals),
-        successfulRentals: Number(successfulRentals),
-        successRate: Number(successRate),
+        score: Number(reputationData.score),
+        totalRentals: Number(reputationData.totalRentals),
+        successfulRentals: Number(reputationData.successfulRentals),
+        successRate: reputationData.totalRentals > 0 ? 
+          Number((reputationData.successfulRentals * 100) / reputationData.totalRentals) : 0,
         tier: Number(tier),
         requiresCollateral,
         collateralMultiplier: Number(collateralMultiplier),
-        isWhitelisted,
-        isBlacklisted
+        isWhitelisted: reputationData.isWhitelisted,
+        isBlacklisted: reputationData.isBlacklisted
       });
     } catch (error) {
       console.error('Failed to load reputation data:', error);
@@ -245,12 +234,18 @@ export const useReputationSystem = () => {
     return reputationData ? reputationData.successRate : 0;
   }, [reputationData, loadReputationData]);
 
-  // Get user achievements (placeholder for future implementation)
+  // Get user achievements
   const getUserAchievements = useCallback(async () => {
-    // This would fetch user achievements from the contract
-    // For now, return empty array
-    return [];
-  }, []);
+    if (!reputationSystemContract || !account) return [];
+    
+    try {
+      const achievements = await reputationSystemContract.getUserAchievements(account);
+      return achievements.map((id: bigint) => Number(id));
+    } catch (error) {
+      console.error('Failed to load user achievements:', error);
+      return [];
+    }
+  }, [reputationSystemContract, account]);
 
   // Get reputation tier name (for compatibility with UserDashboard)
   const getReputationTier = useCallback((score: number) => {

@@ -35,7 +35,18 @@ const NFTManagement = () => {
   const { listForRental, isLoading: isListing } = useNFTFlow();
   const { toast } = useToast();
 
-  const [userNFTs, setUserNFTs] = useState<any[]>([]);
+  const [userNFTs, setUserNFTs] = useState<{
+    id: string;
+    name: string;
+    description: string;
+    image: string;
+    collection: string;
+    pricePerSecond: number;
+    isRented: boolean;
+    owner: string;
+    rarity: string;
+    utilityType: string;
+  }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mintFormData, setMintFormData] = useState({
     name: "",

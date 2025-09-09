@@ -38,7 +38,17 @@ const PaymentStreamManagement = () => {
 
   const [senderStreams, setSenderStreams] = useState<string[]>([]);
   const [recipientStreams, setRecipientStreams] = useState<string[]>([]);
-  const [streamDetails, setStreamDetails] = useState<any[]>([]);
+  const [streamDetails, setStreamDetails] = useState<{
+    id: string;
+    sender: string;
+    recipient: string;
+    deposit: string;
+    ratePerSecond: string;
+    startTime: string;
+    stopTime: string;
+    remainingBalance: string;
+    active: boolean;
+  }[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [createFormData, setCreateFormData] = useState({
     recipient: "",

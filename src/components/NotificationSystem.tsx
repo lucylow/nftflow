@@ -26,7 +26,7 @@ interface Notification {
   timestamp: Date;
   read: boolean;
   category: 'rental' | 'achievement' | 'payment' | 'system';
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 const NotificationSystem: React.FC = () => {

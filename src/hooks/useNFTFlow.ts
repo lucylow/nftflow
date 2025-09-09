@@ -70,11 +70,11 @@ export const useNFTFlow = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to list NFT:', error);
       toast({
         title: "Listing Failed",
-        description: error.message || "Failed to list NFT for rental",
+        description: error instanceof Error ? error.message : "Failed to list NFT for rental",
         variant: "destructive",
       });
       throw error;
@@ -112,11 +112,11 @@ export const useNFTFlow = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to rent NFT:', error);
       toast({
         title: "Rental Failed",
-        description: error.message || "Failed to rent NFT",
+        description: error instanceof Error ? error.message : "Failed to rent NFT",
         variant: "destructive",
       });
       throw error;
@@ -142,11 +142,11 @@ export const useNFTFlow = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to complete rental:', error);
       toast({
         title: "Completion Failed",
-        description: error.message || "Failed to complete rental",
+        description: error instanceof Error ? error.message : "Failed to complete rental",
         variant: "destructive",
       });
       throw error;
@@ -175,11 +175,11 @@ export const useNFTFlow = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to deposit collateral:', error);
       toast({
         title: "Deposit Failed",
-        description: error.message || "Failed to deposit collateral",
+        description: error instanceof Error ? error.message : "Failed to deposit collateral",
         variant: "destructive",
       });
       throw error;
@@ -205,11 +205,11 @@ export const useNFTFlow = () => {
       });
 
       return tx;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to withdraw collateral:', error);
       toast({
         title: "Withdrawal Failed",
-        description: error.message || "Failed to withdraw collateral",
+        description: error instanceof Error ? error.message : "Failed to withdraw collateral",
         variant: "destructive",
       });
       throw error;

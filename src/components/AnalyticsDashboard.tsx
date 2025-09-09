@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -117,9 +117,9 @@ const AnalyticsDashboard: React.FC = () => {
 
   useEffect(() => {
     loadAnalyticsData();
-  }, [timeframe]);
+  }, [loadAnalyticsData]);
 
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -137,7 +137,7 @@ const AnalyticsDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeframe]);
 
   const handleRefresh = async () => {
     setRefreshing(true);

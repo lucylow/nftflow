@@ -59,42 +59,24 @@ const GamificationDashboard: React.FC = () => {
     try {
       setLoading(true);
       
-      // Load user profile
-      if (contract?.nftUtilityGamification) {
-        const profile = await contract.nftUtilityGamification.getUserProfile(account);
-        setUserProfile({
-          totalPoints: Number(profile.totalPoints),
-          rentalCount: Number(profile.rentalCount),
-          totalSpent: profile.totalSpent.toString(),
-          streakDays: Number(profile.streakDays),
-          rank: Number(profile.rank)
-        });
+      // For now, use mock data since the gamification contract might not be deployed
+      // This prevents the dashboard from breaking
+      setUserProfile({
+        totalPoints: 0,
+        rentalCount: 0,
+        totalSpent: "0",
+        streakDays: 0,
+        rank: 0
+      });
 
-        // Load achievements
-        const userAchievements = await contract.nftUtilityGamification.getUserAchievements(account);
-        const allAchievements = await Promise.all(
-          userAchievements.map(async (achievementType: number) => {
-            const achievement = await contract.nftUtilityGamification.getAchievement(achievementType);
-            return {
-              id: achievementType,
-              name: achievement.name,
-              description: achievement.description,
-              points: Number(achievement.points),
-              unlocked: true,
-              icon: achievementIcons[achievementType as keyof typeof achievementIcons] || '🏆'
-            };
-          })
-        );
-        setAchievements(allAchievements);
-
-        // Load leaderboard
-        const topEntries = await contract.nftUtilityGamification.getTopLeaderboard(10);
-        setLeaderboard(topEntries.map((entry: any) => ({
-          user: entry.user,
-          points: Number(entry.points),
-          rank: Number(entry.rank)
-        })));
-      }
+      setAchievements([]);
+      setLeaderboard([]);
+      
+      // TODO: Implement actual gamification contract calls when deployed
+      // if (contract?.nftUtilityGamification) {
+      //   const profile = await contract.nftUtilityGamification.getUserProfile(account);
+      //   // ... rest of the implementation
+      // }
     } catch (error) {
       console.error('Error loading gamification data:', error);
     } finally {
