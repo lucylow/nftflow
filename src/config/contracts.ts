@@ -2,13 +2,13 @@
 // Update these addresses after deploying the contracts
 
 export const CONTRACT_ADDRESSES = {
-  // Main contracts - Latest deployment addresses
-  NFTFlow: '0x59b670e9fA9D0A427751Af201D676719a970857b',
-  PaymentStream: '0x68B1D87F95878fE05B998F19b66F4baba5De1aed',
-  ReputationSystem: '0x3Aa5ebB10DC797CAC828524e59A333d0A371443c',
-  UtilityTracker: '0xc6e7DF5E7b4f2A278906862b61205850344D4e7d',
-  MockPriceOracle: '0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE',
-  MockERC721: '0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1',
+  // Main contracts - Latest deployment addresses (Local Hardhat)
+  NFTFlow: '0x851356ae760d987E095750cCeb3bC6014560891C',
+  PaymentStream: '0x9E545E3C0baAB3E08CdfD552C960A1050f373042',
+  ReputationSystem: '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9',
+  UtilityTracker: '0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8',
+  MockPriceOracle: '0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB',
+  MockERC721: '0xf5059a5D33d5853360D16C683c16e67980206f36',
 };
 
 // Network configuration

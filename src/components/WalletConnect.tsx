@@ -51,8 +51,8 @@ const WalletConnect = () => {
 
   const handleSwitchNetwork = async () => {
     try {
-      // Switch to Somnia testnet
-      await switchNetwork(50311);
+      // Switch to local Hardhat network (where contracts are deployed)
+      await switchNetwork(1337);
     } catch (error: any) {
       toast({
         title: "Network Switch Failed",
@@ -102,7 +102,7 @@ const WalletConnect = () => {
               </button>
             </div>
             <div className="text-xs text-slate-400">
-              {balance ? `${parseFloat(balance).toFixed(4)} STT` : '0 STT'}
+              {balance ? `${parseFloat(balance).toFixed(4)} ETH` : '0 ETH'}
             </div>
             {!nftFlowContract && (
               <div className="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">
@@ -119,7 +119,7 @@ const WalletConnect = () => {
           size="sm"
           onClick={handleSwitchNetwork}
           className="border-slate-600 text-slate-300 hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-400"
-          title="Switch to Somnia Testnet"
+          title="Switch to Local Hardhat"
         >
           <ExternalLink className="w-4 h-4" />
         </Button>
