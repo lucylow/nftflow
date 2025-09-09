@@ -15,7 +15,7 @@ import {
 import { RentalMarketplace } from '@/components/RentalMarketplace';
 import { RentalStatusList } from '@/components/RentalStatus';
 import { LoadingSpinner } from '@/components/ui/skeleton';
-import { useAccount } from 'wagmi';
+import { useWeb3 } from '@/contexts/Web3Context';
 
 // Mock rental data
 const mockRentals = [
@@ -52,7 +52,7 @@ const mockRentals = [
 ];
 
 export default function EnhancedMarketplace() {
-  const { address, isConnected } = useAccount();
+  const { account, isConnected } = useWeb3();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('marketplace');
 

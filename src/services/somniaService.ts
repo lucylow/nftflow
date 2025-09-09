@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { formatEther, parseEther } from 'viem';
 
 // Somnia Network Configuration
 const SOMNIA_CONFIG = {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useBlockNumber, useFeeData } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -83,16 +82,8 @@ const SomniaNetworkMonitor: React.FC = () => {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [updateCount, setUpdateCount] = useState(0);
   
-  const { data: blockNumber } = useBlockNumber({
-    watch: true,
-    chainId: 50312, // Somnia Testnet
-  });
-  
-  const { data: feeData } = useFeeData({
-    watch: true,
-    chainId: 50312,
-    formatUnits: 'gwei',
-  });
+  const [blockNumber, setBlockNumber] = useState<number>(0);
+  const [feeData, setFeeData] = useState<{ gasPrice: bigint } | null>(null);
 
   useEffect(() => {
     const fetchNetworkStats = async () => {
@@ -104,6 +95,10 @@ const SomniaNetworkMonitor: React.FC = () => {
         setLastUpdate(new Date());
         setUpdateCount(prev => prev + 1);
         setIsConnected(true);
+        
+        // Update block number and fee data
+        setBlockNumber(stats.blockNumber);
+        setFeeData({ gasPrice: BigInt(stats.gasPrice) });
       } catch (error) {
         console.error('Error fetching network stats:', error);
         setIsConnected(false);
@@ -114,7 +109,7 @@ const SomniaNetworkMonitor: React.FC = () => {
     const interval = setInterval(fetchNetworkStats, 2000); // Update every 2 seconds
     
     return () => clearInterval(interval);
-  }, [blockNumber, feeData]);
+  }, []);
 
   const getTPSStatus = (tps: number): 'good' | 'warning' | 'critical' => {
     if (tps > 1000) return 'good';

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useBlockNumber } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import {
   Pause,
   CheckCircle
 } from 'lucide-react';
-import { formatEther } from 'viem';
+import { formatEther } from 'ethers';
 import SomniaService, { type RentalEvent, type NetworkStats } from '@/services/somniaService';
 
 interface StatCardProps {
@@ -70,17 +69,11 @@ const SomniaRealTimeDashboard: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   
   // Leverage Somnia's sub-second block times for real-time updates
-  const { data: blockNumber } = useBlockNumber({
-    watch: true,
-    chainId: 50312, // Somnia Testnet
-    enabled: true
-  });
+  const [blockNumber, setBlockNumber] = useState<number>(0);
 
   useEffect(() => {
-    if (blockNumber) {
-      // Use Somnia's high TPS for real-time data fetching
-      fetchRealTimeData();
-    }
+    // Use Somnia's high TPS for real-time data fetching
+    fetchRealTimeData();
   }, [blockNumber]);
 
   useEffect(() => {
@@ -109,6 +102,7 @@ const SomniaRealTimeDashboard: React.FC = () => {
 
       setRentals(rentalsData);
       setNetworkStats(networkData);
+      setBlockNumber(networkData.blockNumber);
       
       // Simulate real-time updates
       setStats(prevStats => ({

@@ -22,8 +22,8 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useNFTFlow } from '@/hooks/useNFTFlow';
-import { useAccount } from 'wagmi';
-import { formatEther, parseEther } from 'viem';
+import { useWeb3 } from '@/contexts/Web3Context';
+import { formatEther, parseEther } from 'ethers';
 
 interface NFTRental {
   id: string;
@@ -46,7 +46,7 @@ interface RentalMarketplaceProps {
 }
 
 export function RentalMarketplace({ className }: RentalMarketplaceProps) {
-  const { address } = useAccount();
+  const { account } = useWeb3();
   const { 
     availableNFTs, 
     rentNFT, 
@@ -128,7 +128,7 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
   });
 
   const handleRentNFT = async (nft: NFTRental) => {
-    if (!address) return;
+    if (!account) return;
     
     setIsRenting(true);
     try {
@@ -380,7 +380,7 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                           
                           <Button
                             onClick={() => handleRentNFT(selectedNFT)}
-                            disabled={isRenting || !address}
+                            disabled={isRenting || !account}
                             className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
                           >
                             {isRenting ? (

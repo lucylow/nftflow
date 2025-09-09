@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useBlockNumber } from 'wagmi';
 
 interface RentalTimerState {
   timeLeft: number;
@@ -22,15 +21,18 @@ export function useRentalTimer({
   onExpire,
   updateInterval = 1000
 }: UseRentalTimerOptions): RentalTimerState {
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const [blockNumber, setBlockNumber] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
 
-  // Update current time based on block number for more accurate timing
+  // Update current time periodically for accurate timing
   useEffect(() => {
-    if (blockNumber) {
+    const interval = setInterval(() => {
       setCurrentTime(Math.floor(Date.now() / 1000));
-    }
-  }, [blockNumber]);
+      setBlockNumber(prev => prev + 1); // Simulate block updates
+    }, updateInterval);
+    
+    return () => clearInterval(interval);
+  }, [updateInterval]);
 
   // Update time every second
   useEffect(() => {
