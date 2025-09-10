@@ -13,7 +13,9 @@ import {
   Edit,
   ExternalLink,
   Copy,
-  BarChart3
+  BarChart3,
+  Tag,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -245,12 +247,45 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="activity" className="space-y-6">
-          <TabsList className="bg-card/50 border-border backdrop-blur-sm">
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="social">Social</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsList 
+            className="bg-card/50 border-border backdrop-blur-sm" 
+            scrollable={true}
+          >
+            <TabsTrigger 
+              value="activity" 
+              variant="underline"
+              icon={<Activity className="w-4 h-4" />}
+            >
+              Activity
+            </TabsTrigger>
+            <TabsTrigger 
+              value="achievements" 
+              variant="underline"
+              icon={<Trophy className="w-4 h-4" />}
+            >
+              Achievements
+            </TabsTrigger>
+            <TabsTrigger 
+              value="categories" 
+              variant="underline"
+              icon={<Tag className="w-4 h-4" />}
+            >
+              Categories
+            </TabsTrigger>
+            <TabsTrigger 
+              value="social" 
+              variant="underline"
+              icon={<Users className="w-4 h-4" />}
+            >
+              Social
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              variant="underline"
+              icon={<Settings className="w-4 h-4" />}
+            >
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="activity" className="space-y-6">

@@ -301,12 +301,18 @@ const Upload = () => {
 
         <Tabs defaultValue="upload" className="space-y-8">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="upload" className="flex items-center gap-2">
-              <UploadIcon className="w-4 h-4" />
+            <TabsTrigger 
+              value="upload" 
+              variant="pills"
+              icon={<UploadIcon className="w-4 h-4" />}
+            >
               Upload Image
             </TabsTrigger>
-            <TabsTrigger value="generate" className="flex items-center gap-2">
-              <Wand2 className="w-4 h-4" />
+            <TabsTrigger 
+              value="generate" 
+              variant="pills"
+              icon={<Wand2 className="w-4 h-4" />}
+            >
               AI Generate
             </TabsTrigger>
           </TabsList>

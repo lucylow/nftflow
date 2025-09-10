@@ -18,6 +18,8 @@ import {
   Flag,
   MoreHorizontal,
   Send,
+  User,
+  Trophy,
   UserPlus,
   UserMinus,
   Award,
@@ -298,11 +300,38 @@ const SocialFeatures: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="community">Community</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+        <TabsList 
+          className="grid w-full grid-cols-2 sm:grid-cols-4" 
+          scrollable={true}
+        >
+          <TabsTrigger 
+            value="community" 
+            variant="pills"
+            icon={<MessageCircle className="w-4 h-4" />}
+          >
+            Community
+          </TabsTrigger>
+          <TabsTrigger 
+            value="reviews" 
+            variant="pills"
+            icon={<Star className="w-4 h-4" />}
+          >
+            Reviews
+          </TabsTrigger>
+          <TabsTrigger 
+            value="profile" 
+            variant="pills"
+            icon={<User className="w-4 h-4" />}
+          >
+            Profile
+          </TabsTrigger>
+          <TabsTrigger 
+            value="leaderboard" 
+            variant="pills"
+            icon={<Trophy className="w-4 h-4" />}
+          >
+            Leaderboard
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="community" className="space-y-6">

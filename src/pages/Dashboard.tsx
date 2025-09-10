@@ -13,11 +13,20 @@ import {
   Filter,
   Download,
   RefreshCw,
-  Trophy
+  Trophy,
+  Image,
+  DollarSign,
+  Zap,
+  Bell,
+  Layers,
+  Smartphone,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EnhancedTabs, EnhancedTabsList, EnhancedTabsTrigger, EnhancedTabsContent } from "@/components/ui/enhanced-tabs";
+import { TabOverflow } from "@/components/ui/tab-overflow";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import NFTCard from "@/components/NFTCard";
@@ -36,6 +45,8 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(3);
+  const [userNFTs, setUserNFTs] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Simulate loading
@@ -264,41 +275,91 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-card/50 border-border backdrop-blur-sm">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+        <EnhancedTabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          animated={true}
+          keyboardNavigation={true}
+        >
+          <TabOverflow 
+            maxVisibleTabs={6}
+            className="bg-card/50 border-border backdrop-blur-sm rounded-md p-1"
+          >
+            <EnhancedTabsTrigger 
+              value="overview" 
+              variant="pills"
+              icon={<BarChart3 className="w-4 h-4" />}
+            >
               Overview
-            </TabsTrigger>
-            <TabsTrigger value="my-nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="my-nfts" 
+              variant="pills"
+              icon={<Image className="w-4 h-4" />}
+              badge={userNFTs?.length || 0}
+            >
               My NFTs
-            </TabsTrigger>
-            <TabsTrigger value="earnings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="earnings" 
+              variant="pills"
+              icon={<DollarSign className="w-4 h-4" />}
+            >
               Earnings
-            </TabsTrigger>
-            <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              NFT Management
-            </TabsTrigger>
-            <TabsTrigger value="streams" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Payment Streams
-            </TabsTrigger>
-            <TabsTrigger value="gamification" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="nfts" 
+              variant="pills"
+              icon={<Settings className="w-4 h-4" />}
+            >
+              Management
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="streams" 
+              variant="pills"
+              icon={<Zap className="w-4 h-4" />}
+            >
+              Streams
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="gamification" 
+              variant="pills"
+              icon={<Trophy className="w-4 h-4" />}
+            >
               Achievements
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="notifications" 
+              variant="pills"
+              icon={<Bell className="w-4 h-4" />}
+              badge={unreadNotifications}
+            >
               Notifications
-            </TabsTrigger>
-            <TabsTrigger value="bulk" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Bulk Operations
-            </TabsTrigger>
-            <TabsTrigger value="mobile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="bulk" 
+              variant="pills"
+              icon={<Layers className="w-4 h-4" />}
+            >
+              Bulk Ops
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="mobile" 
+              variant="pills"
+              icon={<Smartphone className="w-4 h-4" />}
+            >
               Mobile
-            </TabsTrigger>
-            <TabsTrigger value="social" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            </EnhancedTabsTrigger>
+            <EnhancedTabsTrigger 
+              value="social" 
+              variant="pills"
+              icon={<Users className="w-4 h-4" />}
+            >
               Social
-            </TabsTrigger>
-          </TabsList>
+            </EnhancedTabsTrigger>
+          </TabOverflow>
 
-          <TabsContent value="overview" className="space-y-8">
+          <EnhancedTabsContent value="overview" className="space-y-8">
             {/* User Dashboard Component */}
             <UserDashboard />
 
@@ -438,9 +499,9 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="my-nfts" className="space-y-6">
+          <EnhancedTabsContent value="my-nfts" className="space-y-6">
             {/* Active Rentals Section */}
             <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
               <CardHeader>
@@ -525,9 +586,9 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="earnings" className="space-y-6">
+          <EnhancedTabsContent value="earnings" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
                 <CardContent className="p-6 text-center">
@@ -611,38 +672,38 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </EnhancedTabsContent>
 
 
-          <TabsContent value="nfts" className="space-y-8">
+          <EnhancedTabsContent value="nfts" className="space-y-8">
             <NFTManagement />
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="streams" className="space-y-8">
+          <EnhancedTabsContent value="streams" className="space-y-8">
             <PaymentStreamManagement />
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="gamification" className="space-y-8">
+          <EnhancedTabsContent value="gamification" className="space-y-8">
             <GamificationDashboard />
-          </TabsContent>
+          </EnhancedTabsContent>
 
 
-          <TabsContent value="notifications" className="space-y-8">
+          <EnhancedTabsContent value="notifications" className="space-y-8">
             <NotificationSystem />
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="bulk" className="space-y-8">
+          <EnhancedTabsContent value="bulk" className="space-y-8">
             <BulkOperations />
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="mobile" className="space-y-8">
+          <EnhancedTabsContent value="mobile" className="space-y-8">
             <MobileOptimizations />
-          </TabsContent>
+          </EnhancedTabsContent>
 
-          <TabsContent value="social" className="space-y-8">
+          <EnhancedTabsContent value="social" className="space-y-8">
             <SocialFeatures />
-          </TabsContent>
-        </Tabs>
+          </EnhancedTabsContent>
+        </EnhancedTabs>
       </div>
     </div>
   );
