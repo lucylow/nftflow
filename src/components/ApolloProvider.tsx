@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider as ApolloClientProvider } from '@apollo/client';
 import client from '../services/subgraphService';
 
 interface ApolloProviderWrapperProps {
@@ -10,8 +10,8 @@ interface ApolloProviderWrapperProps {
 
 export default function ApolloProviderWrapper({ children }: ApolloProviderWrapperProps) {
   return (
-    <ApolloProvider client={client}>
+    <ApolloClientProvider client={client}>
       {children}
-    </ApolloProvider>
+    </ApolloClientProvider>
   );
 }

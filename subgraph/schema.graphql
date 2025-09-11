@@ -1,0 +1,89 @@
+type Proposal @entity {
+  id: ID!
+  description: String!
+  proposalType: Int!
+  proposer: Bytes!
+  createdAt: BigInt!
+  deadline: BigInt!
+  yesVotes: BigInt!
+  noVotes: BigInt!
+  executed: Boolean!
+  parameters: Bytes!
+  votes: [Vote!]! @derivedFrom(field: "proposal")
+}
+
+type Vote @entity {
+  id: ID!
+  proposal: Proposal!
+  voter: Bytes!
+  support: Boolean!
+  votingPower: BigInt!
+  timestamp: BigInt!
+}
+
+type GovernanceToken @entity {
+  id: ID!
+  tokenId: BigInt!
+  owner: Bytes!
+  mintedAt: BigInt!
+}
+
+type DAOStats @entity {
+  id: ID!
+  totalProposals: Int!
+  activeProposals: Int!
+  totalVotes: Int!
+  totalVotingPower: BigInt!
+  treasuryBalance: BigInt!
+}
+
+type Activity @entity {
+  id: ID!
+  type: String!
+  user: Bytes!
+  proposal: Proposal
+  vote: Vote
+  timestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TreasuryTransaction @entity {
+  id: ID!
+  from: Bytes!
+  to: Bytes!
+  amount: BigInt!
+  token: Bytes!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  proposal: Proposal
+}
+
+type VotingPowerSnapshot @entity {
+  id: ID!
+  voter: Bytes!
+  votingPower: BigInt!
+  timestamp: BigInt!
+}
+
+# Events
+type ProposalCreated @entity {
+  id: ID!
+  proposal: Proposal!
+  timestamp: BigInt!
+}
+
+type VoteCast @entity {
+  id: ID!
+  proposal: Proposal!
+  voter: Bytes!
+  support: Boolean!
+  votingPower: BigInt!
+  timestamp: BigInt!
+}
+
+type ProposalExecuted @entity {
+  id: ID!
+  proposal: Proposal!
+  executor: Bytes!
+  timestamp: BigInt!
+}

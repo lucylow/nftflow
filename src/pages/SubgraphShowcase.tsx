@@ -20,8 +20,8 @@ import {
   Download,
   Share2
 } from 'lucide-react';
-import SubgraphDashboard from '@/components/SubgraphDashboard';
-import RentalSubgraph from '@/components/RentalSubgraph';
+import SubgraphDashboardMock from '@/components/SubgraphDashboardMock';
+import RentalSubgraphMock from '@/components/RentalSubgraphMock';
 
 const SubgraphShowcase = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -223,11 +223,11 @@ const SubgraphShowcase = () => {
             </TabsList>
 
             <TabsContent value="overview">
-              <SubgraphDashboard />
+              <SubgraphDashboardMock />
             </TabsContent>
 
             <TabsContent value="rentals">
-              <RentalSubgraph />
+              <RentalSubgraphMock />
             </TabsContent>
           </Tabs>
         </div>

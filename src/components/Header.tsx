@@ -21,6 +21,7 @@ const Header = () => {
     { label: "Analytics", href: "/analytics", icon: "📈" },
     { label: "Creativity", href: "/creativity", icon: "🎨" },
     { label: "Subgraph", href: "/subgraph", icon: "📊" },
+    { label: "Live Feed", href: "/live-feed", icon: "⚡" },
     { label: "DAO", href: "/dao", icon: "🏛️" },
     { label: "Governance", href: "/governance", icon: "👑" },
     { label: "Profile", href: "/profile", icon: "👤" }

@@ -1,0 +1,237 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: NFTFlowSOMI
+    network: somnia-testnet
+    source:
+      address: "0xYourNFTFlowContractAddress"
+      abi: NFTFlowSOMI
+      startBlock: 1234567
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Token
+        - NFT
+        - NFTListing
+        - ListingFeatures
+        - Rental
+        - User
+        - ReputationEvent
+        - Achievement
+        - Dispute
+        - PlatformMetrics
+        - DailyMetrics
+        - Collection
+        - PriceHistory
+        - Transfer
+        - GovernanceProposal
+        - Vote
+        - AnalyticsSnapshot
+      abis:
+        - name: NFTFlowSOMI
+          file: ./abis/NFTFlowSOMI.json
+        - name: PaymentStreamSOMI
+          file: ./abis/PaymentStreamSOMI.json
+        - name: ReputationSystemEnhanced
+          file: ./abis/ReputationSystemEnhanced.json
+        - name: OnChainAnalytics
+          file: ./abis/OnChainAnalytics.json
+        - name: GovernanceToken
+          file: ./abis/GovernanceToken.json
+        - name: IERC721
+          file: ./abis/IERC721.json
+        - name: IERC4907
+          file: ./abis/IERC4907.json
+      eventHandlers:
+        - event: NFTListedForRent(indexed bytes32,indexed address,indexed uint256,address,uint256,uint256,uint256,bool)
+          handler: handleNFTListedForRent
+        - event: NFTRented(indexed bytes32,indexed address,indexed uint256,address,uint256,uint256,uint256,uint256)
+          handler: handleNFTRented
+        - event: RentalCompleted(indexed bytes32,uint256,uint256,bool,uint256)
+          handler: handleRentalCompleted
+        - event: RentalDisputed(indexed bytes32,indexed address,string,uint256,uint256)
+          handler: handleRentalDisputed
+        - event: DisputeResolved(indexed bytes32,indexed address,bool,uint256,uint256)
+          handler: handleDisputeResolved
+        - event: SOMIPaymentReceived(indexed address,indexed address,uint256,string,uint256)
+          handler: handleSOMIPaymentReceived
+        - event: MicroPaymentProcessed(indexed address,uint256,uint256,uint256)
+          handler: handleMicroPaymentProcessed
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: PaymentStreamSOMI
+    network: somnia-testnet
+    source:
+      address: "0xYourPaymentStreamContractAddress"
+      abi: PaymentStreamSOMI
+      startBlock: 1234567
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PaymentStream
+        - MilestoneEvent
+        - Transfer
+      abis:
+        - name: PaymentStreamSOMI
+          file: ./abis/PaymentStreamSOMI.json
+      eventHandlers:
+        - event: StreamCreated(indexed uint256,indexed address,indexed address,uint256,uint256,uint256,uint256,uint8,uint256[],uint256)
+          handler: handleStreamCreated
+        - event: StreamWithdrawn(indexed uint256,indexed address,uint256,uint256,uint256,uint256)
+          handler: handleStreamWithdrawn
+        - event: StreamFinalized(indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleStreamFinalized
+        - event: StreamCancelled(indexed uint256,indexed address,indexed address,uint256,uint256,uint256,uint256)
+          handler: handleStreamCancelled
+        - event: MilestoneReached(indexed uint256,uint256,uint256,uint256)
+          handler: handleMilestoneReached
+        - event: AutoReleaseExecuted(indexed uint256,uint256,uint256,uint256)
+          handler: handleAutoReleaseExecuted
+        - event: StreamDisputed(indexed uint256,indexed address,string,uint256,uint256)
+          handler: handleStreamDisputed
+        - event: DisputeResolved(indexed uint256,indexed address,bool,uint256,uint256)
+          handler: handleStreamDisputeResolved
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: ReputationSystemEnhanced
+    network: somnia-testnet
+    source:
+      address: "0xYourReputationContractAddress"
+      abi: ReputationSystemEnhanced
+      startBlock: 1234567
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - User
+        - ReputationEvent
+        - Achievement
+      abis:
+        - name: ReputationSystemEnhanced
+          file: ./abis/ReputationSystemEnhanced.json
+      eventHandlers:
+        - event: ReputationUpdated(indexed address,uint256,bool,string,uint256)
+          handler: handleReputationUpdated
+        - event: UserVerified(indexed address,uint256)
+          handler: handleUserVerified
+        - event: AchievementUnlocked(indexed address,uint256,string,string,uint256)
+          handler: handleAchievementUnlocked
+        - event: UserWhitelisted(indexed address,uint256)
+          handler: handleUserWhitelisted
+        - event: UserBlacklisted(indexed address,uint256)
+          handler: handleUserBlacklisted
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: OnChainAnalytics
+    network: somnia-testnet
+    source:
+      address: "0xYourAnalyticsContractAddress"
+      abi: OnChainAnalytics
+      startBlock: 1234567
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PlatformMetrics
+        - DailyMetrics
+        - AnalyticsSnapshot
+        - Collection
+      abis:
+        - name: OnChainAnalytics
+          file: ./abis/OnChainAnalytics.json
+      eventHandlers:
+        - event: AnalyticsProcessed(uint256,uint256,uint256,uint256)
+          handler: handleAnalyticsProcessed
+        - event: PlatformAnalyticsUpdated(uint256,uint256,uint256,uint256)
+          handler: handlePlatformAnalyticsUpdated
+        - event: MarketInsightsUpdated(uint256,uint256,string,uint256)
+          handler: handleMarketInsightsUpdated
+        - event: UserRankingUpdated(address,uint256,uint256,uint256)
+          handler: handleUserRankingUpdated
+        - event: CollectionRankingUpdated(address,uint256,uint256,uint256)
+          handler: handleCollectionRankingUpdated
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: GovernanceToken
+    network: somnia-testnet
+    source:
+      address: "0xYourGovernanceContractAddress"
+      abi: GovernanceToken
+      startBlock: 1234567
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - GovernanceProposal
+        - Vote
+        - User
+      abis:
+        - name: GovernanceToken
+          file: ./abis/GovernanceToken.json
+      eventHandlers:
+        - event: ProposalCreated(indexed uint256,indexed address,string,string,uint256,uint256,bytes)
+          handler: handleProposalCreated
+        - event: VoteCast(indexed uint256,indexed address,uint8,uint256,string)
+          handler: handleVoteCast
+        - event: ProposalExecuted(indexed uint256,bool,string)
+          handler: handleProposalExecuted
+        - event: ProposalCancelled(indexed uint256)
+          handler: handleProposalCancelled
+        - event: DelegationChanged(indexed address,indexed address,uint256,uint256)
+          handler: handleDelegationChanged
+      file: ./src/mapping.ts
+
+templates:
+  - kind: ethereum
+    name: ERC721Template
+    network: somnia-testnet
+    source:
+      abi: IERC721
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NFT
+        - Collection
+        - Transfer
+      abis:
+        - name: IERC721
+          file: ./abis/IERC721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleERC721Transfer
+      file: ./src/mapping.ts
+
+  - kind: ethereum
+    name: ERC4907Template
+    network: somnia-testnet
+    source:
+      abi: IERC4907
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NFT
+        - Rental
+      abis:
+        - name: IERC4907
+          file: ./abis/IERC4907.json
+      eventHandlers:
+        - event: UpdateUser(indexed uint256,indexed address,uint64)
+          handler: handleUpdateUser
+      file: ./src/mapping.ts

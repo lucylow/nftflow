@@ -1,0 +1,43 @@
+{
+  "name": "nftflow-subgraph",
+  "version": "1.0.0",
+  "description": "NFTFlow Subgraph for Somnia Network - Comprehensive NFT rental marketplace indexing",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --product subgraph-studio nftflow-subgraph",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 nftflow-subgraph",
+    "create-local": "graph create --node http://localhost:8020/ nftflow-subgraph",
+    "remove-local": "graph remove --node http://localhost:8020/ nftflow-subgraph",
+    "test": "graph test",
+    "test:unit": "graph test --matchstick",
+    "test:integration": "graph test --integration",
+    "prepare": "npm run codegen && npm run build"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.51.0",
+    "@graphprotocol/graph-ts": "0.29.1"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.5.0"
+  },
+  "keywords": [
+    "somnia",
+    "subgraph",
+    "nft",
+    "rental",
+    "marketplace",
+    "blockchain",
+    "indexing",
+    "the-graph"
+  ],
+  "author": "NFTFlow Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nftflow/somnia-subgraph"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

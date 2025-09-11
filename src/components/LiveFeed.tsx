@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Alert, AlertDescription } from './ui/alert';
 import { useToast } from '../hooks/use-toast';
+import { ethers } from 'ethers';
 import {
   GET_RECENT_PROPOSALS,
   GET_ACTIVITY_FEED,

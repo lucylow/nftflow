@@ -1,447 +1,559 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Database, 
-  Activity, 
-  TrendingUp, 
+import React, { useState, useEffect } from 'react';
+import { useQuery, useSubscription } from '@apollo/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Progress } from './ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Alert, AlertDescription } from './ui/alert';
+import { useWeb3 } from '../contexts/Web3Context';
+import { ethers } from 'ethers';
+import { useToast } from '../hooks/use-toast';
+import {
+  GET_ALL_PROPOSALS,
+  GET_RECENT_PROPOSALS,
+  GET_DAO_STATS,
+  GET_ACTIVITY_FEED,
+  PROPOSAL_CREATED_SUBSCRIPTION,
+  VOTE_CAST_SUBSCRIPTION,
+  PROPOSAL_EXECUTED_SUBSCRIPTION
+} from '../services/subgraphService';
+import {
   Clock,
-  DollarSign,
-  Zap,
-  Globe,
-  RefreshCw,
-  AlertCircle,
+  Users,
+  TrendingUp,
   CheckCircle,
-  BarChart3
+  XCircle,
+  Plus,
+  Vote,
+  Settings,
+  DollarSign,
+  Shield,
+  Zap,
+  Activity,
+  BarChart3,
+  RefreshCw
 } from 'lucide-react';
-import { useQuery } from '@apollo/client';
-import { 
-  GET_FLIP_RESULTS, 
-  GET_RECENT_FLIPS, 
-  GET_FLIP_STATISTICS,
-  GET_RENTALS,
-  GET_RECENT_RENTALS,
-  GET_RENTAL_STATISTICS,
-  GET_NETWORK_STATISTICS
-} from '@/lib/graphql-queries';
 
-interface SubgraphDashboardProps {
-  className?: string;
+interface Proposal {
+  id: string;
+  description: string;
+  proposalType: number;
+  proposer: string;
+  createdAt: string;
+  deadline: string;
+  yesVotes: string;
+  noVotes: string;
+  executed: boolean;
+  parameters: string;
 }
 
-// Utility functions
-const truncateHash = (hash: string) => {
-  return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
-};
+interface DAOStats {
+  totalProposals: number;
+  activeProposals: number;
+  totalVotes: number;
+  totalVotingPower: number;
+  treasuryBalance: string;
+}
 
-const formatEther = (wei: string) => {
-  const ether = parseFloat(wei) / 1e18;
-  return ether.toFixed(4);
-};
+interface Activity {
+  id: string;
+  type: string;
+  user: string;
+  proposal?: {
+    id: string;
+    description: string;
+    proposalType: number;
+  };
+  vote?: {
+    support: boolean;
+    votingPower: string;
+  };
+  timestamp: string;
+  transactionHash: string;
+}
 
-const formatTime = (timestamp: string) => {
-  const milliseconds = parseInt(timestamp) * 1000;
-  const date = new Date(milliseconds);
-  return date.toLocaleString();
-};
+const PROPOSAL_TYPES = [
+  { value: 0, label: 'Fee Change', icon: DollarSign, color: 'bg-blue-500' },
+  { value: 1, label: 'Collateral Update', icon: Shield, color: 'bg-green-500' },
+  { value: 2, label: 'Reward Adjustment', icon: TrendingUp, color: 'bg-purple-500' },
+  { value: 3, label: 'Treasury Management', icon: DollarSign, color: 'bg-yellow-500' },
+  { value: 4, label: 'Contract Upgrade', icon: Settings, color: 'bg-red-500' },
+  { value: 5, label: 'Parameter Update', icon: Settings, color: 'bg-gray-500' },
+  { value: 6, label: 'Oracle Update', icon: Zap, color: 'bg-orange-500' },
+  { value: 7, label: 'Pause/Unpause', icon: Settings, color: 'bg-indigo-500' }
+];
 
-const formatDuration = (startTime: string, endTime: string) => {
-  const start = parseInt(startTime);
-  const end = parseInt(endTime);
-  const duration = end - start;
-  const hours = Math.floor(duration / 3600);
-  const minutes = Math.floor((duration % 3600) / 60);
-  return `${hours}h ${minutes}m`;
-};
+export default function SubgraphDashboard() {
+  const { account } = useWeb3();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const itemsPerPage = 10;
 
-// Flip Results Component
-const FlipResults = () => {
-  const [page, setPage] = useState(0);
-  const itemsPerPage = 20;
+  // Queries
+  const { data: statsData, loading: statsLoading, refetch: refetchStats } = useQuery(GET_DAO_STATS, {
+    pollInterval: autoRefresh ? 10000 : 0, // Refresh every 10 seconds if enabled
+  });
 
-  const { loading, error, data, refetch } = useQuery(GET_FLIP_RESULTS, {
+  const { data: proposalsData, loading: proposalsLoading, refetch: refetchProposals } = useQuery(GET_ALL_PROPOSALS, {
     variables: {
       first: itemsPerPage,
-      skip: page * itemsPerPage,
-      orderBy: 'blockTimestamp',
-      orderDirection: 'desc',
+      skip: currentPage * itemsPerPage,
+      orderBy: 'createdAt',
+      orderDirection: 'desc'
     },
-    pollInterval: 10000,
+    pollInterval: autoRefresh ? 10000 : 0,
   });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw className="w-6 h-6 animate-spin mr-2" />
-        <span>Loading flip results...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center py-12 text-red-500">
-        <AlertCircle className="w-6 h-6 mr-2" />
-        <span>Error: {error.message}</span>
-      </div>
-    );
-  }
-
-  if (!data?.flipResults?.length) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <p>No flip results found</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Coin Flip Results</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => refetch()}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </Button>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left py-3 px-2">Player</th>
-              <th className="text-left py-3 px-2">Bet Amount</th>
-              <th className="text-left py-3 px-2">Choice</th>
-              <th className="text-left py-3 px-2">Result</th>
-              <th className="text-left py-3 px-2">Payout</th>
-              <th className="text-left py-3 px-2">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.flipResults.map((flip: any, index: number) => (
-              <motion.tr
-                key={flip.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="border-b hover:bg-gray-50"
-              >
-                <td className="py-3 px-2">
-                  <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    {truncateHash(flip.player)}
-                  </code>
-                </td>
-                <td className="py-3 px-2 font-medium">
-                  {formatEther(flip.betAmount)} STT
-                </td>
-                <td className="py-3 px-2">
-                  <Badge variant={flip.choice === 'HEADS' ? 'default' : 'secondary'}>
-                    {flip.choice}
-                  </Badge>
-                </td>
-                <td className="py-3 px-2">
-                  <Badge 
-                    variant={flip.result === 'HEADS' ? 'default' : 'secondary'}
-                    className={flip.result === flip.choice ? 'bg-green-500' : 'bg-red-500'}
-                  >
-                    {flip.result}
-                  </Badge>
-                </td>
-                <td className="py-3 px-2">
-                  <span className={flip.payout !== '0' ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                    {flip.payout !== '0' ? `+${formatEther(flip.payout)}` : '0'} STT
-                  </span>
-                </td>
-                <td className="py-3 px-2 text-xs text-gray-500">
-                  {formatTime(flip.blockTimestamp)}
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-between items-center pt-4">
-        <Button
-          variant="outline"
-          onClick={() => setPage(Math.max(0, page - 1))}
-          disabled={page === 0}
-        >
-          Previous
-        </Button>
-        <span className="text-sm text-gray-600">Page {page + 1}</span>
-        <Button
-          variant="outline"
-          onClick={() => setPage(page + 1)}
-          disabled={data.flipResults.length < itemsPerPage}
-        >
-          Next
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-// Live Feed Component
-const LiveFeed = () => {
-  const { loading, error, data } = useQuery(GET_RECENT_FLIPS, {
-    variables: { first: 10 },
-    pollInterval: 5000,
+  const { data: recentProposalsData, loading: recentLoading } = useQuery(GET_RECENT_PROPOSALS, {
+    variables: { first: 5 },
+    pollInterval: autoRefresh ? 5000 : 0, // Refresh every 5 seconds
   });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw className="w-6 h-6 animate-spin mr-2" />
-        <span>Loading live feed...</span>
-      </div>
-    );
-  }
+  const { data: activityData, loading: activityLoading } = useQuery(GET_ACTIVITY_FEED, {
+    variables: { first: 20 },
+    pollInterval: autoRefresh ? 5000 : 0,
+  });
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center py-12 text-red-500">
-        <AlertCircle className="w-6 h-6 mr-2" />
-        <span>Error: {error.message}</span>
-      </div>
-    );
-  }
+  // Real-time subscriptions
+  useSubscription(PROPOSAL_CREATED_SUBSCRIPTION, {
+    onData: ({ data }) => {
+      if (data.data?.proposalCreated) {
+        toast({
+          title: "New Proposal Created",
+          description: `Proposal #${data.data.proposalCreated.id} has been created`,
+        });
+        refetchProposals();
+        refetchStats();
+      }
+    },
+  });
 
-  if (!data?.flipResults?.length) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <p>No recent activity</p>
-      </div>
-    );
-  }
+  useSubscription(VOTE_CAST_SUBSCRIPTION, {
+    onData: ({ data }) => {
+      if (data.data?.voteCast) {
+        toast({
+          title: "Vote Cast",
+          description: `${data.data.voteCast.voter.slice(0, 6)}... voted ${data.data.voteCast.support ? 'YES' : 'NO'}`,
+        });
+        refetchProposals();
+        refetchStats();
+      }
+    },
+  });
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Activity className="w-5 h-5 text-green-500" />
-        <h3 className="text-lg font-semibold">Live Activity Feed</h3>
-        <Badge variant="outline" className="text-green-600 border-green-600">
-          <div className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
-          Live
-        </Badge>
-      </div>
+  useSubscription(PROPOSAL_EXECUTED_SUBSCRIPTION, {
+    onData: ({ data }) => {
+      if (data.data?.proposalExecuted) {
+        toast({
+          title: "Proposal Executed",
+          description: `Proposal #${data.data.proposalExecuted.proposal.id} has been executed`,
+        });
+        refetchProposals();
+        refetchStats();
+      }
+    },
+  });
 
-      <div className="space-y-3">
-        {data.flipResults.map((flip: any, index: number) => (
-          <motion.div
-            key={flip.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="p-4 border rounded-lg hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    {truncateHash(flip.player)}
-                  </code>
-                  <span className="text-sm text-gray-500">
-                    bet {formatEther(flip.betAmount)} STT
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-sm">
-                  <span>
-                    Choice: <Badge variant="outline">{flip.choice}</Badge>
-                  </span>
-                  <span>
-                    Result: <Badge 
-                      variant={flip.result === flip.choice ? 'default' : 'destructive'}
-                      className={flip.result === flip.choice ? 'bg-green-500' : 'bg-red-500'}
-                    >
-                      {flip.result}
-                    </Badge>
-                  </span>
-                  <span className={flip.payout !== '0' ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                    {flip.payout !== '0' ? `+${formatEther(flip.payout)} STT` : 'No win'}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right text-xs text-gray-500">
-                {formatTime(flip.blockTimestamp)}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Statistics Component
-const Statistics = () => {
-  const { loading: flipStatsLoading, data: flipStats } = useQuery(GET_FLIP_STATISTICS);
-  const { loading: rentalStatsLoading, data: rentalStats } = useQuery(GET_RENTAL_STATISTICS);
-  const { loading: networkLoading, data: networkData } = useQuery(GET_NETWORK_STATISTICS);
-
-  const calculateFlipStats = () => {
-    if (!flipStats?.flipResults) return null;
-
-    const flips = flipStats.flipResults;
-    const totalFlips = flips.length;
-    const totalVolume = flips.reduce((sum: number, flip: any) => sum + parseFloat(flip.betAmount), 0);
-    const totalPayouts = flips.reduce((sum: number, flip: any) => sum + parseFloat(flip.payout), 0);
-    const wins = flips.filter((flip: any) => flip.payout !== '0').length;
-    const winRate = totalFlips > 0 ? (wins / totalFlips) * 100 : 0;
-
-    return {
-      totalFlips,
-      totalVolume: formatEther(totalVolume.toString()),
-      totalPayouts: formatEther(totalPayouts.toString()),
-      winRate: winRate.toFixed(2),
-      averageBet: formatEther((totalVolume / totalFlips).toString())
-    };
+  const stats: DAOStats = statsData?.daoStats || {
+    totalProposals: 0,
+    activeProposals: 0,
+    totalVotes: 0,
+    totalVotingPower: 0,
+    treasuryBalance: '0'
   };
 
-  const flipStatsData = calculateFlipStats();
+  const proposals: Proposal[] = proposalsData?.proposals || [];
+  const recentProposals: Proposal[] = recentProposalsData?.proposals || [];
+  const activities: Activity[] = activityData?.activities || [];
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(parseInt(timestamp) * 1000);
+    return date.toLocaleString();
+  };
+
+  const formatEther = (wei: string) => {
+    const ether = parseFloat(wei) / 1e18;
+    return ether.toFixed(4);
+  };
+
+  const getProposalTypeInfo = (type: number) => {
+    return PROPOSAL_TYPES.find(t => t.value === type) || PROPOSAL_TYPES[0];
+  };
+
+  const getProposalStatus = (proposal: Proposal) => {
+    if (proposal.executed) return { status: 'Executed', color: 'bg-green-500' };
+    if (Date.now() / 1000 > parseInt(proposal.deadline)) return { status: 'Ended', color: 'bg-gray-500' };
+    return { status: 'Active', color: 'bg-blue-500' };
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'PROPOSAL_CREATED':
+        return Plus;
+      case 'VOTE_CAST':
+        return Vote;
+      case 'PROPOSAL_EXECUTED':
+        return CheckCircle;
+      default:
+        return Activity;
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'PROPOSAL_CREATED':
+        return 'text-blue-400';
+      case 'VOTE_CAST':
+        return 'text-green-400';
+      case 'PROPOSAL_EXECUTED':
+        return 'text-purple-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
+  const handleRefresh = () => {
+    refetchStats();
+    refetchProposals();
+    toast({
+      title: "Refreshed",
+      description: "Data has been refreshed",
+    });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  if (statsLoading || proposalsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Network Statistics</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {flipStatsData && (
-          <>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart3 className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm font-medium">Total Flips</span>
-                </div>
-                <div className="text-2xl font-bold">{flipStatsData.totalFlips}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="w-5 h-5 text-green-500" />
-                  <span className="text-sm font-medium">Total Volume</span>
-                </div>
-                <div className="text-2xl font-bold">{flipStatsData.totalVolume} STT</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-5 h-5 text-purple-500" />
-                  <span className="text-sm font-medium">Win Rate</span>
-                </div>
-                <div className="text-2xl font-bold">{flipStatsData.winRate}%</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-5 h-5 text-orange-500" />
-                  <span className="text-sm font-medium">Avg Bet</span>
-                </div>
-                <div className="text-2xl font-bold">{flipStatsData.averageBet} STT</div>
-              </CardContent>
-            </Card>
-          </>
-        )}
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">DAO Analytics Dashboard</h1>
+        <div className="flex items-center space-x-4">
+          <Button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            variant={autoRefresh ? "default" : "outline"}
+            size="sm"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+            Auto Refresh {autoRefresh ? 'ON' : 'OFF'}
+          </Button>
+          <Button onClick={handleRefresh} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Now
+          </Button>
+        </div>
       </div>
 
-      {networkData?._meta && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5" />
-              Network Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="font-medium">Current Block:</span>
-                <div className="font-mono text-lg">{networkData._meta.block.number}</div>
-              </div>
-              <div>
-                <span className="font-medium">Deployment:</span>
-                <div className="font-mono text-lg">{networkData._meta.deployment}</div>
-              </div>
-              <div>
-                <span className="font-medium">Indexing Status:</span>
-                <div className="flex items-center gap-2">
-                  {networkData._meta.hasIndexingErrors ? (
-                    <AlertCircle className="w-4 h-4 text-red-500" />
-                  ) : (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  )}
-                  <span>{networkData._meta.hasIndexingErrors ? 'Errors' : 'Healthy'}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-};
-
-// Main Dashboard Component
-export default function SubgraphDashboard({ className }: SubgraphDashboardProps) {
-  const [activeTab, setActiveTab] = useState('flips');
-
-  return (
-    <div className={className}>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
-          <Database className="w-6 h-6" />
-          Somnia Subgraph Dashboard
-        </h2>
-        <p className="text-gray-600">
-          Real-time blockchain data from Somnia subgraphs
-        </p>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="flips">Coin Flips</TabsTrigger>
-          <TabsTrigger value="live">Live Feed</TabsTrigger>
-          <TabsTrigger value="stats">Statistics</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="proposals">Proposals</TabsTrigger>
+          <TabsTrigger value="activity">Activity Feed</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="flips" className="mt-6">
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Proposals</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalProposals}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.activeProposals} active
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Votes</CardTitle>
+                <Vote className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalVotes}</div>
+                <p className="text-xs text-muted-foreground">
+                  Community participation
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Treasury Balance</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatEther(stats.treasuryBalance)} ETH</div>
+                <p className="text-xs text-muted-foreground">
+                  Available funds
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Voting Power</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalVotingPower}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total governance tokens
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Proposals */}
           <Card>
-            <CardContent className="p-6">
-              <FlipResults />
+            <CardHeader>
+              <CardTitle>Recent Proposals</CardTitle>
+              <CardDescription>Latest governance proposals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentProposals.map((proposal) => {
+                  const typeInfo = getProposalTypeInfo(proposal.proposalType);
+                  const status = getProposalStatus(proposal);
+                  const totalVotes = parseInt(proposal.yesVotes) + parseInt(proposal.noVotes);
+                  const yesPercentage = totalVotes > 0 ? (parseInt(proposal.yesVotes) / totalVotes) * 100 : 0;
+
+                  return (
+                    <div key={proposal.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`p-2 rounded-full ${typeInfo.color}`}>
+                          <typeInfo.icon className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">{proposal.description}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {typeInfo.label} • {formatTime(proposal.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <div className="text-sm font-medium">
+                            {proposal.yesVotes} YES • {proposal.noVotes} NO
+                          </div>
+                          <div className="w-24">
+                            <Progress value={yesPercentage} className="h-2" />
+                          </div>
+                        </div>
+                        <Badge className={status.color}>{status.status}</Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="live" className="mt-6">
+        <TabsContent value="proposals" className="space-y-6">
+          <div className="space-y-4">
+            {proposals.map((proposal) => {
+              const typeInfo = getProposalTypeInfo(proposal.proposalType);
+              const status = getProposalStatus(proposal);
+              const totalVotes = parseInt(proposal.yesVotes) + parseInt(proposal.noVotes);
+              const yesPercentage = totalVotes > 0 ? (parseInt(proposal.yesVotes) / totalVotes) * 100 : 0;
+
+              return (
+                <Card key={proposal.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-full ${typeInfo.color}`}>
+                          <typeInfo.icon className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">Proposal #{proposal.id}</CardTitle>
+                          <CardDescription>{typeInfo.label}</CardDescription>
+                        </div>
+                      </div>
+                      <Badge className={status.color}>{status.status}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">{proposal.description}</p>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span>Voting Progress</span>
+                          <span>{yesPercentage.toFixed(1)}% YES</span>
+                        </div>
+                        <Progress value={yesPercentage} className="h-2" />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>{proposal.yesVotes} YES</span>
+                          <span>{proposal.noVotes} NO</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>Deadline: {formatTime(proposal.deadline)}</span>
+                        <span>Proposer: {proposal.proposer.slice(0, 6)}...{proposal.proposer.slice(-4)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-center space-x-2">
+            <Button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+              variant="outline"
+            >
+              Previous
+            </Button>
+            <span className="flex items-center px-4 py-2 text-sm text-muted-foreground">
+              Page {currentPage + 1}
+            </span>
+            <Button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={proposals.length < itemsPerPage}
+              variant="outline"
+            >
+              Next
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="activity" className="space-y-6">
           <Card>
-            <CardContent className="p-6">
-              <LiveFeed />
+            <CardHeader>
+              <CardTitle>Live Activity Feed</CardTitle>
+              <CardDescription>Real-time DAO activity updates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {activities.map((activity) => {
+                  const ActivityIcon = getActivityIcon(activity.type);
+                  const activityColor = getActivityColor(activity.type);
+
+                  return (
+                    <div key={activity.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                      <div className={`p-2 rounded-full bg-gray-100`}>
+                        <ActivityIcon className={`h-4 w-4 ${activityColor}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-medium">
+                            {activity.type === 'PROPOSAL_CREATED' && 'New proposal created'}
+                            {activity.type === 'VOTE_CAST' && 'Vote cast'}
+                            {activity.type === 'PROPOSAL_EXECUTED' && 'Proposal executed'}
+                          </p>
+                          <span className="text-xs text-muted-foreground">
+                            {formatTime(activity.timestamp)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {activity.proposal && `Proposal #${activity.proposal.id}: ${activity.proposal.description}`}
+                          {activity.vote && `Voted ${activity.vote.support ? 'YES' : 'NO'} with ${formatEther(activity.vote.votingPower)} voting power`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          User: {activity.user.slice(0, 6)}...{activity.user.slice(-4)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="stats" className="mt-6">
-          <Card>
-            <CardContent className="p-6">
-              <Statistics />
-            </CardContent>
-          </Card>
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Proposal Types Distribution</CardTitle>
+                <CardDescription>Breakdown of proposal types</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {PROPOSAL_TYPES.map((type) => {
+                    const count = proposals.filter(p => p.proposalType === type.value).length;
+                    const percentage = proposals.length > 0 ? (count / proposals.length) * 100 : 0;
+                    
+                    return (
+                      <div key={type.value} className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <type.icon className="h-4 w-4" />
+                          <span className="text-sm">{type.label}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">{count}</span>
+                          <span className="text-xs text-muted-foreground">({percentage.toFixed(1)}%)</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Voting Statistics</CardTitle>
+                <CardDescription>Community participation metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Total Votes Cast</span>
+                    <span className="font-medium">{stats.totalVotes}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Active Proposals</span>
+                    <span className="font-medium">{stats.activeProposals}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Executed Proposals</span>
+                    <span className="font-medium">
+                      {proposals.filter(p => p.executed).length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Success Rate</span>
+                    <span className="font-medium">
+                      {proposals.length > 0 
+                        ? ((proposals.filter(p => p.executed).length / proposals.length) * 100).toFixed(1)
+                        : 0}%
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Alert>
+            <Activity className="h-4 w-4" />
+            <AlertDescription>
+              This dashboard provides real-time data from the NFTFlow DAO subgraph. 
+              Data is automatically refreshed every 10 seconds when auto-refresh is enabled.
+            </AlertDescription>
+          </Alert>
         </TabsContent>
       </Tabs>
     </div>
