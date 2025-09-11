@@ -22,14 +22,17 @@ import CreativityShowcase from "./pages/CreativityShowcase";
 import SubgraphDashboard from "./components/SubgraphDashboard";
 import LiveFeed from "./components/LiveFeed";
 import SubgraphTest from "./components/SubgraphTest";
+import WalletDebug from "./components/WalletDebug";
+import WalletErrorBoundary from "./components/WalletErrorBoundary";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <Web3Provider>
-        <ApolloProviderWrapper>
+                <QueryClientProvider client={queryClient}>
+                  <WalletErrorBoundary>
+                    <Web3Provider>
+                      <ApolloProviderWrapper>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -52,6 +55,7 @@ const App = () => (
                     <Route path="/subgraph" element={<SubgraphDashboard />} />
                     <Route path="/live-feed" element={<LiveFeed />} />
                     <Route path="/subgraph-test" element={<SubgraphTest />} />
+                    <Route path="/wallet-debug" element={<WalletDebug />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
@@ -59,9 +63,10 @@ const App = () => (
               </div>
             </BrowserRouter>
           </TooltipProvider>
-        </ApolloProviderWrapper>
-      </Web3Provider>
-    </QueryClientProvider>
+                      </ApolloProviderWrapper>
+                    </Web3Provider>
+                  </WalletErrorBoundary>
+                </QueryClientProvider>
   </ErrorBoundary>
 );
 
