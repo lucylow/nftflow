@@ -58,6 +58,11 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
     address public reputationContract;
     address public utilityTrackerContract;
     IPriceOracle public priceOracle;
+    
+    // DAO integration
+    address public daoContract;
+    uint256 public collateralMultiplier = 2; // 2x collateral
+    address public feeRecipient;
 
     // Events
     event RentalListed(
@@ -93,6 +98,15 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
         address indexed user,
         uint256 amount
     );
+    
+    event ParameterUpdated(
+        string indexed key,
+        bytes value
+    );
+    
+    event DAOContractUpdated(
+        address indexed newDAO
+    );
 
     constructor(
         address _priceOracle,
@@ -104,6 +118,7 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
         paymentStreamContract = _paymentStreamContract;
         reputationContract = _reputationContract;
         utilityTrackerContract = _utilityTrackerContract;
+        feeRecipient = msg.sender; // Default to deployer
     }
 
     /**
@@ -166,10 +181,12 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
         uint256 platformFee = totalCost * platformFeePercentage / 10000;
         uint256 ownerPayment = totalCost - platformFee;
         
-        require(msg.value >= totalCost + listing.collateralRequired, "Insufficient payment");
+        // Use DAO-controlled collateral multiplier
+        uint256 requiredCollateral = listing.collateralRequired * collateralMultiplier;
+        
+        require(msg.value >= totalCost + requiredCollateral, "Insufficient payment");
         
         // Check if user has sufficient collateral balance or reputation
-        uint256 requiredCollateral = listing.collateralRequired;
         if (reputationContract != address(0)) {
             // Reduce collateral based on reputation (simplified)
             requiredCollateral = requiredCollateral / 2;
@@ -207,8 +224,14 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
         // Transfer payment to owner
         payable(listing.owner).transfer(ownerPayment);
         
+        // Send platform fee to fee recipient
+        if (platformFee > 0 && feeRecipient != address(0)) {
+            (bool feeSuccess, ) = payable(feeRecipient).call{value: platformFee}("");
+            require(feeSuccess, "Fee transfer failed");
+        }
+        
         // Store collateral
-        userCollateralBalance[msg.sender] = userCollateralBalance[msg.sender] + listing.collateralRequired;
+        userCollateralBalance[msg.sender] = userCollateralBalance[msg.sender] + requiredCollateral;
 
         // Deactivate listing temporarily
         listing.active = false;
@@ -409,6 +432,76 @@ contract NFTFlow is ReentrancyGuard, Pausable, Ownable {
         }
         
         return false;
+    }
+    
+    // --- DAO Governance Functions ---
+    
+    /**
+     * @dev Modifier to restrict functions to DAO only
+     */
+    modifier onlyDAO() {
+        require(msg.sender == daoContract, "Only DAO can call this function");
+        _;
+    }
+    
+    /**
+     * @notice Set DAO contract address (only callable by owner initially)
+     * @param newDAO Address of the new DAO contract
+     */
+    function setDAOContract(address newDAO) external onlyOwner {
+        require(newDAO != address(0), "Invalid DAO address");
+        daoContract = newDAO;
+        emit DAOContractUpdated(newDAO);
+    }
+    
+    /**
+     * @notice Set fee parameters (only callable by DAO)
+     * @param newFeePercentage New fee percentage in basis points
+     * @param newFeeRecipient Address to receive fees
+     */
+    function setFeeParameters(uint256 newFeePercentage, address newFeeRecipient) external onlyDAO {
+        require(newFeePercentage <= 1000, "Fee too high"); // Max 10%
+        require(newFeeRecipient != address(0), "Invalid fee recipient");
+        platformFeePercentage = newFeePercentage;
+        feeRecipient = newFeeRecipient;
+    }
+    
+    /**
+     * @notice Set collateral multiplier (only callable by DAO)
+     * @param newMultiplier New collateral multiplier
+     */
+    function setCollateralMultiplier(uint256 newMultiplier) external onlyDAO {
+        require(newMultiplier >= 1 && newMultiplier <= 10, "Invalid multiplier");
+        collateralMultiplier = newMultiplier;
+    }
+    
+    /**
+     * @notice Generic parameter setting function for DAO
+     * @param key Parameter key
+     * @param value Parameter value
+     */
+    function setParameter(string calldata key, bytes calldata value) external onlyDAO {
+        // Implementation would depend on specific parameters needed
+        // This allows for flexible governance of various contract parameters
+        emit ParameterUpdated(key, value);
+    }
+    
+    /**
+     * @notice Update platform fee (legacy function for backward compatibility)
+     * @param newFeePercentage New fee percentage (in basis points)
+     */
+    function updatePlatformFee(uint256 newFeePercentage) external onlyOwner {
+        require(newFeePercentage <= 1000, "Fee too high"); // Max 10%
+        platformFeePercentage = newFeePercentage;
+    }
+    
+    /**
+     * @notice Set fee recipient (only callable by owner)
+     * @param newFeeRecipient New fee recipient address
+     */
+    function setFeeRecipient(address newFeeRecipient) external onlyOwner {
+        require(newFeeRecipient != address(0), "Invalid fee recipient");
+        feeRecipient = newFeeRecipient;
     }
 }
 
