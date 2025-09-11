@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useSubscription } from '@apollo/client';
+import { useQuery, useSubscription } from '@apollo/client/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -7,8 +7,8 @@ import { Progress } from './ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Alert, AlertDescription } from './ui/alert';
 import { useWeb3 } from '../contexts/Web3Context';
-import { ethers } from 'ethers';
 import { useToast } from '../hooks/use-toast';
+import SubgraphErrorBoundary from './SubgraphErrorBoundary';
 import {
   GET_ALL_PROPOSALS,
   GET_RECENT_PROPOSALS,
@@ -119,11 +119,11 @@ export default function SubgraphDashboard() {
 
   // Real-time subscriptions
   useSubscription(PROPOSAL_CREATED_SUBSCRIPTION, {
-    onData: ({ data }) => {
-      if (data.data?.proposalCreated) {
+    onData: ({ data }: any) => {
+      if (data?.proposalCreated) {
         toast({
           title: "New Proposal Created",
-          description: `Proposal #${data.data.proposalCreated.id} has been created`,
+          description: `Proposal #${data.proposalCreated.id} has been created`,
         });
         refetchProposals();
         refetchStats();
@@ -132,11 +132,11 @@ export default function SubgraphDashboard() {
   });
 
   useSubscription(VOTE_CAST_SUBSCRIPTION, {
-    onData: ({ data }) => {
-      if (data.data?.voteCast) {
+    onData: ({ data }: any) => {
+      if (data?.voteCast) {
         toast({
           title: "Vote Cast",
-          description: `${data.data.voteCast.voter.slice(0, 6)}... voted ${data.data.voteCast.support ? 'YES' : 'NO'}`,
+          description: `${data.voteCast.voter.slice(0, 6)}... voted ${data.voteCast.support ? 'YES' : 'NO'}`,
         });
         refetchProposals();
         refetchStats();
@@ -145,11 +145,11 @@ export default function SubgraphDashboard() {
   });
 
   useSubscription(PROPOSAL_EXECUTED_SUBSCRIPTION, {
-    onData: ({ data }) => {
-      if (data.data?.proposalExecuted) {
+    onData: ({ data }: any) => {
+      if (data?.proposalExecuted) {
         toast({
           title: "Proposal Executed",
-          description: `Proposal #${data.data.proposalExecuted.proposal.id} has been executed`,
+          description: `Proposal #${data.proposalExecuted.proposal.id} has been executed`,
         });
         refetchProposals();
         refetchStats();
@@ -157,7 +157,7 @@ export default function SubgraphDashboard() {
     },
   });
 
-  const stats: DAOStats = statsData?.daoStats || {
+  const stats: DAOStats = (statsData as any)?.daoStats || {
     totalProposals: 0,
     activeProposals: 0,
     totalVotes: 0,
@@ -165,9 +165,9 @@ export default function SubgraphDashboard() {
     treasuryBalance: '0'
   };
 
-  const proposals: Proposal[] = proposalsData?.proposals || [];
-  const recentProposals: Proposal[] = recentProposalsData?.proposals || [];
-  const activities: Activity[] = activityData?.activities || [];
+  const proposals: Proposal[] = (proposalsData as any)?.proposals || [];
+  const recentProposals: Proposal[] = (recentProposalsData as any)?.proposals || [];
+  const activities: Activity[] = (activityData as any)?.activities || [];
 
   const formatTime = (timestamp: string) => {
     const date = new Date(parseInt(timestamp) * 1000);
@@ -237,7 +237,8 @@ export default function SubgraphDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <SubgraphErrorBoundary>
+      <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">DAO Analytics Dashboard</h1>
         <div className="flex items-center space-x-4">
@@ -556,6 +557,7 @@ export default function SubgraphDashboard() {
           </Alert>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </SubgraphErrorBoundary>
   );
 }

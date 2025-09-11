@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useSubscription } from '@apollo/client';
+import { useQuery, useSubscription } from '@apollo/client/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Alert, AlertDescription } from './ui/alert';
 import { useToast } from '../hooks/use-toast';
-import { ethers } from 'ethers';
+import SubgraphErrorBoundary from './SubgraphErrorBoundary';
 import {
   GET_RECENT_PROPOSALS,
   GET_ACTIVITY_FEED,
@@ -86,11 +86,11 @@ export default function LiveFeed() {
 
   // Real-time subscriptions
   useSubscription(PROPOSAL_CREATED_SUBSCRIPTION, {
-    onData: ({ data }) => {
-      if (data.data?.proposalCreated && notificationsEnabled) {
+    onData: ({ data }: any) => {
+      if (data?.proposalCreated && notificationsEnabled) {
         toast({
           title: "🚀 New Proposal Created",
-          description: `Proposal #${data.data.proposalCreated.id}: ${data.data.proposalCreated.description.slice(0, 50)}...`,
+          description: `Proposal #${data.proposalCreated.id}: ${data.proposalCreated.description.slice(0, 50)}...`,
           duration: 5000,
         });
         refetchProposals();
@@ -99,11 +99,11 @@ export default function LiveFeed() {
   });
 
   useSubscription(VOTE_CAST_SUBSCRIPTION, {
-    onData: ({ data }) => {
-      if (data.data?.voteCast && notificationsEnabled) {
+    onData: ({ data }: any) => {
+      if (data?.voteCast && notificationsEnabled) {
         toast({
           title: "🗳️ Vote Cast",
-          description: `${data.data.voteCast.voter.slice(0, 6)}... voted ${data.data.voteCast.support ? 'YES' : 'NO'} on Proposal #${data.data.voteCast.proposal.id}`,
+          description: `${data.voteCast.voter.slice(0, 6)}... voted ${data.voteCast.support ? 'YES' : 'NO'} on Proposal #${data.voteCast.proposal.id}`,
           duration: 3000,
         });
         refetchProposals();
@@ -112,11 +112,11 @@ export default function LiveFeed() {
   });
 
   useSubscription(PROPOSAL_EXECUTED_SUBSCRIPTION, {
-    onData: ({ data }) => {
-      if (data.data?.proposalExecuted && notificationsEnabled) {
+    onData: ({ data }: any) => {
+      if (data?.proposalExecuted && notificationsEnabled) {
         toast({
           title: "✅ Proposal Executed",
-          description: `Proposal #${data.data.proposalExecuted.proposal.id} has been executed successfully!`,
+          description: `Proposal #${data.proposalExecuted.proposal.id} has been executed successfully!`,
           duration: 5000,
         });
         refetchProposals();
@@ -124,8 +124,8 @@ export default function LiveFeed() {
     },
   });
 
-  const recentProposals: Proposal[] = recentProposalsData?.proposals || [];
-  const activities: Activity[] = activityData?.activities || [];
+  const recentProposals: Proposal[] = (recentProposalsData as any)?.proposals || [];
+  const activities: Activity[] = (activityData as any)?.activities || [];
 
   const formatTime = (timestamp: string) => {
     const date = new Date(parseInt(timestamp) * 1000);
@@ -216,7 +216,8 @@ export default function LiveFeed() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <SubgraphErrorBoundary>
+      <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Live DAO Feed</h1>
         <div className="flex items-center space-x-4">
@@ -417,6 +418,7 @@ export default function LiveFeed() {
           </div>
         </AlertDescription>
       </Alert>
-    </div>
+      </div>
+    </SubgraphErrorBoundary>
   );
 }

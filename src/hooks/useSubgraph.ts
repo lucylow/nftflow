@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useSubscription, useLazyQuery } from '@apollo/client';
+import { useQuery, useSubscription, useLazyQuery } from '@apollo/client/react';
 import { useToast } from './use-toast';
 import {
   GET_ALL_PROPOSALS,

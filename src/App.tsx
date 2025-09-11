@@ -21,6 +21,7 @@ import GovernanceTokenMinter from "./components/GovernanceTokenMinter";
 import CreativityShowcase from "./pages/CreativityShowcase";
 import SubgraphDashboard from "./components/SubgraphDashboard";
 import LiveFeed from "./components/LiveFeed";
+import SubgraphTest from "./components/SubgraphTest";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
                     <Route path="/creativity" element={<CreativityShowcase />} />
                     <Route path="/subgraph" element={<SubgraphDashboard />} />
                     <Route path="/live-feed" element={<LiveFeed />} />
+                    <Route path="/subgraph-test" element={<SubgraphTest />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
