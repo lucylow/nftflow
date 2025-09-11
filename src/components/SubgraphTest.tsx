@@ -30,11 +30,22 @@ export default function SubgraphTest() {
         <CardContent>
           <Alert>
             <AlertDescription>
-              <strong>Error:</strong> {error.message}
-              <br />
-              <br />
-              This is expected if the subgraph hasn't been deployed yet. 
-              The subgraph needs to be deployed to Somnia before this component can fetch real data.
+              <div className="space-y-2">
+                <p><strong>Error:</strong> {error.message}</p>
+                <p className="text-sm text-gray-600">
+                  This is expected if the subgraph hasn't been deployed yet. 
+                  The subgraph needs to be deployed to Somnia before this component can fetch real data.
+                </p>
+                <div className="text-xs text-gray-500 mt-2">
+                  <p>Common causes:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Subgraph not deployed to Somnia network</li>
+                    <li>Network connectivity issues</li>
+                    <li>Subgraph URL configuration incorrect</li>
+                    <li>Subgraph indexing in progress</li>
+                  </ul>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
         </CardContent>

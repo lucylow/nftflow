@@ -1,9 +1,28 @@
-import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+import { ApolloClient, InMemoryCache, gql, createHttpLink } from '@apollo/client';
+
+// Create HTTP link for Apollo Client
+const httpLink = createHttpLink({
+  uri: 'https://proxy.somnia.chain.love/subgraphs/name/nftflow-dao',
+  // Add timeout and error handling
+  fetchOptions: {
+    timeout: 10000, // 10 second timeout
+  },
+});
 
 // Configure Apollo Client for Somnia subgraph
 const client = new ApolloClient({
-  uri: 'https://proxy.somnia.chain.love/subgraphs/name/nftflow-dao',
+  link: httpLink,
   cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: 'ignore',
+    },
+    query: {
+      errorPolicy: 'all',
+    },
+  },
+  // Add connection error handling
+  connectToDevTools: process.env.NODE_ENV === 'development',
 });
 
 // GraphQL Queries for NFTFlow DAO
