@@ -412,257 +412,191 @@ const Analytics = () => {
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="platform" className="space-y-8">
-            {/* Platform Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {platformMetrics.map((metric, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-muted-foreground text-sm mb-1">{metric.label}</p>
-                          <p className="text-2xl font-bold">{metric.value}</p>
-                        </div>
-                        <div className="text-primary">
-                          <metric.icon className="w-8 h-8" />
-                        </div>
-                      </div>
-                      <div className="mt-3">
-                        <Badge variant="default" className="bg-success/10 text-success border-success/20">
-                          {metric.change}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Charts Placeholder */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Volume Trend */}
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    Rental Volume (7 Days)
-                  </CardTitle>
+                  <CardTitle>Volume Trend</CardTitle>
+                  <CardDescription>Daily volume and rental count</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
-                    <p className="text-muted-foreground">Chart visualization would go here</p>
-                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={analyticsData.dailyVolume}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area 
+                        type="monotone" 
+                        dataKey="volume" 
+                        stackId="1" 
+                        stroke="#8884d8" 
+                        fill="#8884d8" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              {/* Utility Types Distribution */}
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChart className="w-5 h-5 text-accent" />
-                    Rental Duration Distribution
-                  </CardTitle>
+                  <CardTitle>Utility Types</CardTitle>
+                  <CardDescription>Distribution by utility type</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
-                    <p className="text-muted-foreground">Pie chart visualization would go here</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {networkMetrics.map((metric, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-primary mb-4">
-                        <metric.icon className="w-10 h-10 mx-auto animate-pulse-glow" />
-                      </div>
-                      <p className="text-3xl font-bold mb-2">{metric.value}</p>
-                      <p className="text-muted-foreground text-sm mb-3">{metric.label}</p>
-                      <Badge variant="outline" className="border-accent/50 text-accent">
-                        {metric.change}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-
-            <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Somnia Network Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-success/10 rounded-lg border border-success/20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
-                      <span className="font-medium">Network Health</span>
-                    </div>
-                    <Badge variant="default" className="bg-success/20 text-success">
-                      Excellent
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-muted/30 rounded-lg">
-                      <div className="text-sm text-muted-foreground">Validator Nodes</div>
-                      <div className="text-2xl font-bold text-primary">142</div>
-                    </div>
-                    <div className="p-4 bg-muted/30 rounded-lg">
-                      <div className="text-sm text-muted-foreground">Network Uptime</div>
-                      <div className="text-2xl font-bold text-success">99.97%</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="trending" className="space-y-8">
-            <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-success" />
-                  Top Performing NFTs (24h)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {trendingNFTs.map((nft, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center text-white font-bold">
-                          #{index + 1}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{nft.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {nft.rentals} rentals • {nft.volume.toFixed(2)} STT volume
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {nft.category}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              Avg: {nft.avgDuration}h
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge 
-                        variant={nft.change.startsWith('+') ? "default" : "secondary"}
-                        className={nft.change.startsWith('+') ? 
-                          "bg-success/10 text-success border-success/20" : 
-                          "bg-destructive/10 text-destructive border-destructive/20"
-                        }
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RechartsPieChart>
+                      <Pie
+                        data={analyticsData.utilityTypes}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ type, count }) => `${type}: ${count}`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="count"
                       >
-                        {nft.change}
-                      </Badge>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                        {analyticsData.utilityTypes.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
 
-          <TabsContent value="categories" className="space-y-8">
-            <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+            {/* Top Collections */}
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-accent" />
-                  Category Performance
-                </CardTitle>
+                <CardTitle>Top Collections</CardTitle>
+                <CardDescription>Highest volume collections</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {categoryStats.map((category, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
-                    >
+                  {analyticsData.topCollections.map((collection, index) => (
+                    <div key={collection.name} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                          {category.category.split(' ')[0].slice(0, 2).toUpperCase()}
-                        </div>
+                        <Badge variant="outline">#{index + 1}</Badge>
                         <div>
-                          <h3 className="font-semibold">{category.category}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {category.rentals} rentals • Avg: {category.avgPrice} STT
-                          </p>
+                          <h4 className="font-medium">{collection.name}</h4>
+                          <p className="text-sm text-muted-foreground">{collection.rentals} rentals</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-success">{category.volume.toFixed(2)} STT</p>
-                        <p className="text-sm text-muted-foreground">Total Volume</p>
+                        <div className="font-medium">{collection.volume} STT</div>
+                        <div className="text-sm text-muted-foreground">Volume</div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="hourly" className="space-y-8">
-            <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+          <TabsContent value="volume" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Hourly Volume */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Hourly Volume</CardTitle>
+                  <CardDescription>Volume distribution by hour</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={analyticsData.hourlyVolume}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="hour" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="volume" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Price Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Price Distribution</CardTitle>
+                  <CardDescription>Rental price ranges</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={analyticsData.priceDistribution}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="range" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="collections" className="space-y-6">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-primary" />
-                  Hourly Activity Patterns
-                </CardTitle>
+                <CardTitle>Collection Performance</CardTitle>
+                <CardDescription>Detailed collection analytics</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {hourlyStats.map((hour, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between p-3 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-bold text-sm">
-                          {hour.hour}
+                  {analyticsData.topCollections.map((collection, index) => (
+                    <div key={collection.name} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{collection.name}</h4>
+                        <Badge variant="secondary">#{index + 1}</Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-2xl font-bold">{collection.volume} STT</div>
+                          <div className="text-sm text-muted-foreground">Total Volume</div>
                         </div>
                         <div>
-                          <p className="font-medium">{hour.rentals} rentals</p>
-                          <p className="text-sm text-muted-foreground">{hour.volume.toFixed(2)} STT volume</p>
+                          <div className="text-2xl font-bold">{collection.rentals}</div>
+                          <div className="text-sm text-muted-foreground">Total Rentals</div>
                         </div>
                       </div>
-                      <div className="w-32 bg-muted/30 rounded-full h-2">
-                        <div 
-                          className="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${(hour.rentals / 112) * 100}%` }}
-                        ></div>
+                      <div className="mt-4">
+                        <div className="text-sm text-muted-foreground mb-1">Average Price</div>
+                        <div className="text-lg font-medium">
+                          {(collection.volume / collection.rentals).toFixed(4)} STT/rental
+                        </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Growth</CardTitle>
+                <CardDescription>New users and total user count</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={analyticsData.userGrowth}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="newUsers" stroke="#8884d8" strokeWidth={2} />
+                    <Line type="monotone" dataKey="totalUsers" stroke="#82ca9d" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
     </div>

@@ -430,3 +430,4 @@ export function calculateROI(investment: BigInt, returnValue: BigInt): BigInt {
   let profit = returnValue.minus(investment)
   return profit.times(BigInt.fromI32(100)).div(investment)
 }
+

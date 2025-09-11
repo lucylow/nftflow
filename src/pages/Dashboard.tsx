@@ -39,15 +39,19 @@ import BulkOperations from "@/components/BulkOperations";
 import MobileOptimizations from "@/components/MobileOptimizations";
 import SocialFeatures from "@/components/SocialFeatures";
 import { NFTCardSkeleton, StatsCardSkeleton, ActivitySkeleton, DashboardSkeleton, LoadingSpinner } from "@/components/ui/skeleton";
+import { EnhancedCard, StatCard, FeatureCard } from "@/components/ui/enhanced-card";
+import { LoadingSpinner as NewLoadingSpinner, LoadingDots, LoadingSkeleton } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
+import { useUserNFTs } from "@/hooks/useUserNFTs";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(3);
-  const [userNFTs, setUserNFTs] = useState<any[]>([]);
   const { toast } = useToast();
+  const { userNFTs, loading: nftsLoading, rentNFT, returnNFT, listNFT } = useUserNFTs();
+  const { unreadCount } = useNotifications();
 
   // Simulate loading
   useEffect(() => {
@@ -328,14 +332,14 @@ const Dashboard = () => {
             >
               Achievements
             </EnhancedTabsTrigger>
-            <EnhancedTabsTrigger 
-              value="notifications" 
-              variant="pills"
-              icon={<Bell className="w-4 h-4" />}
-              badge={unreadNotifications}
-            >
+              <EnhancedTabsTrigger 
+                value="notifications" 
+                variant="pills"
+                icon={<Bell className="w-4 h-4" />}
+                badge={unreadCount}
+              >
               Notifications
-            </EnhancedTabsTrigger>
+              </EnhancedTabsTrigger>
             <EnhancedTabsTrigger 
               value="bulk" 
               variant="pills"
@@ -512,11 +516,66 @@ const Dashboard = () => {
                 <CardDescription>NFTs you are currently renting</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {activeRentals.map((nft) => (
-                    <NFTCard key={nft.id} nft={nft} />
-                  ))}
-                </div>
+                {nftsLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <NFTCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {userNFTs.filter(nft => nft.isRented).map((nft) => (
+                      <Card key={nft.id} className="bg-card/30 border-border/30 backdrop-blur-sm hover:border-primary/30 transition-all">
+                        <CardContent className="p-4">
+                          <div className="aspect-square mb-4 rounded-lg overflow-hidden">
+                            <img 
+                              src={nft.image} 
+                              alt={nft.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="font-semibold text-foreground">{nft.name}</h3>
+                            <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline" className="text-xs">
+                                {nft.rarity}
+                              </Badge>
+                              <Badge variant="default" className="text-xs">
+                                Rented
+                              </Badge>
+                            </div>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Time Left:</span>
+                                <span className="font-medium text-primary">{nft.timeLeft}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Total Cost:</span>
+                                <span className="font-medium">{nft.totalCost?.toFixed(4)} STT</span>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full mt-2"
+                              onClick={() => returnNFT(nft.id)}
+                            >
+                              Return NFT
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {userNFTs.filter(nft => nft.isRented).length === 0 && (
+                      <div className="col-span-full text-center py-8 text-muted-foreground">
+                        <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No active rentals</p>
+                        <p className="text-sm">Start renting NFTs from the marketplace!</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -528,7 +587,14 @@ const Dashboard = () => {
                     <Edit className="w-5 h-5" />
                     My Listed NFTs
                   </div>
-                  <Button variant="premium">
+                  <Button 
+                    variant="premium"
+                    onClick={() => {
+                      const nftId = Date.now().toString();
+                      const pricePerSecond = 0.000001;
+                      listNFT(nftId, pricePerSecond);
+                    }}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     List New NFT
                   </Button>
@@ -536,54 +602,62 @@ const Dashboard = () => {
                 <CardDescription>NFTs you have listed for rental</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userListings.map((nft) => (
-                    <Card key={nft.id} className="bg-card/30 border-border/30 backdrop-blur-sm hover:border-primary/30 transition-all">
-                      <CardContent className="p-4">
-                        <div className="aspect-square mb-4 rounded-lg overflow-hidden">
-                          <img 
-                            src={nft.image} 
-                            alt={nft.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-semibold text-foreground">{nft.name}</h3>
-                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">
-                              {nft.rarity}
-                            </Badge>
-                            <Badge variant={nft.isRented ? "default" : "secondary"} className="text-xs">
-                              {nft.isRented ? "Rented" : "Available"}
-                            </Badge>
+                {nftsLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <NFTCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {userNFTs.filter(nft => !nft.isRented).map((nft) => (
+                      <Card key={nft.id} className="bg-card/30 border-border/30 backdrop-blur-sm hover:border-primary/30 transition-all">
+                        <CardContent className="p-4">
+                          <div className="aspect-square mb-4 rounded-lg overflow-hidden">
+                            <img 
+                              src={nft.image} 
+                              alt={nft.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Total Earnings:</span>
-                              <span className="font-medium text-success">{nft.totalEarnings} STT</span>
+                          <div className="space-y-2">
+                            <h3 className="font-semibold text-foreground">{nft.name}</h3>
+                            <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline" className="text-xs">
+                                {nft.rarity}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                Available
+                              </Badge>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Rentals:</span>
-                              <span className="font-medium">{nft.rentalCount}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Last Rented:</span>
-                              <span className="font-medium">{nft.lastRented}</span>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Price:</span>
+                                <span className="font-medium">{(nft.pricePerSecond * 3600).toFixed(6)} STT/h</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Total Earnings:</span>
+                                <span className="font-medium text-success">{nft.totalEarnings || 0} STT</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Rentals:</span>
+                                <span className="font-medium">{nft.rentalCount || 0}</span>
+                              </div>
                             </div>
                           </div>
-                          {nft.isRented && (
-                            <div className="mt-2 p-2 bg-primary/10 rounded text-center">
-                              <p className="text-sm text-primary font-medium">
-                                Time Left: {nft.timeLeft}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {userNFTs.filter(nft => !nft.isRented).length === 0 && (
+                      <div className="col-span-full text-center py-8 text-muted-foreground">
+                        <Edit className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No listed NFTs</p>
+                        <p className="text-sm">List your first NFT to start earning!</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </EnhancedTabsContent>

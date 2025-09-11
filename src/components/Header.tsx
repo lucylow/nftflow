@@ -1,17 +1,31 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X, Bell, Search } from "lucide-react";
+import { Zap, Menu, X, Bell, Search, Sun, Moon, Settings, Check, X as XIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import WalletConnect from "./WalletConnect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useTheme } from "@/hooks/use-theme";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuItem
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
+  const { notifications, unreadCount, isOpen, setIsOpen, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
 
   const navItems = [
     { label: "Marketplace", href: "/marketplace", icon: "🏪" },
@@ -109,12 +123,125 @@ const Header = () => {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="w-4 h-4" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-primary">
-                3
-              </Badge>
+          <div className="hidden md:flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowSearch(!showSearch)}
+              className="relative"
+            >
+              <Search className="w-4 h-4" />
+            </Button>
+            <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-primary">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    Notifications
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={markAllAsRead}
+                        className="h-6 px-2 text-xs"
+                      >
+                        <Check className="w-3 h-3 mr-1" />
+                        Mark all read
+                      </Button>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    {unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
+                  </CardDescription>
+                </CardHeader>
+                <ScrollArea className="h-80">
+                  {notifications.length > 0 ? (
+                    <div className="space-y-2 p-2">
+                      {notifications.slice(0, 5).map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 rounded-lg border transition-colors ${
+                            notification.read 
+                              ? 'bg-muted/20 border-muted' 
+                              : 'bg-background border-border shadow-sm'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className={`text-sm font-medium ${notification.read ? 'text-muted-foreground' : 'text-foreground'}`}>
+                                  {notification.title}
+                                </h4>
+                                {!notification.read && (
+                                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                )}
+                              </div>
+                              <p className={`text-xs ${notification.read ? 'text-muted-foreground' : 'text-foreground'}`}>
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(notification.timestamp).toLocaleTimeString()}
+                              </p>
+                            </div>
+                            <div className="flex gap-1">
+                              {!notification.read && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => markAsRead(notification.id)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteNotification(notification.id)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <XIcon className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No notifications</p>
+                    </div>
+                  )}
+                </ScrollArea>
+                {notifications.length > 5 && (
+                  <div className="p-2 border-t">
+                    <Button variant="ghost" size="sm" className="w-full">
+                      View all notifications
+                    </Button>
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
             </Button>
             <WalletConnect />
           </div>
@@ -133,6 +260,34 @@ const Header = () => {
             )}
           </Button>
         </div>
+
+        {/* Animated Search Bar */}
+        <AnimatePresence>
+          {showSearch && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="hidden md:block overflow-hidden border-t border-border"
+            >
+              <div className="py-4">
+                <form onSubmit={handleSearch} className="max-w-md mx-auto">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search NFTs, collections, creators..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                      autoFocus
+                    />
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Menu */}
         <AnimatePresence>
@@ -181,11 +336,32 @@ const Header = () => {
                 <div className="px-4 pt-4 border-t border-border space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Notifications</span>
-                    <Button variant="ghost" size="sm" className="relative">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="relative"
+                      onClick={() => setIsOpen(!isOpen)}
+                    >
                       <Bell className="w-4 h-4" />
-                      <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-primary">
-                        3
-                      </Badge>
+                      {unreadCount > 0 && (
+                        <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-primary">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Theme</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    >
+                      {theme === 'dark' ? (
+                        <Sun className="w-4 h-4" />
+                      ) : (
+                        <Moon className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                   <WalletConnect />

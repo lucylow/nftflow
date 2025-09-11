@@ -392,3 +392,4 @@ export function RealTimePaymentStream({ streamId, className }: RealTimePaymentSt
     </Card>
   );
 }
+

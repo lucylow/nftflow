@@ -293,3 +293,4 @@ function MyComponent() {
 - [Subgraph Development Guide](https://thegraph.com/docs/en/developing/creating-a-subgraph/)
 
 This implementation provides a complete, production-ready UI for querying Somnia subgraphs with modern web technologies and best practices.
+

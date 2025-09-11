@@ -918,3 +918,4 @@ export function handleUpdateUser(event: UpdateUser): void {
   nft.lastUpdated = event.block.timestamp
   nft.save()
 }
+

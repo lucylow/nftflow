@@ -580,3 +580,4 @@ export function InteractiveRentalDashboard({ className }: InteractiveRentalDashb
     </div>
   );
 }
+

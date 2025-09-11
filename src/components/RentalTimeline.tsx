@@ -697,3 +697,4 @@ export function RentalTimeline({ className }: RentalTimelineProps) {
     </div>
   );
 }
+

@@ -126,3 +126,4 @@ export const MARKETPLACE_ANALYTICS = {
     { name: 'Utility', volume: '1,043.00', percentage: 5.6 }
   ]
 };
+

@@ -641,3 +641,4 @@ describe("NFTFlow Subgraph", () => {
     assert.fieldEquals("Collection", collection2Id, "totalRentals", "1")
   })
 })
+

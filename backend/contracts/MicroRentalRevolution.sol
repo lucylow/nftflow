@@ -562,3 +562,4 @@ contract MicroRentalRevolution is ReentrancyGuard, Ownable {
         payable(owner()).transfer(address(this).balance);
     }
 }
+

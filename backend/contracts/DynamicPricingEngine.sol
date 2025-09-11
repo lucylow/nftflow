@@ -509,3 +509,4 @@ contract DynamicPricingEngine is Ownable, ReentrancyGuard {
         return globalDemandFactors;
     }
 }
+

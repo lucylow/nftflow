@@ -495,3 +495,4 @@ export function measurePerformance(testFunction: () => void): i64 {
   let endTime = Date.now()
   return endTime - startTime
 }
+

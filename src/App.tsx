@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Web3Provider } from "@/contexts/Web3Context";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import ApolloProviderWrapper from "./components/ApolloProvider";
 import Header from "./components/Header";
@@ -24,16 +25,19 @@ import LiveFeed from "./components/LiveFeed";
 import SubgraphTest from "./components/SubgraphTest";
 import WalletDebug from "./components/WalletDebug";
 import WalletErrorBoundary from "./components/WalletErrorBoundary";
+import { ThemeProvider } from "./hooks/use-theme";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <ErrorBoundary>
-                <QueryClientProvider client={queryClient}>
-                  <WalletErrorBoundary>
-                    <Web3Provider>
-                      <ApolloProviderWrapper>
-          <TooltipProvider>
+    <ThemeProvider defaultTheme="system" storageKey="nftflow-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <WalletErrorBoundary>
+          <Web3Provider>
+            <NotificationProvider>
+              <ApolloProviderWrapper>
+                <TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -62,11 +66,13 @@ const App = () => (
                 </main>
               </div>
             </BrowserRouter>
-          </TooltipProvider>
-                      </ApolloProviderWrapper>
-                    </Web3Provider>
-                  </WalletErrorBoundary>
-                </QueryClientProvider>
+                </TooltipProvider>
+              </ApolloProviderWrapper>
+            </NotificationProvider>
+          </Web3Provider>
+        </WalletErrorBoundary>
+      </QueryClientProvider>
+    </ThemeProvider>
   </ErrorBoundary>
 );
 

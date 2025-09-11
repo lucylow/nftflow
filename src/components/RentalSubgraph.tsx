@@ -417,3 +417,4 @@ export default function RentalSubgraph({ className }: RentalSubgraphProps) {
     </div>
   );
 }
+

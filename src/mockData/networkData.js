@@ -64,3 +64,4 @@ export const SUBGRAPH_STATISTICS = {
     uptime: '99.99%'
   }
 };
+

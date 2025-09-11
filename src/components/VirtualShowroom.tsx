@@ -596,3 +596,4 @@ export function VirtualShowroom({ className }: VirtualShowroomProps) {
     </div>
   );
 }
+
