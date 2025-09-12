@@ -132,8 +132,10 @@ export const switchToNetwork = async (chainId: number) => {
     }
     
   } catch (switchError: unknown) {
+    const error = switchError as { code?: number; message?: string };
+    
     // This error code indicates that the chain has not been added to MetaMask
-    if ((switchError as { code?: number }).code === 4902) {
+    if (error.code === 4902) {
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
@@ -158,16 +160,27 @@ export const switchToNetwork = async (chainId: number) => {
         }
         
       } catch (addError: unknown) {
-        if ((addError as { code?: number }).code === 4001) {
+        const addErr = addError as { code?: number; message?: string };
+        if (addErr.code === 4001) {
           throw new Error('Network addition rejected. Please approve adding the Somnia network in MetaMask.');
+        } else if (addErr.code === -32602) {
+          throw new Error('Invalid network parameters. Please check the network configuration.');
+        } else if (addErr.code === -32603) {
+          throw new Error('Internal MetaMask error while adding network. Please try again.');
         } else {
-          throw new Error(`Failed to add ${network.name} network: ${addError instanceof Error ? addError.message : 'Unknown error'}`);
+          throw new Error(`Failed to add ${network.name} network: ${addErr.message || 'Unknown error'}`);
         }
       }
-    } else if ((switchError as { code?: number }).code === 4001) {
+    } else if (error.code === 4001) {
       throw new Error('Network switch rejected. Please approve the network switch in MetaMask.');
+    } else if (error.code === -32602) {
+      throw new Error('Invalid chain ID. Please check the network configuration.');
+    } else if (error.code === -32603) {
+      throw new Error('Internal MetaMask error. Please refresh the page and try again.');
+    } else if (error.code === -32002) {
+      throw new Error('Network switch request already pending. Please check MetaMask and try again.');
     } else {
-      throw new Error(`Failed to switch to ${network.name}: ${switchError instanceof Error ? switchError.message : 'Unknown error'}`);
+      throw new Error(`Failed to switch to ${network.name}: ${error.message || 'Unknown error'}`);
     }
   }
 };
@@ -207,7 +220,10 @@ export const getMetaMaskAccount = async (): Promise<string | null> => {
 
 // Ensure user is connected to Somnia network
 export const ensureSomniaNetwork = async (): Promise<void> => {
+  console.log('🌐 Checking current network...');
+  
   if (!isMetaMaskInstalled()) {
+    console.error('❌ MetaMask not available');
     throw new Error('MetaMask not available. Please install MetaMask to connect to Somnia network.');
   }
 
@@ -216,13 +232,22 @@ export const ensureSomniaNetwork = async (): Promise<void> => {
     const network = await provider.getNetwork();
     const currentChainId = Number(network.chainId);
     
+    console.log('📊 Current network info:', {
+      chainId: currentChainId,
+      name: network.name,
+      isSomnia: currentChainId === 50312
+    });
+    
     // If not on Somnia testnet, switch to it
     if (currentChainId !== 50312) {
-      console.log(`Current network: ${currentChainId}, switching to Somnia Testnet (50312)`);
+      console.log(`🔄 Switching from ${currentChainId} to Somnia Testnet (50312)`);
       await switchToNetwork(50312);
+      console.log('✅ Successfully switched to Somnia Testnet');
+    } else {
+      console.log('✅ Already on Somnia Testnet');
     }
   } catch (error) {
-    console.error('Failed to ensure Somnia network:', error);
+    console.error('❌ Failed to ensure Somnia network:', error);
     throw error;
   }
 };

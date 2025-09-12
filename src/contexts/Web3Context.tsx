@@ -111,30 +111,40 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
 
   // Connect wallet
   const connectWallet = async () => {
+    console.log('🔌 Starting wallet connection process...');
+    
     if (typeof window === 'undefined' || !window.ethereum) {
+      console.error('❌ MetaMask not available');
       throw new Error('MetaMask not installed. Please install MetaMask to connect your wallet.');
     }
 
+    console.log('✅ MetaMask detected');
     setIsConnecting(true);
+    
     try {
       // First, try to get accounts without requesting access
       let accounts;
       try {
+        console.log('🔍 Checking for existing accounts...');
         accounts = await window.ethereum.request({
           method: 'eth_accounts',
         });
+        console.log('📋 Existing accounts:', accounts);
       } catch (error) {
-        console.warn('Failed to get existing accounts:', error);
+        console.warn('⚠️ Failed to get existing accounts:', error);
         accounts = [];
       }
 
       // If no accounts are available, request access
       if (!accounts || accounts.length === 0) {
+        console.log('🔐 No existing accounts, requesting access...');
         try {
           accounts = await window.ethereum.request({
             method: 'eth_requestAccounts',
           });
+          console.log('✅ Account access granted:', accounts);
         } catch (requestError: unknown) {
+          console.error('❌ Account access denied:', requestError);
           // Handle specific MetaMask errors
           const error = requestError as { code?: number; message?: string };
           if (error.code === 4001) {
@@ -154,9 +164,11 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       }
 
       if (!accounts || accounts.length === 0) {
+        console.error('❌ No accounts found after request');
         throw new Error('No accounts found. Please create an account in MetaMask or unlock your wallet.');
       }
 
+      console.log('🌐 Ensuring Somnia network connection...');
       // Ensure we're on the Somnia network
       await ensureSomniaNetwork();
 
@@ -165,18 +177,28 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       const address = await signer.getAddress();
       const network = await provider.getNetwork();
       
+      console.log('✅ Wallet connected successfully:', {
+        address,
+        chainId: Number(network.chainId),
+        networkName: network.name
+      });
+      
       setAccount(address);
       setChainId(Number(network.chainId));
       setIsConnected(true);
       
+      console.log('📋 Initializing contracts...');
       // Initialize contracts (this won't fail the connection if contracts aren't deployed)
       await initializeContracts();
       
+      console.log('💰 Refreshing balance...');
       // Get initial balance
       await refreshBalance();
       
+      console.log('🎉 Wallet connection process completed successfully');
+      
     } catch (error: unknown) {
-      console.error('Failed to connect wallet:', error);
+      console.error('❌ Failed to connect wallet:', error);
       
       // Re-throw the error with proper message
       if (error instanceof Error && error.message) {
@@ -272,31 +294,54 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   useEffect(() => {
     if (typeof window !== 'undefined' && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
+        console.log('Accounts changed:', accounts);
         if (accounts.length === 0) {
+          console.log('No accounts found, disconnecting wallet');
           disconnectWallet();
-        } else {
+        } else if (accounts[0] !== account) {
+          console.log('Account changed to:', accounts[0]);
           setAccount(accounts[0]);
           refreshBalance();
         }
       };
 
       const handleChainChanged = (chainId: string) => {
-        setChainId(parseInt(chainId, 16));
+        const newChainId = parseInt(chainId, 16);
+        console.log('Chain changed to:', newChainId);
+        setChainId(newChainId);
+        
         // Reinitialize contracts on chain change
         if (isConnected) {
+          console.log('Reinitializing contracts after chain change');
           initializeContracts();
         }
       };
 
+      const handleConnect = () => {
+        console.log('MetaMask connected');
+        // Don't automatically connect, let user initiate
+      };
+
+      const handleDisconnect = () => {
+        console.log('MetaMask disconnected');
+        disconnectWallet();
+      };
+
+      // Add event listeners
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on('connect', handleConnect);
+      window.ethereum.on('disconnect', handleDisconnect);
 
       return () => {
+        // Clean up event listeners
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
         window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener('connect', handleConnect);
+        window.ethereum.removeListener('disconnect', handleDisconnect);
       };
     }
-  }, [isConnected]);
+  }, [isConnected, account]);
 
   const value: Web3ContextType = {
     isConnected,
