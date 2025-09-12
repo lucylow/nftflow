@@ -35,18 +35,7 @@ const NFTManagement = () => {
   const { listForRental, isLoading: isListing } = useNFTFlow();
   const { toast } = useToast();
 
-  const [userNFTs, setUserNFTs] = useState<{
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    collection: string;
-    pricePerSecond: number;
-    isRented: boolean;
-    owner: string;
-    rarity: string;
-    utilityType: string;
-  }[]>([]);
+  const [userNFTs, setUserNFTs] = useState<UserNFT[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mintFormData, setMintFormData] = useState({
     name: "",
@@ -68,8 +57,23 @@ const NFTManagement = () => {
     
     setIsLoading(true);
     try {
-      const nfts = await getUserNFTs();
-      setUserNFTs(nfts);
+      const nfts = await getUserNFTs() || [];
+      const formattedNFTs = nfts.map((nft: any) => ({
+        id: nft.tokenId?.toString() || nft.id || '0',
+        name: nft.name || 'Unknown NFT',
+        description: nft.description || '',
+        image: nft.image || '',
+        collection: nft.collection || '',
+        pricePerSecond: nft.pricePerSecond || 0,
+        isRented: nft.isRented || false,
+        owner: nft.owner || '',
+        rarity: nft.rarity || 'Common',
+        utilityType: nft.utilityType || 'Basic',
+        tokenId: nft.tokenId || nft.id || '0',
+        isApproved: nft.isApproved || false,
+        isListed: nft.isListed || false
+      }));
+      setUserNFTs(formattedNFTs);
     } catch (error) {
       console.error('Failed to load user NFTs:', error);
       toast({
@@ -96,7 +100,7 @@ const NFTManagement = () => {
     }
 
     try {
-      await mintNFT(mintFormData);
+      await mintNFT(mintFormData.name, mintFormData.description, mintFormData.image, JSON.stringify(mintFormData.attributes));
       setMintFormData({ name: "", description: "", image: "", attributes: [] });
       await loadUserNFTs(); // Refresh the list
     } catch (error) {
@@ -121,10 +125,10 @@ const NFTManagement = () => {
       await listForRental(
         CONTRACT_ADDRESSES.MockERC721,
         listingFormData.tokenId,
-        listingFormData.pricePerSecond,
-        listingFormData.minDuration,
-        listingFormData.maxDuration,
-        listingFormData.collateralRequired
+        parseFloat(listingFormData.pricePerSecond),
+        parseInt(listingFormData.minDuration),
+        parseInt(listingFormData.maxDuration),
+        parseFloat(listingFormData.collateralRequired)
       );
       
       setListingFormData({
@@ -153,7 +157,7 @@ const NFTManagement = () => {
     }
 
     try {
-      await approveNFTFlow("0"); // This approves for all tokens
+      await approveNFTFlow(CONTRACT_ADDRESSES.MockERC721, "0"); // This approves for all tokens
       await loadUserNFTs(); // Refresh the list
     } catch (error) {
       console.error("Failed to approve NFTFlow:", error);
@@ -346,7 +350,7 @@ const NFTManagement = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {userNFTs.map((nft) => (
                 <motion.div
-                  key={nft.tokenId}
+                  key={nft.tokenId || nft.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}

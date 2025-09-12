@@ -49,8 +49,7 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
   const { account } = useWeb3();
   const { 
     rentNFT, 
-    isLoading, 
-    error 
+    isLoading 
   } = useNFTFlow();
   
   const [searchTerm, setSearchTerm] = useState('');

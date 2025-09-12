@@ -188,6 +188,8 @@ const BulkOperations: React.FC = () => {
               return { ...nft, isRented: true };
             case 'list':
               return { ...nft, isRented: false };
+            case 'update_price':
+              return { ...nft, pricePerSecond: parseFloat(bulkPrice) || nft.pricePerSecond };
             case 'unlist':
               return { ...nft, isRented: false };
             case 'update_price':
@@ -341,7 +343,7 @@ const BulkOperations: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="operation-type">Operation Type</Label>
-                  <Select value={operationType} onValueChange={setOperationType}>
+                  <Select value={operationType} onValueChange={(value: typeof operationType) => setOperationType(value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

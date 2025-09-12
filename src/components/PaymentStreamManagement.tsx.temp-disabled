@@ -89,7 +89,20 @@ const PaymentStreamManagement = () => {
         })
       );
       
-      setStreamDetails(details.filter(Boolean));
+      const formattedDetails = details.filter(Boolean).map((stream: any) => ({
+        id: stream.streamId || stream.id,
+        sender: stream.sender,
+        recipient: stream.recipient,
+        deposit: stream.deposit,
+        ratePerSecond: stream.ratePerSecond,
+        startTime: stream.startTime,
+        stopTime: stream.stopTime,
+        remainingBalance: stream.remainingBalance,
+        active: stream.active,
+        balance: stream.balance || stream.remainingBalance,
+        streamId: stream.streamId || stream.id
+      }));
+      setStreamDetails(formattedDetails);
     } catch (error) {
       console.error('Failed to load streams:', error);
       toast({

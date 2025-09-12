@@ -98,7 +98,7 @@ const UserDashboard = ({ className }: UserDashboardProps) => {
     };
 
     loadUserData();
-  }, [account, isConnected, getUserCollateralBalance, getUserReputation, getSuccessRate, getUserAchievements, getSenderStreams, getRecipientStreams]);
+  }, [account, isConnected, getUserReputation, getSuccessRate, getUserAchievements, getSenderStreams, getRecipientStreams]);
 
   if (!isConnected) {
     return (
