@@ -9,6 +9,7 @@ import WalletErrorBoundary from "@/components/WalletErrorBoundary";
 import { ThemeProvider } from "./hooks/use-theme";
 import Index from "@/pages/SimpleIndex";
 import SimpleWallet from "@/components/SimpleWallet";
+import SimpleRentalFlow from "@/components/SimpleRentalFlow";
 
 const queryClient = new QueryClient();
 
@@ -25,9 +26,10 @@ const App = () => (
                   <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950">
                     <main>
                       <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/wallet" element={<SimpleWallet />} />
-                        <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />
+                         <Route path="/" element={<Index />} />
+                         <Route path="/wallet" element={<SimpleWallet />} />
+                         <Route path="/rental" element={<SimpleRentalFlow />} />
+                         <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />
                       </Routes>
                     </main>
                   </div>

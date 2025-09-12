@@ -115,10 +115,6 @@ const AnalyticsDashboard: React.FC = () => {
     ]
   };
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [loadAnalyticsData]);
-
   const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);

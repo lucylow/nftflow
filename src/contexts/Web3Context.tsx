@@ -36,6 +36,12 @@ interface Web3ContextType {
   dynamicPricingContract: ethers.Contract | null;
   utilityTrackerContract: ethers.Contract | null;
   
+  // Legacy contract support
+  contract?: ethers.Contract | null;
+  gamificationContract?: ethers.Contract | null;
+  achievementSystemContract?: ethers.Contract | null;
+  microRentalContract?: ethers.Contract | null;
+  
   // Methods
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;

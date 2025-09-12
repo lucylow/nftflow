@@ -363,8 +363,8 @@ const BulkOperations: React.FC = () => {
                       type="number"
                       step="0.000001"
                       placeholder="0.000001"
-                      value={operationParams.newPrice || ''}
-                      onChange={(e) => setOperationParams({ ...operationParams, newPrice: parseFloat(e.target.value) })}
+                       value={operationParams.newPrice?.toString() || ''}
+                       onChange={(e) => setOperationParams({ ...operationParams, newPrice: parseFloat(e.target.value) || 0 })}
                     />
                   </div>
                 )}
@@ -378,8 +378,8 @@ const BulkOperations: React.FC = () => {
                       min="1"
                       max="720"
                       placeholder="24"
-                      value={operationParams.duration || ''}
-                      onChange={(e) => setOperationParams({ ...operationParams, duration: parseInt(e.target.value) })}
+                     value={operationParams.duration?.toString() || ''}
+                     onChange={(e) => setOperationParams({ ...operationParams, duration: parseInt(e.target.value) || 0 })}
                     />
                   </div>
                 )}
