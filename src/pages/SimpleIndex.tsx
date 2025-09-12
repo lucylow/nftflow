@@ -2,9 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import WalletConnect from '@/components/WalletConnect';
-import { Wallet, Zap, Shield, Clock } from 'lucide-react';
+import { Wallet, Zap, Shield, Clock, BarChart3, ShoppingCart, Plus, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SimpleIndex = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950">
       {/* Header */}
@@ -82,16 +85,74 @@ const SimpleIndex = () => {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              onClick={() => navigate('/marketplace')}
             >
+              <ShoppingCart className="w-4 h-4 mr-2" />
               Explore Marketplace
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
               className="border-slate-600 text-slate-300 hover:bg-slate-800"
+              onClick={() => navigate('/dashboard')}
             >
-              Learn More
+              <BarChart3 className="w-4 h-4 mr-2" />
+              View Dashboard
             </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Access Navigation */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-3xl font-bold text-white text-center mb-8">
+            Explore NFTFlow Features
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card 
+              className="bg-slate-800/50 border-slate-700/50 hover:border-purple-500/50 transition-all cursor-pointer"
+              onClick={() => navigate('/dashboard')}
+            >
+              <CardContent className="p-6 text-center">
+                <BarChart3 className="h-8 w-8 text-purple-400 mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-white mb-2">Dashboard</h4>
+                <p className="text-sm text-slate-300">Manage your NFTs and view analytics</p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-slate-800/50 border-slate-700/50 hover:border-blue-500/50 transition-all cursor-pointer"
+              onClick={() => navigate('/marketplace')}
+            >
+              <CardContent className="p-6 text-center">
+                <ShoppingCart className="h-8 w-8 text-blue-400 mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-white mb-2">Marketplace</h4>
+                <p className="text-sm text-slate-300">Browse and rent NFTs</p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-slate-800/50 border-slate-700/50 hover:border-green-500/50 transition-all cursor-pointer"
+              onClick={() => navigate('/create')}
+            >
+              <CardContent className="p-6 text-center">
+                <Plus className="h-8 w-8 text-green-400 mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-white mb-2">Create</h4>
+                <p className="text-sm text-slate-300">Mint and list new NFTs</p>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="bg-slate-800/50 border-slate-700/50 hover:border-pink-500/50 transition-all cursor-pointer"
+              onClick={() => navigate('/analytics')}
+            >
+              <CardContent className="p-6 text-center">
+                <BarChart3 className="h-8 w-8 text-pink-400 mx-auto mb-3" />
+                <h4 className="text-lg font-semibold text-white mb-2">Analytics</h4>
+                <p className="text-sm text-slate-300">View detailed analytics and insights</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

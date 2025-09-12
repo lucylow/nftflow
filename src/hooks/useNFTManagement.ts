@@ -1,255 +1,194 @@
-import { useState, useCallback } from 'react';
-import { ethers } from 'ethers';
+import { useState, useCallback, useEffect } from 'react';
 import { useWeb3 } from '@/contexts/Web3Context';
-import { getMockERC721Contract, parseEther, formatEther } from '@/lib/web3';
 import { useToast } from '@/hooks/use-toast';
-import { CONTRACT_ADDRESSES } from '@/config/contracts';
 
-export interface NFTMetadata {
-  name: string;
-  description: string;
-  image: string;
-  attributes: Array<{
-    trait_type: string;
-    value: string | number;
-  }>;
-}
-
-export interface NFTData {
-  tokenId: string;
-  owner: string;
+export interface UserNFT {
+  id: string;
   name: string;
   description: string;
   image: string;
   collection: string;
-  attributes: Array<{
-    trait_type: string;
-    value: string | number;
-  }>;
-  isApproved: boolean;
-  isListed: boolean;
-  listingId?: string;
-  pricePerSecond?: string;
-  minDuration?: string;
-  maxDuration?: string;
-  collateralRequired?: string;
+  pricePerSecond: number;
+  isRented: boolean;
+  owner: string;
+  timeLeft?: string;
+  rarity: string;
+  utilityType: string;
+  totalEarnings?: number;
+  rentalCount?: number;
+  lastRented?: string;
+  rentalStartTime?: string;
+  totalCost?: number;
 }
 
 export const useNFTManagement = () => {
-  const { account, isConnected } = useWeb3();
+  const { isConnected, account, nftFlowContract } = useWeb3();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [userNFTs, setUserNFTs] = useState<UserNFT[]>([]);
 
-  // Mint a new NFT
-  const mintNFT = useCallback(async (metadata: NFTMetadata) => {
+  // Mock NFT data
+  const mockUserNFTs: UserNFT[] = [
+    {
+      id: "1",
+      name: "Cosmic Wizard #1234",
+      description: "A powerful wizard from the cosmic realm",
+      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
+      collection: "Cosmic Wizards",
+      pricePerSecond: 0.5 / 3600,
+      isRented: true,
+      owner: "0x1234567890abcdef",
+      timeLeft: "2h 15m",
+      rarity: "Rare",
+      utilityType: "Gaming Weapon",
+      rentalStartTime: "2024-01-15T10:30:00Z",
+      totalCost: 1.25
+    },
+    {
+      id: "2",
+      name: "Galaxy Punk #5678",
+      description: "A punk from the galaxy",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
+      collection: "Galaxy Punks",
+      pricePerSecond: 1.2 / 3600,
+      isRented: true,
+      owner: "0x9876543210fedcba",
+      timeLeft: "45m",
+      rarity: "Epic",
+      utilityType: "Gaming Avatar",
+      rentalStartTime: "2024-01-15T14:00:00Z",
+      totalCost: 2.4
+    },
+    {
+      id: "3",
+      name: "Digital Art Gallery Space",
+      description: "A virtual gallery space for displaying digital art",
+      image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
+      collection: "Virtual Galleries",
+      pricePerSecond: 0.000002,
+      isRented: false,
+      owner: "0x5555666677778888",
+      rarity: "Rare",
+      utilityType: "Art Display",
+      totalEarnings: 12.5,
+      rentalCount: 8,
+      lastRented: "2 days ago"
+    }
+  ];
+
+  const mintNFT = useCallback(async (name: string, description: string, image: string, collection: string) => {
     if (!isConnected || !account) {
-      throw new Error('Wallet not connected');
+      toast({
+        title: "Error",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
+      return;
     }
 
     setIsLoading(true);
     try {
-      const mockERC721 = await getMockERC721Contract(CONTRACT_ADDRESSES.MockERC721);
-      const tx = await mockERC721.safeMint(account);
-      await tx.wait();
-
-      // Get the token ID from the transaction receipt
-      const receipt = await tx.wait();
-      let tokenId = "0"; // Default fallback
+      // Mock implementation - replace with actual contract call
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate minting delay
       
-      // Try to extract token ID from Transfer event
-      if (receipt.logs && receipt.logs.length > 0) {
-        const transferLog = receipt.logs.find(log => 
-          log.topics && log.topics[0] === "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef" // Transfer event signature
-        );
-        if (transferLog && transferLog.topics && transferLog.topics.length > 3) {
-          tokenId = transferLog.topics[3];
-        }
-      }
+      const newNFT: UserNFT = {
+        id: Date.now().toString(),
+        name,
+        description,
+        image,
+        collection,
+        pricePerSecond: 0.000001,
+        isRented: false,
+        owner: account,
+        rarity: "Common",
+        utilityType: "General",
+        totalEarnings: 0,
+        rentalCount: 0,
+        lastRented: "Never"
+      };
 
+      setUserNFTs(prev => [...prev, newNFT]);
+      
       toast({
-        title: "NFT Minted Successfully",
-        description: `Your NFT has been minted with token ID ${tokenId}`,
+        title: "Success",
+        description: "NFT minted successfully!",
       });
-
-      return { tx, tokenId };
-    } catch (error: unknown) {
-      console.error('Failed to mint NFT:', error);
+    } catch (error) {
+      console.error('Error minting NFT:', error);
       toast({
-        title: "Minting Failed",
-        description: error instanceof Error ? error.message : "Failed to mint NFT",
+        title: "Error",
+        description: "Failed to mint NFT",
         variant: "destructive",
       });
-      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [account, isConnected, toast]);
+  }, [isConnected, account, toast]);
 
-  // Get NFT data
-  const getNFTData = useCallback(async (tokenId: string): Promise<NFTData | null> => {
-    if (!isConnected) {
-      return null;
-    }
-
-    try {
-      const mockERC721 = await getMockERC721Contract(CONTRACT_ADDRESSES.MockERC721);
-      
-      const [owner, name, symbol, tokenURI] = await Promise.all([
-        mockERC721.ownerOf(tokenId),
-        mockERC721.name(),
-        mockERC721.symbol(),
-        mockERC721.tokenURI(tokenId)
-      ]);
-
-      // Parse metadata from tokenURI
-      let metadata: NFTMetadata = {
-        name: `${name} #${tokenId}`,
-        description: "A unique NFT from the collection",
-        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-        attributes: []
-      };
-
-      try {
-        if (tokenURI && tokenURI !== '') {
-          const response = await fetch(tokenURI);
-          if (response.ok) {
-            metadata = await response.json();
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to fetch NFT metadata:', error);
-      }
-
-      // Check if NFT is approved for NFTFlow
-      const isApproved = await mockERC721.isApprovedForAll(owner, CONTRACT_ADDRESSES.NFTFlow);
-
-      return {
-        tokenId,
-        owner,
-        name: metadata.name,
-        description: metadata.description,
-        image: metadata.image,
-        collection: symbol,
-        attributes: metadata.attributes,
-        isApproved,
-        isListed: false, // This would need to be checked against NFTFlow contract
-      };
-    } catch (error) {
-      console.error('Failed to get NFT data:', error);
-      return null;
-    }
-  }, [isConnected]);
-
-  // Get all NFTs owned by user
-  const getUserNFTs = useCallback(async (): Promise<NFTData[]> => {
+  const getUserNFTs = useCallback(async () => {
     if (!isConnected || !account) {
-      return [];
-    }
-
-    try {
-      const mockERC721 = await getMockERC721Contract(CONTRACT_ADDRESSES.MockERC721);
-      
-      // For now, we'll check a range of token IDs (0-100)
-      // In a real implementation, you'd want to track minted tokens
-      const nfts: NFTData[] = [];
-      
-      for (let i = 0; i < 100; i++) {
-        try {
-          const owner = await mockERC721.ownerOf(i);
-          if (owner.toLowerCase() === account.toLowerCase()) {
-            const nftData = await getNFTData(i.toString());
-            if (nftData) {
-              nfts.push(nftData);
-            }
-          }
-        } catch (error) {
-          // Token doesn't exist or error occurred, continue
-          continue;
-        }
-      }
-
-      return nfts;
-    } catch (error) {
-      console.error('Failed to get user NFTs:', error);
-      return [];
-    }
-  }, [account, isConnected, getNFTData]);
-
-  // Approve NFTFlow to manage NFT
-  const approveNFTFlow = useCallback(async (tokenId: string) => {
-    if (!isConnected || !account) {
-      throw new Error('Wallet not connected');
+      return;
     }
 
     setIsLoading(true);
     try {
-      const mockERC721 = await getMockERC721Contract(CONTRACT_ADDRESSES.MockERC721);
-      const tx = await mockERC721.setApprovalForAll(CONTRACT_ADDRESSES.NFTFlow, true);
-      await tx.wait();
-
+      // Mock implementation - replace with actual contract call
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading delay
+      setUserNFTs(mockUserNFTs);
+    } catch (error) {
+      console.error('Error fetching user NFTs:', error);
       toast({
-        title: "Approval Successful",
-        description: "NFTFlow is now approved to manage your NFTs",
-      });
-
-      return tx;
-    } catch (error: unknown) {
-      console.error('Failed to approve NFTFlow:', error);
-      toast({
-        title: "Approval Failed",
-        description: error instanceof Error ? error.message : "Failed to approve NFTFlow",
+        title: "Error",
+        description: "Failed to fetch user NFTs",
         variant: "destructive",
       });
-      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [account, isConnected, toast]);
+  }, [isConnected, account, toast]);
 
-  // Get all available NFTs for rental
-  const getAvailableNFTs = useCallback(async (): Promise<NFTData[]> => {
-    if (!isConnected) {
-      return [];
+  const approveNFTFlow = useCallback(async (nftContract: string, tokenId: string) => {
+    if (!isConnected || !account) {
+      toast({
+        title: "Error",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
+      return;
     }
 
+    setIsLoading(true);
     try {
-      // This would need to be implemented by querying the NFTFlow contract
-      // for all active listings. For now, we'll return mock data.
-      const mockNFTs: NFTData[] = [
-        {
-          tokenId: "0",
-          owner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-          name: "TestNFT #0",
-          description: "A test NFT for rental",
-          image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-          collection: "TNFT",
-          attributes: [
-            { trait_type: "Rarity", value: "Common" },
-            { trait_type: "Color", value: "Blue" }
-          ],
-          isApproved: true,
-          isListed: true,
-          listingId: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12",
-          pricePerSecond: "0.000001",
-          minDuration: "3600",
-          maxDuration: "2592000",
-          collateralRequired: "0.1"
-        }
-      ];
-
-      return mockNFTs;
+      // Mock implementation - replace with actual contract call
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate approval delay
+      
+      toast({
+        title: "Success",
+        description: "NFT approved for rental!",
+      });
     } catch (error) {
-      console.error('Failed to get available NFTs:', error);
-      return [];
+      console.error('Error approving NFT:', error);
+      toast({
+        title: "Error",
+        description: "Failed to approve NFT",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [isConnected]);
+  }, [isConnected, account, toast]);
+
+  useEffect(() => {
+    if (isConnected && account) {
+      getUserNFTs();
+    }
+  }, [isConnected, account, getUserNFTs]);
 
   return {
-    isLoading,
     mintNFT,
-    getNFTData,
     getUserNFTs,
     approveNFTFlow,
-    getAvailableNFTs,
+    userNFTs,
+    isLoading,
   };
 };
