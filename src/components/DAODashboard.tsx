@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -58,7 +59,7 @@ const PROPOSAL_TYPES = [
 ];
 
 export default function DAODashboard() {
-  const { account, contract } = useWeb3();
+  const { account, isConnected, nftFlowContract } = useWeb3();
   const { toast } = useToast();
   const [stats, setStats] = useState<DAOStats | null>(null);
   const [proposals, setProposals] = useState<Proposal[]>([]);

@@ -8,7 +8,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import ApolloProviderWrapper from "./components/ApolloProvider";
 import Header from "./components/Header";
-import Index from "./pages/Index";
+import Index from "@/pages/SimpleIndex";
 import Marketplace from "./pages/Marketplace";
 import Dashboard from "./pages/Dashboard";
 import Create from "./pages/Create";
