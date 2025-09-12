@@ -72,15 +72,28 @@ export default function DAODashboard() {
   const [proposalParameters, setProposalParameters] = useState('');
 
   useEffect(() => {
-    if (contract?.dao) {
-      loadDAOData();
+    if (nftFlowContract) {
+      // loadDAOData(); // Temporarily disabled
     }
-  }, [contract?.dao, account]);
+  }, [nftFlowContract, account]);
 
   const loadDAOData = async () => {
     try {
       setLoading(true);
       
+      // Temporarily disabled - contracts not yet deployed
+      setStats({
+        totalProposals: 0,
+        activeProposals: 0,
+        totalVotingPower: 0,
+        userVotingPower: 0,
+        treasuryBalance: '0',
+        quorumPercentage: 0,
+        votingDuration: 0
+      });
+      setProposals([]);
+      
+      /*
       // Load DAO stats
       const [
         totalProposals,
@@ -89,12 +102,13 @@ export default function DAODashboard() {
         quorumPercentage,
         votingDuration
       ] = await Promise.all([
-        contract.dao.totalProposals(),
-        contract.dao.getVotingPower(account),
-        contract.dao.treasuryBalance(),
-        contract.dao.quorumPercentage(),
-        contract.dao.votingDuration()
+        nftFlowContract.totalProposals(),
+        nftFlowContract.getVotingPower(account),
+        nftFlowContract.treasuryBalance(),
+        nftFlowContract.quorumPercentage(),
+        nftFlowContract.votingDuration()
       ]);
+      */
 
       // Calculate active proposals
       let activeProposals = 0;
