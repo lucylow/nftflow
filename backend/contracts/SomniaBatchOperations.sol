@@ -512,3 +512,4 @@ contract SomniaBatchOperations is Ownable, ReentrancyGuard, Pausable {
         payable(owner()).transfer(address(this).balance);
     }
 }
+

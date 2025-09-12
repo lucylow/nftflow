@@ -493,3 +493,4 @@ export const useOnChainBatchData = () => {
     fetchBatchCollectionMetadata
   };
 };
+
