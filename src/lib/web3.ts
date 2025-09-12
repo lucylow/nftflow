@@ -10,6 +10,14 @@ import {
   UTILITY_TRACKER_ABI
 } from './contracts';
 
+interface Network {
+  chainId: number;
+  name: string;
+  rpcUrl?: string;
+  currency: string;
+  blockExplorerUrl?: string;
+}
+
 // Network configuration
 export const NETWORKS = {
   hardhat: {
@@ -148,7 +156,7 @@ export const switchToNetwork = async (chainId: number) => {
               symbol: network.currency,
               decimals: 18,
             },
-            blockExplorerUrls: network.blockExplorerUrl ? [network.blockExplorerUrl] : undefined,
+            blockExplorerUrls: (network as Network).blockExplorerUrl ? [(network as Network).blockExplorerUrl] : undefined,
           }],
         });
         
@@ -196,7 +204,7 @@ export const isMetaMaskConnected = async (): Promise<boolean> => {
   try {
     const accounts = await window.ethereum.request({
       method: 'eth_accounts',
-    });
+    }) as string[];
     return accounts && accounts.length > 0;
   } catch (error) {
     console.warn('Failed to check MetaMask connection:', error);
@@ -210,7 +218,7 @@ export const getMetaMaskAccount = async (): Promise<string | null> => {
   try {
     const accounts = await window.ethereum.request({
       method: 'eth_accounts',
-    });
+    }) as string[];
     return accounts && accounts.length > 0 ? accounts[0] : null;
   } catch (error) {
     console.warn('Failed to get MetaMask account:', error);
