@@ -129,3 +129,4 @@ export const NFT_COLLECTIONS = [
   }
 ];
 
+

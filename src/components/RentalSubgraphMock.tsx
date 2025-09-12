@@ -370,3 +370,4 @@ export default function RentalSubgraphMock({ className }: RentalSubgraphProps) {
   );
 }
 
+

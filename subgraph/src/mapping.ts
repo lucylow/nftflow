@@ -919,3 +919,4 @@ export function handleUpdateUser(event: UpdateUser): void {
   nft.save()
 }
 
+

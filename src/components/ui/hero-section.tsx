@@ -288,3 +288,4 @@ export function HeroSection({ onGetStarted, onWatchDemo }: HeroSectionProps) {
   );
 }
 
+

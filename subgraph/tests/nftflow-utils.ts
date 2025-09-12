@@ -496,3 +496,4 @@ export function measurePerformance(testFunction: () => void): i64 {
   return endTime - startTime
 }
 
+
