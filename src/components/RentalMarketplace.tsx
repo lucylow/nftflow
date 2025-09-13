@@ -135,10 +135,9 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
       const totalAmount = totalPrice + collateral;
       
       await rentNFT(
-        nft.id, // listingId
-        rentalDuration.toString(),
-        totalPrice.toString(),
-        collateral.toString()
+        nft.id, // listingId 
+        nft.id, // tokenId
+        rentalDuration
       );
       
       // Success feedback

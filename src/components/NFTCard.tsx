@@ -61,7 +61,7 @@ const NFTCard = ({ nft, onRent }: NFTCardProps) => {
       const totalCost = (nft.pricePerSecond * 3600).toString();
       const collateralAmount = nft.collateralRequired?.toString() || "0";
       
-      await rentNFT(nft.listingId, parseInt(duration), parseFloat(totalCost));
+      await rentNFT(nft.listingId, nft.id, parseInt(duration));
       
       toast({
         title: "Rental Started",

@@ -230,7 +230,7 @@ export const SomniaNetwork = {
       const isSomnia = chainId === `0x${SOMNIA_CONFIG.NETWORK_ID.toString(16)}`;
       
       return {
-        chainId: parseInt(chainId, 16),
+        chainId: parseInt(chainId as string, 16),
         isSomnia,
         name: isSomnia ? 'Somnia Testnet' : 'Unknown',
         rpcUrl: isSomnia ? SOMNIA_CONFIG.RPC_URL : null,

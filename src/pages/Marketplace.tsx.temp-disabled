@@ -471,16 +471,16 @@ const Marketplace = () => {
         description: nft.description || "A unique NFT with special utility",
         image: nft.image,
         collection: nft.collection,
-        pricePerSecond: parseFloat(nft.pricePerSecond || "0.000001"),
+        pricePerSecond: Number(nft.pricePerSecond || 0.000001),
         isRented: false,
         owner: nft.owner,
         rarity: String(nft.attributes?.find(attr => attr.trait_type === "Rarity")?.value || "Common"),
         listingId: nft.listingId || `0x${index.toString().padStart(64, '0')}`,
         nftContract: "0xMockERC721",
-        tokenId: nft.tokenId,
-        minDuration: parseInt(nft.minDuration || "3600"),
-        maxDuration: parseInt(nft.maxDuration || "2592000"),
-        collateralRequired: parseFloat(nft.collateralRequired || "0.1"),
+        tokenId: String(nft.tokenId),
+        minDuration: String(nft.minDuration || 3600),
+        maxDuration: String(nft.maxDuration || 2592000),
+        collateralRequired: String(nft.collateralRequired || 0.1),
         utilityType: "Gaming Weapon", // Default utility type
         utilityDescription: nft.description || "A unique NFT with special utility"
       }));

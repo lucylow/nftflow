@@ -19,6 +19,12 @@ export interface UserNFT {
   lastRented?: string;
   rentalStartTime?: string;
   totalCost?: number;
+  tokenId?: string;
+  listingId?: string;
+  attributes?: Array<{ trait_type: string; value: string }>;
+  minDuration?: number;
+  maxDuration?: number;
+  collateralRequired?: number;
 }
 
 export const useNFTManagement = () => {
@@ -31,6 +37,8 @@ export const useNFTManagement = () => {
   const mockUserNFTs: UserNFT[] = [
     {
       id: "1",
+      tokenId: "1234",
+      listingId: "listing-1",
       name: "Cosmic Wizard #1234",
       description: "A powerful wizard from the cosmic realm",
       image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
@@ -42,10 +50,16 @@ export const useNFTManagement = () => {
       rarity: "Rare",
       utilityType: "Gaming Weapon",
       rentalStartTime: "2024-01-15T10:30:00Z",
-      totalCost: 1.25
+      totalCost: 1.25,
+      attributes: [{ trait_type: "Power", value: "Magic" }],
+      minDuration: 3600,
+      maxDuration: 86400,
+      collateralRequired: 1.0
     },
     {
       id: "2",
+      tokenId: "5678", 
+      listingId: "listing-2",
       name: "Galaxy Punk #5678",
       description: "A punk from the galaxy",
       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
@@ -57,10 +71,16 @@ export const useNFTManagement = () => {
       rarity: "Epic",
       utilityType: "Gaming Avatar",
       rentalStartTime: "2024-01-15T14:00:00Z",
-      totalCost: 2.4
+      totalCost: 2.4,
+      attributes: [{ trait_type: "Style", value: "Punk" }],
+      minDuration: 1800,
+      maxDuration: 43200,
+      collateralRequired: 2.0
     },
     {
       id: "3",
+      tokenId: "9999",
+      listingId: "listing-3",
       name: "Digital Art Gallery Space",
       description: "A virtual gallery space for displaying digital art",
       image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
@@ -72,7 +92,11 @@ export const useNFTManagement = () => {
       utilityType: "Art Display",
       totalEarnings: 12.5,
       rentalCount: 8,
-      lastRented: "2 days ago"
+      lastRented: "2 days ago",
+      attributes: [{ trait_type: "Type", value: "Gallery" }],
+      minDuration: 7200,
+      maxDuration: 604800,
+      collateralRequired: 0.5
     }
   ];
 
@@ -178,6 +202,11 @@ export const useNFTManagement = () => {
     }
   }, [isConnected, account, toast]);
 
+  const getAvailableNFTs = useCallback(async () => {
+    // Return mock available NFTs for marketplace
+    return mockUserNFTs.filter(nft => !nft.isRented);
+  }, []);
+
   useEffect(() => {
     if (isConnected && account) {
       getUserNFTs();
@@ -187,6 +216,7 @@ export const useNFTManagement = () => {
   return {
     mintNFT,
     getUserNFTs,
+    getAvailableNFTs,
     approveNFTFlow,
     userNFTs,
     isLoading,

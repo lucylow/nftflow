@@ -162,7 +162,7 @@ export const useOnChainData = (): UseOnChainDataReturn => {
           const metadata = new ethers.Contract(
             SOMNIA_CONFIG.CONTRACTS.NFT_FLOW_METADATA,
             [], // ABI would be imported
-            nftFlow.provider
+            nftFlow.runner
           );
           setMetadataContract(metadata);
         }
@@ -171,7 +171,7 @@ export const useOnChainData = (): UseOnChainDataReturn => {
           const analytics = new ethers.Contract(
             SOMNIA_CONFIG.CONTRACTS.ON_CHAIN_ANALYTICS,
             [], // ABI would be imported
-            nftFlow.provider
+            nftFlow.runner
           );
           setAnalyticsContract(analytics);
         }
