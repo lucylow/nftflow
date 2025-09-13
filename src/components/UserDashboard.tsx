@@ -24,7 +24,6 @@ interface UserDashboardProps {
 
 const UserDashboard = ({ className }: UserDashboardProps) => {
   const { account, isConnected } = useWeb3();
-  const { getUserCollateralBalance } = useNFTFlow();
   const { 
     getUserReputation, 
     getSuccessRate, 
@@ -61,7 +60,7 @@ const UserDashboard = ({ className }: UserDashboardProps) => {
     const loadUserData = async () => {
       try {
         // Check if all functions are available
-        if (!getUserCollateralBalance || !getUserReputation || !getSuccessRate || 
+        if (!getUserReputation || !getSuccessRate || 
             !getUserAchievements || !getSenderStreams || !getRecipientStreams) {
           console.error('One or more required functions are not available');
           setIsLoading(false);
@@ -69,14 +68,12 @@ const UserDashboard = ({ className }: UserDashboardProps) => {
         }
 
         const [
-          collateral,
           userReputation,
           rate,
           userAchievements,
           sender,
           recipient
         ] = await Promise.all([
-          getUserCollateralBalance(),
           getUserReputation(),
           getSuccessRate(),
           getUserAchievements(),
@@ -84,7 +81,7 @@ const UserDashboard = ({ className }: UserDashboardProps) => {
           getRecipientStreams()
         ]);
 
-        setCollateralBalance(collateral);
+        setCollateralBalance('0'); // Mock collateral balance
         setReputation(userReputation);
         setSuccessRate(rate);
         setAchievements(userAchievements);

@@ -58,23 +58,10 @@ const NFTManagement = () => {
     
     setIsLoading(true);
     try {
-      const nfts = await getUserNFTs() || [];
-      const formattedNFTs = nfts.map((nft: any) => ({
-        id: nft.tokenId?.toString() || nft.id || '0',
-        name: nft.name || 'Unknown NFT',
-        description: nft.description || '',
-        image: nft.image || '',
-        collection: nft.collection || '',
-        pricePerSecond: nft.pricePerSecond || 0,
-        isRented: nft.isRented || false,
-        owner: nft.owner || '',
-        rarity: nft.rarity || 'Common',
-        utilityType: nft.utilityType || 'Basic',
-        tokenId: nft.tokenId || nft.id || '0',
-        isApproved: nft.isApproved || false,
-        isListed: nft.isListed || false
-      }));
-      setUserNFTs(formattedNFTs);
+      await getUserNFTs();
+      // Mock some NFTs for now since getUserNFTs doesn't return data
+      const mockNFTs: UserNFT[] = [];
+      setUserNFTs(mockNFTs);
     } catch (error) {
       console.error('Failed to load user NFTs:', error);
       toast({

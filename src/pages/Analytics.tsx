@@ -123,10 +123,10 @@ const Analytics = () => {
       { date: '2024-01-05', newUsers: 73, totalUsers: 1458 },
       { date: '2024-01-06', newUsers: 89, totalUsers: 1547 },
       { date: '2024-01-07', newUsers: 95, totalUsers: 1642 }
-    ]
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [loadAnalyticsData]);
+     ]
+  };
+
+  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -144,7 +144,11 @@ const Analytics = () => {
     } finally {
       setLoading(false);
     }
-  }, [timeframe]);
+  }, [timeframe, toast]);
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [loadAnalyticsData]);
 
   const handleRefresh = async () => {
     setRefreshing(true);

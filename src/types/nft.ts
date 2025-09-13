@@ -1,5 +1,41 @@
 // NFT and Stream type definitions for Somnia NFTFlow
 
+export interface NFT {
+  id: string;
+  name: string;
+  description?: string;
+  image: string;
+  collection: string;
+  pricePerSecond: number;
+  isRented: boolean;
+  owner: string;
+  rarity: string;
+  utilityType: string;
+  listingId?: string;
+  nftContract?: string;
+  tokenId?: string;
+  collateralRequired?: number;
+  minDuration?: number;
+  maxDuration?: number;
+  timeLeft?: string;
+}
+
+export interface UserNFT {
+  id: string;
+  tokenId: string;
+  name: string;
+  description: string;
+  image: string;
+  collection: string;
+  pricePerSecond: number;
+  isRented: boolean;
+  owner: string;
+  rarity: string;
+  utilityType: string;
+  isApproved: boolean;
+  isListed: boolean;
+}
+
 export interface NFTItem {
   id: string;
   name: string;
