@@ -8,13 +8,12 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import WalletErrorBoundary from "@/components/WalletErrorBoundary";
 import { ThemeProvider } from "./hooks/use-theme";
 import Index from "@/pages/SimpleIndex";
-// Disabled modules
-// import Dashboard from "@/pages/Dashboard";
-// import Analytics from "@/pages/Analytics";
-// import Marketplace from "@/pages/Marketplace";
-// import EnhancedMarketplace from "@/pages/EnhancedMarketplace";
-// import Create from "@/pages/Create";
-// import Upload from "@/pages/Upload";
+import Dashboard from "@/pages/Dashboard";
+import Analytics from "@/pages/Analytics";
+import Marketplace from "@/pages/Marketplace";
+import EnhancedMarketplace from "@/pages/EnhancedMarketplace";
+import Create from "@/pages/Create";
+import Upload from "@/pages/Upload";
 import Profile from "@/pages/Profile";
 import NFTDetail from "@/pages/NFTDetail";
 import SimpleWallet from "@/components/SimpleWallet";
@@ -36,6 +35,12 @@ const App = () => (
                     <main>
                        <Routes>
                          <Route path="/" element={<Index />} />
+                         <Route path="/dashboard" element={<Dashboard />} />
+                         <Route path="/analytics" element={<Analytics />} />
+                         <Route path="/marketplace" element={<Marketplace />} />
+                         <Route path="/enhanced-marketplace" element={<EnhancedMarketplace />} />
+                         <Route path="/create" element={<Create />} />
+                         <Route path="/upload" element={<Upload />} />
                          <Route path="/profile" element={<Profile />} />
                          <Route path="/nft/:id" element={<NFTDetail />} />
                          <Route path="/wallet" element={<SimpleWallet />} />

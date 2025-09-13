@@ -124,13 +124,9 @@ const Analytics = () => {
       { date: '2024-01-06', newUsers: 89, totalUsers: 1547 },
       { date: '2024-01-07', newUsers: 95, totalUsers: 1642 }
     ]
-  };
-
   useEffect(() => {
     loadAnalyticsData();
   }, [loadAnalyticsData]);
-
-  const loadAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       

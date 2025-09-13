@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { NFT, UserNFT } from "@/types/nft";
 import { 
   Plus, 
   Upload, 
