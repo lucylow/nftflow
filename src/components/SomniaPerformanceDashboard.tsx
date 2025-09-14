@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { 
   Zap, 
   Clock, 
@@ -13,7 +14,10 @@ import {
   AlertTriangle,
   Target,
   Gauge,
-  BarChart3
+  BarChart3,
+  RefreshCw,
+  Pause,
+  Play
 } from 'lucide-react';
 import { SOMNIA_CONFIG, SomniaUtils } from '@/config/somniaConfig';
 
@@ -30,21 +34,22 @@ interface PerformanceMetric {
 const SomniaPerformanceDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRealTime, setIsRealTime] = useState(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
 
   useEffect(() => {
-    // Simulate fetching real-time Somnia performance data
     const fetchPerformanceData = async () => {
       setIsLoading(true);
       
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Mock performance data
+      // Mock performance data with some randomization for real-time feel
       const performanceData: PerformanceMetric[] = [
         {
           name: 'Transactions Per Second',
-          value: 125000, // Current TPS
-          target: 1000000, // Somnia's max TPS
+          value: Math.floor(Math.random() * 100000) + 900000, // 900k - 1M TPS
+          target: 1000000,
           unit: 'TPS',
           status: 'excellent',
           description: 'Real-time transaction throughput',
@@ -52,8 +57,8 @@ const SomniaPerformanceDashboard: React.FC = () => {
         },
         {
           name: 'Block Time',
-          value: 85, // Current block time in ms
-          target: 100, // Somnia's target (<100ms)
+          value: Math.floor(Math.random() * 20) + 80, // 80-100ms
+          target: 100,
           unit: 'ms',
           status: 'excellent',
           description: 'Average block confirmation time',
@@ -61,8 +66,8 @@ const SomniaPerformanceDashboard: React.FC = () => {
         },
         {
           name: 'Gas Price',
-          value: 0.0005, // Current gas price in Gwei
-          target: 1, // Somnia's target (<1 Gwei)
+          value: parseFloat((Math.random() * 0.5 + 0.3).toFixed(4)), // 0.3-0.8 Gwei
+          target: 1,
           unit: 'Gwei',
           status: 'excellent',
           description: 'Current network gas price',
@@ -70,8 +75,8 @@ const SomniaPerformanceDashboard: React.FC = () => {
         },
         {
           name: 'Network Utilization',
-          value: 12.5, // Current utilization %
-          target: 80, // Target utilization %
+          value: Math.floor(Math.random() * 15) + 10, // 10-25%
+          target: 80,
           unit: '%',
           status: 'excellent',
           description: 'Network capacity utilization',
@@ -79,8 +84,8 @@ const SomniaPerformanceDashboard: React.FC = () => {
         },
         {
           name: 'Finality Time',
-          value: 0.8, // Current finality time in seconds
-          target: 1, // Somnia's target (<1 second)
+          value: parseFloat((Math.random() * 0.3 + 0.7).toFixed(1)), // 0.7-1.0s
+          target: 1,
           unit: 's',
           status: 'excellent',
           description: 'Transaction finality time',
@@ -88,8 +93,8 @@ const SomniaPerformanceDashboard: React.FC = () => {
         },
         {
           name: 'Active Connections',
-          value: 15420, // Current active connections
-          target: 100000, // Target connections
+          value: Math.floor(Math.random() * 3000) + 15000, // 15k-18k
+          target: 100000,
           unit: '',
           status: 'good',
           description: 'Active network connections',
@@ -103,11 +108,19 @@ const SomniaPerformanceDashboard: React.FC = () => {
 
     fetchPerformanceData();
     
-    // Update every 5 seconds
-    const interval = setInterval(fetchPerformanceData, 5000);
+    // Update every 3 seconds when real-time is enabled
+    let interval: NodeJS.Timeout | null = null;
+    if (isRealTime) {
+      interval = setInterval(() => {
+        fetchPerformanceData();
+        setLastUpdateTime(Date.now());
+      }, 3000);
+    }
     
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRealTime]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -173,13 +186,103 @@ const SomniaPerformanceDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
-          Somnia Network Performance Dashboard
-        </h2>
-        <p className="text-slate-400">
-          Real-time monitoring of Somnia's revolutionary blockchain capabilities
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="text-center flex-1">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            Somnia Performance Dashboard
+          </h2>
+          <p className="text-muted-foreground">
+            Real-time monitoring of the world's fastest blockchain
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant={isRealTime ? "default" : "secondary"} className="gap-1">
+            <Activity className={`w-3 h-3 ${isRealTime ? 'animate-pulse' : ''}`} />
+            {isRealTime ? 'Live' : 'Paused'}
+          </Badge>
+          <Button
+            onClick={() => setIsRealTime(!isRealTime)}
+            variant="outline"
+            size="sm"
+          >
+            {isRealTime ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          </Button>
+          <Button
+            onClick={() => {
+              const fetchData = async () => {
+                setIsLoading(true);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                const performanceData: PerformanceMetric[] = [
+                  {
+                    name: 'Transactions Per Second',
+                    value: Math.floor(Math.random() * 100000) + 900000,
+                    target: 1000000,
+                    unit: 'TPS',
+                    status: 'excellent',
+                    description: 'Real-time transaction throughput',
+                    icon: <TrendingUp className="w-5 h-5" />
+                  },
+                  {
+                    name: 'Block Time',
+                    value: Math.floor(Math.random() * 20) + 80,
+                    target: 100,
+                    unit: 'ms',
+                    status: 'excellent',
+                    description: 'Average block confirmation time',
+                    icon: <Clock className="w-5 h-5" />
+                  },
+                  {
+                    name: 'Gas Price',
+                    value: parseFloat((Math.random() * 0.5 + 0.3).toFixed(4)),
+                    target: 1,
+                    unit: 'Gwei',
+                    status: 'excellent',
+                    description: 'Current network gas price',
+                    icon: <DollarSign className="w-5 h-5" />
+                  },
+                  {
+                    name: 'Network Utilization',
+                    value: Math.floor(Math.random() * 15) + 10,
+                    target: 80,
+                    unit: '%',
+                    status: 'excellent',
+                    description: 'Network capacity utilization',
+                    icon: <Gauge className="w-5 h-5" />
+                  },
+                  {
+                    name: 'Finality Time',
+                    value: parseFloat((Math.random() * 0.3 + 0.7).toFixed(1)),
+                    target: 1,
+                    unit: 's',
+                    status: 'excellent',
+                    description: 'Transaction finality time',
+                    icon: <CheckCircle className="w-5 h-5" />
+                  },
+                  {
+                    name: 'Active Connections',
+                    value: Math.floor(Math.random() * 3000) + 15000,
+                    target: 100000,
+                    unit: '',
+                    status: 'good',
+                    description: 'Active network connections',
+                    icon: <Activity className="w-5 h-5" />
+                  }
+                ];
+                
+                setMetrics(performanceData);
+                setIsLoading(false);
+              };
+              
+              fetchData();
+              setLastUpdateTime(Date.now());
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Key Performance Indicators */}
