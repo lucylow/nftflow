@@ -22,8 +22,11 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useNFTFlow } from '@/hooks/useNFTFlow';
+import { useEnhancedNFTFlow } from '@/hooks/useEnhancedNFTFlow';
+import { useBlockchainEvents } from '@/hooks/useBlockchainEvents';
 import { useWeb3 } from '@/contexts/Web3Context';
 import { formatEther, parseEther } from 'ethers';
+import { TransactionStatus } from '@/components/TransactionStatus';
 
 interface NFTRental {
   id: string;
@@ -51,6 +54,12 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
     rentNFT, 
     isLoading 
   } = useNFTFlow();
+  const {
+    rentNFTEnhanced,
+    transactionStatus,
+    clearTransactionStatus
+  } = useEnhancedNFTFlow();
+  const { userEvents } = useBlockchainEvents();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [durationFilter, setDurationFilter] = useState('all');
@@ -163,6 +172,11 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
 
   return (
     <div className={`space-y-6 ${className}`}>
+      <TransactionStatus 
+        status={transactionStatus} 
+        onClose={clearTransactionStatus}
+      />
+      
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
