@@ -4,9 +4,9 @@ export const NFT_ITEMS = [
     id: 'nft-1',
     collectionId: 'collection-1',
     tokenId: '1234',
-    name: 'Somnia Punk #1234',
-    description: 'A unique digital collectible from the Somnia Punks collection',
-    image: 'https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/1234',
+    name: 'Cosmic Wizard #1234',
+    description: 'A powerful cosmic wizard wielding ethereal magic and interdimensional spells. Perfect for RPG adventures and fantasy gaming.',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f103fc96?w=400&h=400&fit=crop&crop=center',
     animation_url: 'https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/1234.mp4',
     external_url: 'https://somniapunks.io/token/1234',
     attributes: [
