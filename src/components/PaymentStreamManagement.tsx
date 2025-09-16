@@ -18,8 +18,31 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWeb3 } from "@/contexts/Web3Context";
-import { usePaymentStream } from "@/hooks/usePaymentStream";
 import { useToast } from "@/hooks/use-toast";
+
+// Mock implementation for demonstration
+const usePaymentStream = () => {
+  return {
+    createStream: async () => {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    withdrawFromStream: async () => {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    cancelStream: async () => {
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    },
+    getStream: async () => ({}),
+    getStreamBalance: async () => "0",
+    isStreamActive: async () => false,
+    getSenderStreams: async () => [],
+    getRecipientStreams: async () => [],
+    isLoading: false
+  };
+};
 
 const PaymentStreamManagement = () => {
   const { isConnected, account } = useWeb3();
@@ -57,52 +80,46 @@ const PaymentStreamManagement = () => {
     depositAmount: ""
   });
 
+  // Mock stream data for demonstration
+  const mockStreams = [
+    {
+      id: "stream-1",
+      sender: account || "0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59",
+      recipient: "0x1234567890123456789012345678901234567890",
+      deposit: "2.5",
+      ratePerSecond: "0.0001",
+      startTime: Date.now() - 3600000, // 1 hour ago
+      stopTime: Date.now() + 86400000, // 24 hours from start
+      remainingBalance: "1.8",
+      active: true
+    },
+    {
+      id: "stream-2",
+      sender: "0x9876543210987654321098765432109876543210",
+      recipient: account || "0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59",
+      deposit: "1.0",
+      ratePerSecond: "0.00005",
+      startTime: Date.now() - 7200000, // 2 hours ago
+      stopTime: Date.now() + 43200000, // 12 hours from start
+      remainingBalance: "0.7",
+      active: true
+    }
+  ];
+
   // Load streams
   const loadStreams = async () => {
     if (!isConnected) return;
     
     setIsRefreshing(true);
     try {
-      const [sender, recipient] = await Promise.all([
-        getSenderStreams(),
-        getRecipientStreams()
-      ]);
+      // Mock implementation - filter streams based on account
+      const sentStreams = mockStreams.filter(stream => stream.sender.toLowerCase() === account?.toLowerCase());
+      const receivedStreams = mockStreams.filter(stream => stream.recipient.toLowerCase() === account?.toLowerCase());
       
-      setSenderStreams(sender);
-      setRecipientStreams(recipient);
+      setSenderStreams(sentStreams.map(s => s.id));
+      setRecipientStreams(receivedStreams.map(s => s.id));
+      setStreamDetails(mockStreams);
       
-      // Load details for all streams
-      const allStreams = [...sender, ...recipient];
-      const details = await Promise.all(
-        allStreams.map(async (streamId) => {
-          try {
-            const [stream, balance, active] = await Promise.all([
-              getStream(streamId),
-              getStreamBalance(streamId),
-              isStreamActive(streamId)
-            ]);
-            return { streamId, ...stream, balance, active };
-          } catch (error) {
-            console.error(`Failed to load stream ${streamId}:`, error);
-            return null;
-          }
-        })
-      );
-      
-      const formattedDetails = details.filter(Boolean).map((stream: any) => ({
-        id: stream.streamId || stream.id,
-        sender: stream.sender,
-        recipient: stream.recipient,
-        deposit: stream.deposit,
-        ratePerSecond: stream.ratePerSecond,
-        startTime: stream.startTime,
-        stopTime: stream.stopTime,
-        remainingBalance: stream.remainingBalance,
-        active: stream.active,
-        balance: stream.balance || stream.remainingBalance,
-        streamId: stream.streamId || stream.id
-      }));
-      setStreamDetails(formattedDetails);
     } catch (error) {
       console.error('Failed to load streams:', error);
       toast({
@@ -129,15 +146,7 @@ const PaymentStreamManagement = () => {
     }
 
     try {
-      const startTime = Math.floor(Date.now() / 1000) + 60; // 1 minute from now
-      const stopTime = startTime + (parseInt(createFormData.stopTime) * 3600); // Convert hours to seconds
-      
-      await createStream(
-        createFormData.recipient,
-        startTime,
-        stopTime,
-        createFormData.depositAmount
-      );
+      await createStream();
       
       setCreateFormData({
         recipient: "",
@@ -146,29 +155,57 @@ const PaymentStreamManagement = () => {
         depositAmount: ""
       });
       
+      toast({
+        title: "Stream Created",
+        description: "Payment stream created successfully (Mock)",
+      });
+      
       await loadStreams(); // Refresh the list
     } catch (error) {
       console.error("Failed to create stream:", error);
+      toast({
+        title: "Failed to Create Stream",
+        description: "Could not create payment stream",
+        variant: "destructive",
+      });
     }
   };
 
   // Withdraw from stream
   const handleWithdraw = async (streamId: string, amount?: string) => {
     try {
-      await withdrawFromStream(streamId, amount);
+      await withdrawFromStream();
+      toast({
+        title: "Withdrawal Successful",
+        description: "Funds withdrawn from stream (Mock)",
+      });
       await loadStreams(); // Refresh the list
     } catch (error) {
       console.error("Failed to withdraw from stream:", error);
+      toast({
+        title: "Withdrawal Failed",
+        description: "Could not withdraw from stream",
+        variant: "destructive",
+      });
     }
   };
 
   // Cancel stream
   const handleCancel = async (streamId: string) => {
     try {
-      await cancelStream(streamId);
+      await cancelStream();
+      toast({
+        title: "Stream Cancelled",
+        description: "Payment stream cancelled (Mock)",
+      });
       await loadStreams(); // Refresh the list
     } catch (error) {
       console.error("Failed to cancel stream:", error);
+      toast({
+        title: "Cancellation Failed",
+        description: "Could not cancel stream",
+        variant: "destructive",
+      });
     }
   };
 
@@ -178,9 +215,9 @@ const PaymentStreamManagement = () => {
 
   if (!isConnected) {
     return (
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700/50">
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">Please connect your wallet to manage payment streams</p>
+          <p className="text-slate-400">Please connect your wallet to manage payment streams</p>
         </CardContent>
       </Card>
     );
@@ -189,24 +226,29 @@ const PaymentStreamManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Payment Stream Management</h2>
-        <Button onClick={loadStreams} variant="outline" size="sm">
+        <h2 className="text-2xl font-bold text-white">Payment Stream Management</h2>
+        <Button 
+          onClick={loadStreams} 
+          variant="outline" 
+          size="sm"
+          className="border-slate-600 text-slate-300 hover:bg-slate-700"
+        >
           <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </div>
 
       <Tabs defaultValue="create" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="create">Create Stream</TabsTrigger>
-          <TabsTrigger value="sent">Sent Streams</TabsTrigger>
-          <TabsTrigger value="received">Received Streams</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-slate-800/50">
+          <TabsTrigger value="create" className="data-[state=active]:bg-purple-600">Create Stream</TabsTrigger>
+          <TabsTrigger value="sent" className="data-[state=active]:bg-purple-600">Sent Streams</TabsTrigger>
+          <TabsTrigger value="received" className="data-[state=active]:bg-purple-600">Received Streams</TabsTrigger>
         </TabsList>
 
         <TabsContent value="create" className="space-y-4">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Plus className="w-5 h-5" />
                 Create Payment Stream
               </CardTitle>
@@ -214,17 +256,18 @@ const PaymentStreamManagement = () => {
             <CardContent>
               <form onSubmit={handleCreateStream} className="space-y-4">
                 <div>
-                  <Label htmlFor="recipient">Recipient Address</Label>
+                  <Label htmlFor="recipient" className="text-white">Recipient Address</Label>
                   <Input
                     id="recipient"
                     value={createFormData.recipient}
                     onChange={(e) => setCreateFormData(prev => ({ ...prev, recipient: e.target.value }))}
                     placeholder="0x..."
                     required
+                    className="bg-slate-700/50 border-slate-600 text-white"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="depositAmount">Deposit Amount (ETH)</Label>
+                  <Label htmlFor="depositAmount" className="text-white">Deposit Amount (STT)</Label>
                   <Input
                     id="depositAmount"
                     type="number"
@@ -233,10 +276,11 @@ const PaymentStreamManagement = () => {
                     onChange={(e) => setCreateFormData(prev => ({ ...prev, depositAmount: e.target.value }))}
                     placeholder="1.0"
                     required
+                    className="bg-slate-700/50 border-slate-600 text-white"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="stopTime">Duration (hours)</Label>
+                  <Label htmlFor="stopTime" className="text-white">Duration (hours)</Label>
                   <Input
                     id="stopTime"
                     type="number"
@@ -244,9 +288,10 @@ const PaymentStreamManagement = () => {
                     onChange={(e) => setCreateFormData(prev => ({ ...prev, stopTime: e.target.value }))}
                     placeholder="24"
                     required
+                    className="bg-slate-700/50 border-slate-600 text-white"
                   />
                 </div>
-                <Button type="submit" disabled={isLoading} className="w-full">
+                <Button type="submit" disabled={isLoading} className="w-full bg-purple-600 hover:bg-purple-700">
                   {isLoading ? "Creating..." : "Create Stream"}
                 </Button>
               </form>
@@ -257,53 +302,53 @@ const PaymentStreamManagement = () => {
         <TabsContent value="sent" className="space-y-4">
           <div className="space-y-4">
             {senderStreams.length === 0 ? (
-              <Card>
+              <Card className="bg-slate-800/50 border-slate-700/50">
                 <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">No streams sent yet</p>
+                  <p className="text-slate-400">No streams sent yet</p>
                 </CardContent>
               </Card>
             ) : (
               streamDetails
-                .filter(stream => senderStreams.includes(stream.streamId))
+                .filter(stream => senderStreams.includes(stream.id))
                 .map((stream) => (
                   <motion.div
-                    key={stream.streamId}
+                    key={stream.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card>
+                    <Card className="bg-slate-800/50 border-slate-700/50">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h3 className="font-semibold">Stream #{stream.streamId.slice(0, 8)}...</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <h3 className="font-semibold text-white">Stream #{stream.id.slice(0, 8)}...</h3>
+                            <p className="text-sm text-slate-400">
                               To: {stream.recipient.slice(0, 6)}...{stream.recipient.slice(-4)}
                             </p>
                           </div>
-                          <Badge variant={stream.active ? "default" : "secondary"}>
+                          <Badge variant={stream.active ? "default" : "secondary"} className={stream.active ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30"}>
                             {stream.active ? "Active" : "Inactive"}
                           </Badge>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                            <p className="text-sm text-muted-foreground">Total Deposit</p>
-                            <p className="font-semibold">{stream.deposit} ETH</p>
+                            <p className="text-sm text-slate-400">Total Deposit</p>
+                            <p className="font-semibold text-white">{stream.deposit} STT</p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">Remaining</p>
-                            <p className="font-semibold">{stream.balance} ETH</p>
+                            <p className="text-sm text-slate-400">Remaining</p>
+                            <p className="font-semibold text-white">{stream.remainingBalance} STT</p>
                           </div>
                         </div>
                         
                         <div className="mb-4">
                           <div className="flex justify-between text-sm mb-1">
-                            <span>Progress</span>
-                            <span>{parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.balance)) / parseFloat(stream.deposit) * 100).toFixed(1) : 0}%</span>
+                            <span className="text-white">Progress</span>
+                            <span className="text-white">{parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.remainingBalance)) / parseFloat(stream.deposit) * 100).toFixed(1) : 0}%</span>
                           </div>
                           <Progress 
-                            value={parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.balance)) / parseFloat(stream.deposit) * 100) : 0} 
+                            value={parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.remainingBalance)) / parseFloat(stream.deposit) * 100) : 0} 
                             className="h-2"
                           />
                         </div>
@@ -312,8 +357,9 @@ const PaymentStreamManagement = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleCancel(stream.streamId)}
+                            onClick={() => handleCancel(stream.id)}
                             disabled={!stream.active}
+                            className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
                           >
                             <Pause className="w-4 h-4 mr-2" />
                             Cancel
@@ -330,53 +376,53 @@ const PaymentStreamManagement = () => {
         <TabsContent value="received" className="space-y-4">
           <div className="space-y-4">
             {recipientStreams.length === 0 ? (
-              <Card>
+              <Card className="bg-slate-800/50 border-slate-700/50">
                 <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground">No streams received yet</p>
+                  <p className="text-slate-400">No streams received yet</p>
                 </CardContent>
               </Card>
             ) : (
               streamDetails
-                .filter(stream => recipientStreams.includes(stream.streamId))
+                .filter(stream => recipientStreams.includes(stream.id))
                 .map((stream) => (
                   <motion.div
-                    key={stream.streamId}
+                    key={stream.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card>
+                    <Card className="bg-slate-800/50 border-slate-700/50">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h3 className="font-semibold">Stream #{stream.streamId.slice(0, 8)}...</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <h3 className="font-semibold text-white">Stream #{stream.id.slice(0, 8)}...</h3>
+                            <p className="text-sm text-slate-400">
                               From: {stream.sender.slice(0, 6)}...{stream.sender.slice(-4)}
                             </p>
                           </div>
-                          <Badge variant={stream.active ? "default" : "secondary"}>
+                          <Badge variant={stream.active ? "default" : "secondary"} className={stream.active ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30"}>
                             {stream.active ? "Active" : "Inactive"}
                           </Badge>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                            <p className="text-sm text-muted-foreground">Total Deposit</p>
-                            <p className="font-semibold">{stream.deposit} ETH</p>
+                            <p className="text-sm text-slate-400">Total Deposit</p>
+                            <p className="font-semibold text-white">{stream.deposit} STT</p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">Available</p>
-                            <p className="font-semibold">{stream.balance} ETH</p>
+                            <p className="text-sm text-slate-400">Available</p>
+                            <p className="font-semibold text-white">{stream.remainingBalance} STT</p>
                           </div>
                         </div>
                         
                         <div className="mb-4">
                           <div className="flex justify-between text-sm mb-1">
-                            <span>Progress</span>
-                            <span>{parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.balance)) / parseFloat(stream.deposit) * 100).toFixed(1) : 0}%</span>
+                            <span className="text-white">Progress</span>
+                            <span className="text-white">{parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.remainingBalance)) / parseFloat(stream.deposit) * 100).toFixed(1) : 0}%</span>
                           </div>
                           <Progress 
-                            value={parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.balance)) / parseFloat(stream.deposit) * 100) : 0} 
+                            value={parseFloat(stream.deposit) > 0 ? ((parseFloat(stream.deposit) - parseFloat(stream.remainingBalance)) / parseFloat(stream.deposit) * 100) : 0} 
                             className="h-2"
                           />
                         </div>
@@ -384,8 +430,9 @@ const PaymentStreamManagement = () => {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            onClick={() => handleWithdraw(stream.streamId)}
-                            disabled={!stream.active || parseFloat(stream.balance) === 0}
+                            onClick={() => handleWithdraw(stream.id)}
+                            disabled={!stream.active || parseFloat(stream.remainingBalance) === 0}
+                            className="bg-green-600 hover:bg-green-700"
                           >
                             <DollarSign className="w-4 h-4 mr-2" />
                             Withdraw All

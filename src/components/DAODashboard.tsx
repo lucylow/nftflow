@@ -73,7 +73,56 @@ export default function DAODashboard() {
 
   useEffect(() => {
     if (nftFlowContract) {
-      // loadDAOData(); // Temporarily disabled
+      loadDAOData();
+    } else {
+      // Mock data for demonstration
+      setStats({
+        totalProposals: 5,
+        activeProposals: 2,
+        totalVotingPower: 1000000,
+        userVotingPower: 1500,
+        treasuryBalance: '125.5',
+        quorumPercentage: 25,
+        votingDuration: 7 * 24 * 60 * 60 // 7 days
+      });
+      
+      setProposals([
+        {
+          id: 1,
+          description: 'Increase platform fee from 2.5% to 3%',
+          proposalType: 0,
+          yesVotes: 2500,
+          noVotes: 800,
+          deadline: Math.floor(Date.now() / 1000) + 3 * 24 * 60 * 60,
+          executed: false,
+          proposer: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+          createdAt: Math.floor(Date.now() / 1000) - 4 * 24 * 60 * 60
+        },
+        {
+          id: 2,
+          description: 'Update collateral requirements for premium NFTs',
+          proposalType: 1,
+          yesVotes: 1800,
+          noVotes: 1200,
+          deadline: Math.floor(Date.now() / 1000) + 5 * 24 * 60 * 60,
+          executed: false,
+          proposer: '0x1234567890123456789012345678901234567890',
+          createdAt: Math.floor(Date.now() / 1000) - 2 * 24 * 60 * 60
+        },
+        {
+          id: 3,
+          description: 'Implement new reward structure for active users',
+          proposalType: 2,
+          yesVotes: 3200,
+          noVotes: 400,
+          deadline: Math.floor(Date.now() / 1000) - 1 * 24 * 60 * 60,
+          executed: true,
+          proposer: '0x9876543210987654321098765432109876543210',
+          createdAt: Math.floor(Date.now() / 1000) - 8 * 24 * 60 * 60
+        }
+      ]);
+      
+      setLoading(false);
     }
   }, [nftFlowContract, account]);
 
@@ -81,7 +130,7 @@ export default function DAODashboard() {
     try {
       setLoading(true);
       
-      // Temporarily disabled - contracts not yet deployed
+      // Mock implementation - replace with actual contract calls when deployed
       setStats({
         totalProposals: 0,
         activeProposals: 0,
@@ -93,56 +142,6 @@ export default function DAODashboard() {
       });
       setProposals([]);
       
-      /*
-      // Load DAO stats
-      const [
-        totalProposals,
-        userVotingPower,
-        treasuryBalance,
-        quorumPercentage,
-        votingDuration
-      ] = await Promise.all([
-        nftFlowContract.totalProposals(),
-        nftFlowContract.getVotingPower(account),
-        nftFlowContract.treasuryBalance(),
-        nftFlowContract.quorumPercentage(),
-        nftFlowContract.votingDuration()
-      ]);
-      */
-
-      // Calculate active proposals
-      let activeProposals = 0;
-      const proposalsList: Proposal[] = [];
-      
-      for (let i = 0; i < totalProposals; i++) {
-        const proposal = await contract.dao.getProposal(i);
-        const isActive = !proposal.executed && Date.now() / 1000 < Number(proposal.deadline);
-        if (isActive) activeProposals++;
-        
-        proposalsList.push({
-          id: Number(proposal.id),
-          description: proposal.description,
-          proposalType: Number(proposal.proposalType),
-          yesVotes: Number(proposal.yesVotes),
-          noVotes: Number(proposal.noVotes),
-          deadline: Number(proposal.deadline),
-          executed: proposal.executed,
-          proposer: proposal.proposer,
-          createdAt: Number(proposal.createdAt)
-        });
-      }
-
-      setStats({
-        totalProposals: Number(totalProposals),
-        activeProposals,
-        totalVotingPower: 0, // Would need to calculate from governance token supply
-        userVotingPower: Number(userVotingPower),
-        treasuryBalance: ethers.formatEther(treasuryBalance),
-        quorumPercentage: Number(quorumPercentage),
-        votingDuration: Number(votingDuration)
-      });
-
-      setProposals(proposalsList);
     } catch (error) {
       console.error('Error loading DAO data:', error);
       toast({
@@ -166,17 +165,10 @@ export default function DAODashboard() {
     }
 
     try {
-      const tx = await contract.dao.createProposal(
-        proposalDescription,
-        proposalType,
-        proposalParameters || '0x'
-      );
-      
-      await tx.wait();
-      
+      // Mock implementation - replace with actual contract call when deployed
       toast({
         title: "Success",
-        description: "Proposal created successfully"
+        description: "Proposal created successfully (Mock)"
       });
       
       // Reset form
@@ -198,12 +190,10 @@ export default function DAODashboard() {
 
   const voteOnProposal = async (proposalId: number, support: boolean) => {
     try {
-      const tx = await contract.dao.vote(proposalId, support);
-      await tx.wait();
-      
+      // Mock implementation - replace with actual contract call when deployed
       toast({
         title: "Success",
-        description: `Voted ${support ? 'YES' : 'NO'} on proposal ${proposalId}`
+        description: `Voted ${support ? 'YES' : 'NO'} on proposal ${proposalId} (Mock)`
       });
       
       loadDAOData();
@@ -219,12 +209,10 @@ export default function DAODashboard() {
 
   const executeProposal = async (proposalId: number) => {
     try {
-      const tx = await contract.dao.executeProposal(proposalId);
-      await tx.wait();
-      
+      // Mock implementation - replace with actual contract call when deployed
       toast({
         title: "Success",
-        description: `Proposal ${proposalId} executed successfully`
+        description: `Proposal ${proposalId} executed successfully (Mock)`
       });
       
       loadDAOData();
@@ -256,7 +244,7 @@ export default function DAODashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
       </div>
     );
   }
@@ -264,7 +252,7 @@ export default function DAODashboard() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">DAO Governance</h1>
+        <h1 className="text-3xl font-bold text-white">DAO Governance</h1>
         <Button onClick={loadDAOData} variant="outline">
           Refresh
         </Button>
@@ -281,53 +269,53 @@ export default function DAODashboard() {
         <TabsContent value="overview" className="space-y-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Proposals</CardTitle>
-                <Plus className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-white">Total Proposals</CardTitle>
+                <Plus className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats?.totalProposals || 0}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-white">{stats?.totalProposals || 0}</div>
+                <p className="text-xs text-slate-400">
                   {stats?.activeProposals || 0} active
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Your Voting Power</CardTitle>
-                <Vote className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-white">Your Voting Power</CardTitle>
+                <Vote className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats?.userVotingPower || 0}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-white">{stats?.userVotingPower || 0}</div>
+                <p className="text-xs text-slate-400">
                   Governance tokens
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Treasury Balance</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-white">Treasury Balance</CardTitle>
+                <DollarSign className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats?.treasuryBalance || '0'} ETH</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-white">{stats?.treasuryBalance || '0'} STT</div>
+                <p className="text-xs text-slate-400">
                   Available funds
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Quorum</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-white">Quorum</CardTitle>
+                <Users className="h-4 w-4 text-purple-400" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats?.quorumPercentage || 0}%</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-white">{stats?.quorumPercentage || 0}%</div>
+                <p className="text-xs text-slate-400">
                   Required to pass
                 </p>
               </CardContent>
@@ -335,10 +323,10 @@ export default function DAODashboard() {
           </div>
 
           {/* Recent Proposals */}
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle>Recent Proposals</CardTitle>
-              <CardDescription>Latest governance proposals</CardDescription>
+              <CardTitle className="text-white">Recent Proposals</CardTitle>
+              <CardDescription className="text-slate-400">Latest governance proposals</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -349,21 +337,21 @@ export default function DAODashboard() {
                   const yesPercentage = totalVotes > 0 ? (proposal.yesVotes / totalVotes) * 100 : 0;
 
                   return (
-                    <div key={proposal.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={proposal.id} className="flex items-center justify-between p-4 border border-slate-700/50 rounded-lg bg-slate-700/30">
                       <div className="flex items-center space-x-4">
                         <div className={`p-2 rounded-full ${typeInfo.color}`}>
                           <typeInfo.icon className="h-4 w-4 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-medium">{proposal.description}</h3>
-                          <p className="text-sm text-muted-foreground">
+                          <h3 className="font-medium text-white">{proposal.description}</h3>
+                          <p className="text-sm text-slate-400">
                             {typeInfo.label} • {formatTime(proposal.createdAt)}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
-                          <div className="text-sm font-medium">
+                          <div className="text-sm font-medium text-white">
                             {proposal.yesVotes} YES • {proposal.noVotes} NO
                           </div>
                           <div className="w-24">
@@ -391,7 +379,7 @@ export default function DAODashboard() {
               const canExecute = !proposal.executed && Date.now() / 1000 > proposal.deadline && proposal.yesVotes > proposal.noVotes;
 
               return (
-                <Card key={proposal.id}>
+                <Card key={proposal.id} className="bg-slate-800/50 border-slate-700/50">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -399,30 +387,30 @@ export default function DAODashboard() {
                           <typeInfo.icon className="h-4 w-4 text-white" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg">Proposal #{proposal.id}</CardTitle>
-                          <CardDescription>{typeInfo.label}</CardDescription>
+                          <CardTitle className="text-lg text-white">Proposal #{proposal.id}</CardTitle>
+                          <CardDescription className="text-slate-400">{typeInfo.label}</CardDescription>
                         </div>
                       </div>
                       <Badge className={status.color}>{status.status}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">{proposal.description}</p>
+                    <p className="text-sm text-slate-300 mb-4">{proposal.description}</p>
                     
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between text-sm mb-2">
-                          <span>Voting Progress</span>
-                          <span>{yesPercentage.toFixed(1)}% YES</span>
+                          <span className="text-white">Voting Progress</span>
+                          <span className="text-white">{yesPercentage.toFixed(1)}% YES</span>
                         </div>
                         <Progress value={yesPercentage} className="h-2" />
-                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <div className="flex justify-between text-xs text-slate-400 mt-1">
                           <span>{proposal.yesVotes} YES</span>
                           <span>{proposal.noVotes} NO</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center justify-between text-sm text-slate-400">
                         <span>Deadline: {formatTime(proposal.deadline)}</span>
                         <span>Proposer: {proposal.proposer.slice(0, 6)}...{proposal.proposer.slice(-4)}</span>
                       </div>
@@ -432,7 +420,7 @@ export default function DAODashboard() {
                           <Button 
                             size="sm" 
                             onClick={() => voteOnProposal(proposal.id, true)}
-                            className="flex-1"
+                            className="flex-1 bg-green-600 hover:bg-green-700"
                           >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Vote YES
@@ -441,7 +429,7 @@ export default function DAODashboard() {
                             size="sm" 
                             variant="outline"
                             onClick={() => voteOnProposal(proposal.id, false)}
-                            className="flex-1"
+                            className="flex-1 border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
                           >
                             <XCircle className="h-4 w-4 mr-2" />
                             Vote NO
@@ -452,7 +440,7 @@ export default function DAODashboard() {
                       {canExecute && (
                         <Button 
                           onClick={() => executeProposal(proposal.id)}
-                          className="w-full"
+                          className="w-full bg-purple-600 hover:bg-purple-700"
                         >
                           Execute Proposal
                         </Button>
@@ -466,21 +454,21 @@ export default function DAODashboard() {
         </TabsContent>
 
         <TabsContent value="create" className="space-y-6">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle>Create New Proposal</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">Create New Proposal</CardTitle>
+              <CardDescription className="text-slate-400">
                 Create a governance proposal to change platform parameters
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Proposal Type</label>
+                <label className="text-sm font-medium text-white">Proposal Type</label>
                 <Select value={proposalType} onValueChange={setProposalType}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-slate-700/50 border-slate-600">
                     <SelectValue placeholder="Select proposal type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-slate-800 border-slate-700">
                     {PROPOSAL_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value.toString()}>
                         <div className="flex items-center space-x-2">
@@ -494,29 +482,31 @@ export default function DAODashboard() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Description</label>
+                <label className="text-sm font-medium text-white">Description</label>
                 <Textarea
                   placeholder="Describe your proposal..."
                   value={proposalDescription}
                   onChange={(e) => setProposalDescription(e.target.value)}
+                  className="bg-slate-700/50 border-slate-600 text-white"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium">Parameters (Hex Encoded)</label>
+                <label className="text-sm font-medium text-white">Parameters (Hex Encoded)</label>
                 <Input
                   placeholder="0x..."
                   value={proposalParameters}
                   onChange={(e) => setProposalParameters(e.target.value)}
+                  className="bg-slate-700/50 border-slate-600 text-white"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   Leave empty for simple proposals
                 </p>
               </div>
 
               {stats?.userVotingPower === 0 && (
-                <Alert>
-                  <AlertDescription>
+                <Alert className="bg-yellow-500/10 border-yellow-500/30">
+                  <AlertDescription className="text-yellow-400">
                     You need governance tokens to create proposals. 
                     Contact the DAO administrator to become eligible.
                   </AlertDescription>
@@ -526,7 +516,7 @@ export default function DAODashboard() {
               <Button 
                 onClick={createProposal}
                 disabled={stats?.userVotingPower === 0}
-                className="w-full"
+                className="w-full bg-purple-600 hover:bg-purple-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Proposal
@@ -536,24 +526,24 @@ export default function DAODashboard() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle>DAO Settings</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">DAO Settings</CardTitle>
+              <CardDescription className="text-slate-400">
                 Current governance parameters
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Voting Duration</label>
-                  <p className="text-sm text-muted-foreground">
+                  <label className="text-sm font-medium text-white">Voting Duration</label>
+                  <p className="text-sm text-slate-400">
                     {stats?.votingDuration ? Math.floor(stats.votingDuration / (24 * 60 * 60)) : 0} days
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Quorum Percentage</label>
-                  <p className="text-sm text-muted-foreground">
+                  <label className="text-sm font-medium text-white">Quorum Percentage</label>
+                  <p className="text-sm text-slate-400">
                     {stats?.quorumPercentage || 0}%
                   </p>
                 </div>

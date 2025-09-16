@@ -9,22 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWeb3 } from "@/contexts/Web3Context";
-import { useNFTFlow } from "@/hooks/useNFTFlow";
-import { useNFTManagement } from "@/hooks/useNFTManagement";
 import { useToast } from "@/hooks/use-toast";
-import { CONTRACT_ADDRESSES } from "@/config/contracts";
-import { FormSkeleton, LoadingSpinner } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 const Create = () => {
   const { isConnected, account } = useWeb3();
-  const { listForRental, isLoading } = useNFTFlow();
-  const { mintNFT, getUserNFTs, approveNFTFlow, isLoading: isMinting } = useNFTManagement();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -33,7 +30,7 @@ const Create = () => {
     minDuration: "",
     maxDuration: "",
     collateralRequired: "",
-    nftContract: CONTRACT_ADDRESSES.MockERC721,
+    nftContract: "",
     tokenId: "",
     image: null,
     collection: "",
@@ -52,13 +49,6 @@ const Create = () => {
     rarity: string;
     utilityType: string;
   }[]>([]);
-  const [showMintForm, setShowMintForm] = useState(false);
-  const [mintFormData, setMintFormData] = useState({
-    name: "",
-    description: "",
-    image: "",
-    attributes: []
-  });
 
   // Handle file upload
   const handleFileUpload = useCallback((file: File) => {
@@ -129,41 +119,6 @@ const Create = () => {
     fileInputRef.current?.click();
   };
 
-  // Load user's NFTs
-  const loadUserNFTs = async () => {
-    if (!isConnected) return;
-    
-    try {
-      const nfts = await getUserNFTs();
-      setUserNFTs(nfts);
-    } catch (error) {
-      console.error('Failed to load user NFTs:', error);
-    }
-  };
-
-  // Handle minting a new NFT
-  const handleMint = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!isConnected) {
-      toast({
-        title: "Wallet Not Connected",
-        description: "Please connect your wallet to mint an NFT",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await mintNFT(mintFormData);
-      setMintFormData({ name: "", description: "", image: "", attributes: [] });
-      setShowMintForm(false);
-      await loadUserNFTs(); // Refresh the list
-    } catch (error) {
-      console.error("Failed to mint NFT:", error);
-    }
-  };
-
   // Handle listing NFT for rental
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,15 +141,16 @@ const Create = () => {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      await listForRental(
-        formData.nftContract,
-        formData.tokenId,
-        formData.pricePerSecond,
-        formData.minDuration,
-        formData.maxDuration,
-        formData.collateralRequired
-      );
+      // Mock implementation - replace with actual contract call when deployed
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "NFT Listed Successfully",
+        description: "Your NFT has been listed for rental (Mock)",
+      });
       
       // Reset form
       setFormData({
@@ -204,23 +160,33 @@ const Create = () => {
         minDuration: "",
         maxDuration: "",
         collateralRequired: "",
-        nftContract: CONTRACT_ADDRESSES.MockERC721,
+        nftContract: "",
         tokenId: "",
         image: null,
         collection: "",
         attributes: []
       });
       
-      await loadUserNFTs(); // Refresh the list
+      // Clean up uploaded file
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl("");
+      }
+      setUploadedFile(null);
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
     } catch (error) {
       console.error("Failed to list NFT:", error);
+      toast({
+        title: "Failed to List NFT",
+        description: "An error occurred while listing your NFT",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // Load user NFTs on component mount
-  useEffect(() => {
-    loadUserNFTs();
-  }, [isConnected]);
 
   // Cleanup effect to prevent memory leaks
   useEffect(() => {
@@ -232,25 +198,25 @@ const Create = () => {
   }, [previewUrl]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent mb-4">
             List Your NFT for Rent
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-slate-300 text-lg">
             Earn passive income by renting out your valuable NFTs to other users
           </p>
         </motion.div>
 
         {!isConnected && (
-          <Alert className="mb-8">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="mb-8 bg-yellow-500/10 border-yellow-500/30">
+            <AlertCircle className="h-4 w-4 text-yellow-400" />
+            <AlertDescription className="text-yellow-400">
               Please connect your wallet to list an NFT for rental.
             </AlertDescription>
           </Alert>
@@ -260,85 +226,90 @@ const Create = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Basic Info */}
             <div className="space-y-6">
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/10 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Info className="w-5 h-5 text-primary" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Info className="w-5 h-5 text-purple-400" />
                     NFT Contract Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="nftContract">NFT Contract Address</Label>
+                    <Label htmlFor="nftContract" className="text-white">NFT Contract Address</Label>
                     <Input
                       id="nftContract"
                       placeholder="0x..."
                       value={formData.nftContract}
                       onChange={(e) => setFormData({...formData, nftContract: e.target.value})}
                       disabled={!isConnected}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-slate-400 mt-1">
                       Address of the NFT contract
                     </p>
                   </div>
                   
                   <div>
-                    <Label htmlFor="tokenId">Token ID</Label>
+                    <Label htmlFor="tokenId" className="text-white">Token ID</Label>
                     <Input
                       id="tokenId"
                       placeholder="1234"
                       value={formData.tokenId}
                       onChange={(e) => setFormData({...formData, tokenId: e.target.value})}
                       disabled={!isConnected}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-slate-400 mt-1">
                       The specific token ID to list
                     </p>
                   </div>
                   
                   <div>
-                    <Label htmlFor="name">NFT Name (Optional)</Label>
+                    <Label htmlFor="name" className="text-white">NFT Name (Optional)</Label>
                     <Input
                       id="name"
                       placeholder="e.g. Cosmic Wizard #1234"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="collection">Collection (Optional)</Label>
+                    <Label htmlFor="collection" className="text-white">Collection (Optional)</Label>
                     <Input
                       id="collection"
                       placeholder="e.g. Cosmic Wizards"
                       value={formData.collection}
                       onChange={(e) => setFormData({...formData, collection: e.target.value})}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="description">Description (Optional)</Label>
+                    <Label htmlFor="description" className="text-white">Description (Optional)</Label>
                     <Textarea
                       id="description"
                       placeholder="Describe your NFT and what makes it special..."
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       rows={4}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/10 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-success" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <DollarSign className="w-5 h-5 text-green-400" />
                     Rental Pricing & Duration
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="pricePerSecond">Price per Second (STT)</Label>
+                    <Label htmlFor="pricePerSecond" className="text-white">Price per Second (STT)</Label>
                     <Input
                       id="pricePerSecond"
                       type="number"
@@ -347,15 +318,16 @@ const Create = () => {
                       value={formData.pricePerSecond}
                       onChange={(e) => setFormData({...formData, pricePerSecond: e.target.value})}
                       disabled={!isConnected}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-slate-400 mt-1">
                       Recommended: 0.000001 - 0.00001 STT per second
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="minDuration">Minimum Duration (seconds)</Label>
+                      <Label htmlFor="minDuration" className="text-white">Minimum Duration (seconds)</Label>
                       <Input
                         id="minDuration"
                         type="number"
@@ -363,14 +335,15 @@ const Create = () => {
                         value={formData.minDuration}
                         onChange={(e) => setFormData({...formData, minDuration: e.target.value})}
                         disabled={!isConnected}
+                        className="bg-slate-700/50 border-slate-600 text-white"
                       />
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-slate-400 mt-1">
                         Minimum rental time (1 hour = 3600 seconds)
                       </p>
                     </div>
                     
                     <div>
-                      <Label htmlFor="maxDuration">Maximum Duration (seconds)</Label>
+                      <Label htmlFor="maxDuration" className="text-white">Maximum Duration (seconds)</Label>
                       <Input
                         id="maxDuration"
                         type="number"
@@ -378,15 +351,16 @@ const Create = () => {
                         value={formData.maxDuration}
                         onChange={(e) => setFormData({...formData, maxDuration: e.target.value})}
                         disabled={!isConnected}
+                        className="bg-slate-700/50 border-slate-600 text-white"
                       />
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-slate-400 mt-1">
                         Maximum rental time (30 days = 2,592,000 seconds)
                       </p>
                     </div>
                   </div>
                   
                   <div>
-                    <Label htmlFor="collateralRequired">Collateral Required (STT)</Label>
+                    <Label htmlFor="collateralRequired" className="text-white">Collateral Required (STT)</Label>
                     <Input
                       id="collateralRequired"
                       type="number"
@@ -395,28 +369,29 @@ const Create = () => {
                       value={formData.collateralRequired}
                       onChange={(e) => setFormData({...formData, collateralRequired: e.target.value})}
                       disabled={!isConnected}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-slate-400 mt-1">
                       Security deposit required from renters
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="text-center p-2 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">1 Hour</div>
-                      <div className="font-semibold text-success">
+                    <div className="text-center p-2 bg-slate-700/30 rounded-lg">
+                      <div className="text-sm text-slate-400">1 Hour</div>
+                      <div className="font-semibold text-green-400">
                         {formData.pricePerSecond ? (parseFloat(formData.pricePerSecond) * 3600).toFixed(6) : "0"} STT
                       </div>
                     </div>
-                    <div className="text-center p-2 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">1 Day</div>
-                      <div className="font-semibold text-success">
+                    <div className="text-center p-2 bg-slate-700/30 rounded-lg">
+                      <div className="text-sm text-slate-400">1 Day</div>
+                      <div className="font-semibold text-green-400">
                         {formData.pricePerSecond ? (parseFloat(formData.pricePerSecond) * 86400).toFixed(6) : "0"} STT
                       </div>
                     </div>
-                    <div className="text-center p-2 bg-muted rounded-lg">
-                      <div className="text-sm text-muted-foreground">1 Week</div>
-                      <div className="font-semibold text-success">
+                    <div className="text-center p-2 bg-slate-700/30 rounded-lg">
+                      <div className="text-sm text-slate-400">1 Week</div>
+                      <div className="font-semibold text-green-400">
                         {formData.pricePerSecond ? (parseFloat(formData.pricePerSecond) * 604800).toFixed(6) : "0"} STT
                       </div>
                     </div>
@@ -427,10 +402,10 @@ const Create = () => {
 
             {/* Right Column - Image Upload */}
             <div className="space-y-6">
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/10 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5 text-accent" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <ImageIcon className="w-5 h-5 text-pink-400" />
                     NFT Media
                   </CardTitle>
                 </CardHeader>
@@ -438,22 +413,22 @@ const Create = () => {
                   <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                       dragActive 
-                        ? "border-primary bg-primary/5" 
-                        : "border-primary/20 hover:border-primary/40"
+                        ? "border-purple-500 bg-purple-500/5" 
+                        : "border-purple-500/20 hover:border-purple-500/40"
                     }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                   >
-                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Upload NFT Image</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                    <h3 className="font-semibold mb-2 text-white">Upload NFT Image</h3>
+                    <p className="text-sm text-slate-400 mb-4">
                       Drag and drop or click to upload
                     </p>
                     <Button 
                       variant="outline" 
-                      className="mb-2"
+                      className="mb-2 border-slate-600 text-slate-300 hover:bg-slate-700"
                       onClick={handleFileInputClick}
                       disabled={!isConnected}
                     >
@@ -466,7 +441,7 @@ const Create = () => {
                       onChange={handleFileInputChange}
                       className="hidden"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-400">
                       Supports JPG, PNG, GIF, WebP up to 10MB
                     </p>
                   </div>
@@ -475,13 +450,13 @@ const Create = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 p-4 bg-muted/50 rounded-lg"
+                      className="mt-4 p-4 bg-slate-700/30 rounded-lg"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <ImageIcon className="w-4 h-4" />
-                          <span className="text-sm font-medium">{uploadedFile.name}</span>
-                          <Badge variant="secondary">
+                          <ImageIcon className="w-4 h-4 text-slate-400" />
+                          <span className="text-sm font-medium text-white">{uploadedFile.name}</span>
+                          <Badge variant="secondary" className="bg-slate-600 text-slate-300">
                             {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
                           </Badge>
                         </div>
@@ -493,6 +468,7 @@ const Create = () => {
                             setPreviewUrl("");
                             setFormData(prev => ({ ...prev, image: null }));
                           }}
+                          className="text-slate-400 hover:text-white"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -502,12 +478,12 @@ const Create = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/10 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Preview</CardTitle>
+                  <CardTitle className="text-white">Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="aspect-square bg-slate-700/30 rounded-lg flex items-center justify-center overflow-hidden">
                     {previewUrl ? (
                       <img 
                         src={previewUrl} 
@@ -515,18 +491,18 @@ const Create = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                      <ImageIcon className="w-16 h-16 text-slate-400" />
                     )}
                   </div>
                   <div className="mt-4 space-y-2">
-                    <h3 className="font-semibold">
+                    <h3 className="font-semibold text-white">
                       {formData.name || "NFT Name"}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-slate-400">
                       {formData.collection || "Collection"}
                     </p>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-success/10 text-success">
+                      <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
                         <Clock className="w-3 h-3 mr-1" />
                         {formData.pricePerSecond || "0"} STT/second
                       </Badge>
@@ -537,11 +513,11 @@ const Create = () => {
             </div>
           </div>
 
-          <div className="flex gap-4 pt-6 border-t">
+          <div className="flex gap-4 pt-6 border-t border-slate-700">
             <Button 
               type="button" 
               variant="outline" 
-              className="flex-1"
+              className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
               disabled={!isConnected}
               onClick={() => {
                 toast({
@@ -554,11 +530,11 @@ const Create = () => {
             </Button>
             <Button 
               type="submit" 
-              className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 relative overflow-hidden group"
+              className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 relative overflow-hidden group"
               disabled={!isConnected || isLoading}
             >
               {isLoading ? (
-                <LoadingSpinner size="sm" className="mr-2" />
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               ) : (
                 <Zap className="w-4 h-4 mr-2" />
               )}

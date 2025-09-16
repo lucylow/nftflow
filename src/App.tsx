@@ -14,6 +14,9 @@ import Marketplace from "@/pages/Marketplace";
 import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import NFTDetail from "@/pages/NFTDetail";
+import Create from "@/pages/Create";
+import DAO from "@/pages/DAO";
+import Governance from "@/pages/Governance";
 import SimpleWallet from "@/components/SimpleWallet";
 import SimpleRentalFlow from "@/components/SimpleRentalFlow";
 
@@ -39,6 +42,9 @@ const App = () => (
                          <Route path="/enhanced-marketplace" element={<EnhancedMarketplace />} />
                          <Route path="/profile" element={<Profile />} />
                          <Route path="/nft/:id" element={<NFTDetail />} />
+                         <Route path="/create" element={<Create />} />
+                         <Route path="/dao" element={<DAO />} />
+                         <Route path="/governance" element={<Governance />} />
                          <Route path="/wallet" element={<SimpleWallet />} />
                          <Route path="/rental" element={<SimpleRentalFlow />} />
                          <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />

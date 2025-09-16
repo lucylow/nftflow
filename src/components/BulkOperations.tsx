@@ -188,8 +188,6 @@ const BulkOperations: React.FC = () => {
               return { ...nft, isRented: true };
             case 'list':
               return { ...nft, isRented: false };
-            case 'update_price':
-              return { ...nft, pricePerSecond: parseFloat(bulkPrice) || nft.pricePerSecond };
             case 'unlist':
               return { ...nft, isRented: false };
             case 'update_price':
@@ -213,7 +211,7 @@ const BulkOperations: React.FC = () => {
       setBulkOperations(prev => 
         prev.map(op => 
           op.id === operation.id 
-            ? { ...op, status: 'failed', error: error.message }
+            ? { ...op, status: 'failed', error: (error as Error).message }
             : op
         )
       );
@@ -241,11 +239,11 @@ const BulkOperations: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'processing': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'completed': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'failed': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
     }
   };
 
@@ -276,11 +274,11 @@ const BulkOperations: React.FC = () => {
 
   if (!isConnected) {
     return (
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700/50">
         <CardContent className="p-8 text-center">
-          <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <h3 className="text-lg font-medium mb-2">Connect Your Wallet</h3>
-          <p className="text-muted-foreground">Connect your wallet to manage your NFTs</p>
+          <Settings className="h-12 w-12 mx-auto mb-4 text-slate-400 opacity-50" />
+          <h3 className="text-lg font-medium mb-2 text-white">Connect Your Wallet</h3>
+          <p className="text-slate-400">Connect your wallet to manage your NFTs</p>
         </CardContent>
       </Card>
     );
@@ -291,13 +289,19 @@ const BulkOperations: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Bulk Operations
           </h2>
-          <p className="text-muted-foreground">Manage multiple NFTs efficiently</p>
+          <p className="text-slate-400">Manage multiple NFTs efficiently</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportSelectedNFTs} disabled={selectedNFTs.length === 0}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportSelectedNFTs} 
+            disabled={selectedNFTs.length === 0}
+            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+          >
             <Download className="h-4 w-4 mr-2" />
             Export Selected
           </Button>
@@ -305,20 +309,20 @@ const BulkOperations: React.FC = () => {
       </div>
 
       <Tabs defaultValue="manage" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="manage">Manage NFTs</TabsTrigger>
-          <TabsTrigger value="operations">Operation History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
+          <TabsTrigger value="manage" className="data-[state=active]:bg-purple-600">Manage NFTs</TabsTrigger>
+          <TabsTrigger value="operations" className="data-[state=active]:bg-purple-600">Operation History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="manage" className="space-y-6">
           {/* Selection Controls */}
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <CheckSquare className="h-5 w-5" />
                 NFT Selection
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400">
                 Select NFTs to perform bulk operations
               </CardDescription>
             </CardHeader>
@@ -330,11 +334,11 @@ const BulkOperations: React.FC = () => {
                     checked={selectedNFTs.length === nfts.length && nfts.length > 0}
                     onCheckedChange={handleSelectAll}
                   />
-                  <Label htmlFor="select-all">
+                  <Label htmlFor="select-all" className="text-white">
                     Select All ({selectedNFTs.length}/{nfts.length})
                   </Label>
                 </div>
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="bg-purple-500/20 text-purple-400">
                   {selectedNFTs.length} selected
                 </Badge>
               </div>
@@ -342,12 +346,12 @@ const BulkOperations: React.FC = () => {
               {/* Operation Configuration */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="operation-type">Operation Type</Label>
+                  <Label htmlFor="operation-type" className="text-white">Operation Type</Label>
                   <Select value={operationType} onValueChange={(value: typeof operationType) => setOperationType(value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-slate-700/50 border-slate-600">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-slate-800 border-slate-700">
                       <SelectItem value="rent">Rent NFTs</SelectItem>
                       <SelectItem value="list">List for Rental</SelectItem>
                       <SelectItem value="unlist">Unlist from Rental</SelectItem>
@@ -359,29 +363,31 @@ const BulkOperations: React.FC = () => {
 
                 {operationType === 'update_price' && (
                   <div>
-                    <Label htmlFor="new-price">New Price (STT/second)</Label>
+                    <Label htmlFor="new-price" className="text-white">New Price (STT/second)</Label>
                     <Input
                       id="new-price"
                       type="number"
                       step="0.000001"
                       placeholder="0.000001"
-                       value={operationParams.newPrice?.toString() || ''}
-                       onChange={(e) => setOperationParams({ ...operationParams, newPrice: parseFloat(e.target.value) || 0 })}
+                      value={operationParams.newPrice?.toString() || ''}
+                      onChange={(e) => setOperationParams({ ...operationParams, newPrice: parseFloat(e.target.value) || 0 })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
                   </div>
                 )}
 
                 {operationType === 'rent' && (
                   <div>
-                    <Label htmlFor="rental-duration">Rental Duration (hours)</Label>
+                    <Label htmlFor="rental-duration" className="text-white">Rental Duration (hours)</Label>
                     <Input
                       id="rental-duration"
                       type="number"
                       min="1"
                       max="720"
                       placeholder="24"
-                     value={operationParams.duration?.toString() || ''}
-                     onChange={(e) => setOperationParams({ ...operationParams, duration: parseInt(e.target.value) || 0 })}
+                      value={operationParams.duration?.toString() || ''}
+                      onChange={(e) => setOperationParams({ ...operationParams, duration: parseInt(e.target.value) || 0 })}
+                      className="bg-slate-700/50 border-slate-600 text-white"
                     />
                   </div>
                 )}
@@ -390,7 +396,7 @@ const BulkOperations: React.FC = () => {
               <Button 
                 onClick={handleBulkOperation}
                 disabled={selectedNFTs.length === 0 || isProcessing}
-                className="w-full"
+                className="w-full bg-purple-600 hover:bg-purple-700"
               >
                 {isProcessing ? (
                   <>
@@ -416,8 +422,8 @@ const BulkOperations: React.FC = () => {
           {/* NFT Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {nfts.map((nft) => (
-              <Card key={nft.id} className={`transition-all duration-200 ${
-                selectedNFTs.includes(nft.id) ? 'ring-2 ring-primary' : ''
+              <Card key={nft.id} className={`transition-all duration-200 bg-slate-800/50 border-slate-700/50 ${
+                selectedNFTs.includes(nft.id) ? 'ring-2 ring-purple-500' : ''
               }`}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
@@ -426,7 +432,7 @@ const BulkOperations: React.FC = () => {
                       onCheckedChange={(checked) => handleSelectNFT(nft.id, checked as boolean)}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="aspect-square w-full mb-3 bg-muted rounded-lg overflow-hidden">
+                      <div className="aspect-square w-full mb-3 bg-slate-700/50 rounded-lg overflow-hidden">
                         <img
                           src={nft.image}
                           alt={nft.name}
@@ -435,11 +441,11 @@ const BulkOperations: React.FC = () => {
                       </div>
                       <div className="space-y-2">
                         <div>
-                          <h4 className="font-medium truncate">{nft.name}</h4>
-                          <p className="text-sm text-muted-foreground">{nft.collection}</p>
+                          <h4 className="font-medium truncate text-white">{nft.name}</h4>
+                          <p className="text-sm text-slate-400">{nft.collection}</p>
                         </div>
                         <div className="flex items-center justify-between">
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
                             {nft.rarity}
                           </Badge>
                           <Badge variant={nft.isRented ? "destructive" : "secondary"} className="text-xs">
@@ -447,8 +453,8 @@ const BulkOperations: React.FC = () => {
                           </Badge>
                         </div>
                         <div className="text-sm">
-                          <div className="text-muted-foreground">Price</div>
-                          <div className="font-medium">{(nft.pricePerSecond * 3600).toFixed(6)} STT/hour</div>
+                          <div className="text-slate-400">Price</div>
+                          <div className="font-medium text-white">{(nft.pricePerSecond * 3600).toFixed(6)} STT/hour</div>
                         </div>
                       </div>
                     </div>
@@ -459,24 +465,24 @@ const BulkOperations: React.FC = () => {
           </div>
 
           {nfts.length === 0 && (
-            <Card>
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardContent className="p-8 text-center">
-                <Settings className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-lg font-medium mb-2">No NFTs Found</h3>
-                <p className="text-muted-foreground">You don't have any NFTs to manage</p>
+                <Settings className="h-12 w-12 mx-auto mb-4 text-slate-400 opacity-50" />
+                <h3 className="text-lg font-medium mb-2 text-white">No NFTs Found</h3>
+                <p className="text-slate-400">You don't have any NFTs to manage</p>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
         <TabsContent value="operations" className="space-y-6">
-          <Card>
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Clock className="h-5 w-5" />
                 Operation History
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400">
                 Track your bulk operations
               </CardDescription>
             </CardHeader>
@@ -484,15 +490,15 @@ const BulkOperations: React.FC = () => {
               {bulkOperations.length > 0 ? (
                 <div className="space-y-4">
                   {bulkOperations.map((operation) => (
-                    <div key={operation.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={operation.id} className="flex items-center justify-between p-4 border border-slate-700/50 rounded-lg bg-slate-700/30">
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                           {getOperationIcon(operation.type)}
                           <div>
-                            <div className="font-medium capitalize">
+                            <div className="font-medium capitalize text-white">
                               {operation.type.replace('_', ' ')} Operation
                             </div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-sm text-slate-400">
                               {operation.nftIds.length} NFTs • {operation.createdAt.toLocaleString()}
                             </div>
                           </div>
@@ -510,7 +516,7 @@ const BulkOperations: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-slate-400">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No operations yet</p>
                   <p className="text-sm">Your bulk operations will appear here</p>
