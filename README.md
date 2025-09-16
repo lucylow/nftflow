@@ -9,6 +9,7 @@
 
 > **The Netflix for NFTs** - A revolutionary marketplace that transforms NFT utility from static ownership to dynamic, accessible usage powered by Somnia Network's 1M+ TPS blockchain.
 
+![](https://github.com/lucylow/nftflow/blob/main/logo.png?raw=true)
 ## 🌟 Overview
 
 NFTFlow **fundamentally redefines NFT utility** by shifting the paradigm from speculative ownership to **active, accessible usage**. We unlock the $200B+ NFT market by enabling **micro-rentals** of digital assets, making premium NFT utilities accessible to everyone through real-time payment streaming and Somnia Network's sub-second finality.
@@ -45,23 +46,8 @@ NFTFlow doesn't just enable rentals—it **fundamentally transforms how NFTs pro
 
 ### System Overview
 
-```
-┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│   User Layer    │    │  Application Layer   │    │   Backend & Data    │    │  Blockchain Layer   │
-│                 │    │                      │    │                     │    │   (Somnia Network)  │
-│ ┌─────────────┐ │    │  ┌────────────────┐  │    │  ┌───────────────┐  │    │  ┌───────────────┐  │
-│ │   Web dApp  │◄┼────┼──┤ NFTFlow Server │──┼────┼──►  PostgreSQL   │  │    │  │   Somnia L1   │  │
-│ └─────────────┘ │    │  └────────────────┘  │    │  └───────────────┘  │    │  │   Blockchain   │  │
-│                 │    │          │           │    │          │           │    │  └───────────────┘  │
-│ ┌─────────────┐ │    │          │           │    │  ┌───────────────┐  │    │          ▲           │
-│ │ Mobile App  │◄┼────┼──────────┘           │    │  │     Redis     │  │    │          │           │
-│ └─────────────┘ │    │                      │    │  └───────────────┘  │    │  ┌───────────────┐  │
-│                 │    │  ┌────────────────┐  │    │          │           │    │  │ Smart Contracts│ │
-│ ┌─────────────┐ │    │  │   WebSocket    │◄─┼────┼──────────┘           │    │  │  • NFTFlow    │ │
-│ │    User     │◄┼────┼──┤   Real-Time    │  │    │  ┌───────────────┐  │    │  │  • Payment    │ │
-│ └─────────────┘ │    │  │    Updates     │  │    │  │     IPFS      │◄─┼────┼──┤  • Reputation │ │
-└─────────────────┘    │  └────────────────┘  │    │  └───────────────┘  │    │  └───────────────┘  │
-                       └──────────────────────┘    └─────────────────────┘    └─────────────────────┘
+![](https://github.com/lucylow/nftflow/blob/main/architecture.png?raw=true)
+
 ```
 
 ### Smart Contract Architecture
