@@ -1,6 +1,6 @@
 // src/services/somniaTokenService.js
 import { ethers } from 'ethers';
-import { SOMNIA_CONFIG } from '../config/constants.js';
+import { SOMNIA_CONFIG } from '../config/somniaConfig';
 
 /**
  * SomniaTokenService

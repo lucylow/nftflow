@@ -1,6 +1,6 @@
 // src/services/somniaWebSocketService.js
 import { ethers } from 'ethers';
-import { SOMNIA_CONFIG } from '../config/constants.js';
+import { SOMNIA_CONFIG } from '../config/somniaConfig';
 
 /**
  * SomniaWebSocketService
@@ -863,4 +863,27 @@ class SomniaWebSocketService {
   }
 }
 
-export default new SomniaWebSocketService();
+// Create and export the service instance
+const somniaWebSocketService = new SomniaWebSocketService();
+
+// Export types (for TypeScript compatibility)
+export const SomniaEvent = {
+  NFTListedForRent: 'NFTListedForRent',
+  NFTRented: 'NFTRented',
+  RentalCompleted: 'RentalCompleted',
+  RentalDisputed: 'RentalDisputed',
+  DisputeResolved: 'DisputeResolved',
+  SOMIPaymentReceived: 'SOMIPaymentReceived',
+  MicroPaymentProcessed: 'MicroPaymentProcessed',
+  StreamCreated: 'StreamCreated',
+  StreamWithdrawn: 'StreamWithdrawn',
+  AutoReleaseExecuted: 'AutoReleaseExecuted',
+  MilestoneReached: 'MilestoneReached',
+  ReputationUpdated: 'ReputationUpdated',
+  UserVerified: 'UserVerified',
+  AchievementUnlocked: 'AchievementUnlocked',
+  NewBlock: 'NewBlock'
+};
+
+export { somniaWebSocketService };
+export default somniaWebSocketService;
