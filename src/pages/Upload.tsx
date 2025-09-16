@@ -275,32 +275,32 @@ const Upload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
             Create & Upload NFT
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-gray-300 text-lg">
             Upload your own image or generate one with AI, then mint it as an NFT
           </p>
         </motion.div>
 
         {!isConnected && (
-          <Alert className="mb-8">
+          <Alert className="mb-8 bg-slate-800 border-slate-700">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+            <AlertDescription className="text-gray-300">
               Please connect your wallet to create and mint NFTs.
             </AlertDescription>
           </Alert>
         )}
 
         <Tabs defaultValue="upload" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-800">
             <TabsTrigger 
               value="upload" 
               variant="pills"
@@ -320,10 +320,10 @@ const Upload = () => {
           <TabsContent value="upload" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Upload Section */}
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/20 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UploadIcon className="w-5 h-5 text-primary" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <UploadIcon className="w-5 h-5 text-purple-400" />
                     Upload Image
                   </CardTitle>
                 </CardHeader>
@@ -331,24 +331,24 @@ const Upload = () => {
                   <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                       dragActive 
-                        ? "border-primary bg-primary/5" 
-                        : "border-primary/20 hover:border-primary/40"
+                        ? "border-purple-500 bg-purple-500/10" 
+                        : "border-purple-500/30 hover:border-purple-500/50"
                     }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                   >
-                    <UploadIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">Drop your image here</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <UploadIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="font-semibold mb-2 text-white">Drop your image here</h3>
+                    <p className="text-sm text-gray-400 mb-4">
                       or click to browse files
                     </p>
                     <Button 
                       variant="outline" 
                       onClick={handleFileInputClick}
                       disabled={!isConnected}
-                      className="hover:bg-primary/10 hover:border-primary/50 transition-colors"
+                      className="hover:bg-purple-500/10 hover:border-purple-500/50 transition-colors border-slate-600 text-white"
                     >
                       <UploadIcon className="w-4 h-4 mr-2" />
                       Choose File
@@ -360,7 +360,7 @@ const Upload = () => {
                       onChange={handleFileInputChange}
                       className="hidden"
                     />
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-gray-500 mt-2">
                       Supports JPG, PNG, GIF, WebP up to 10MB
                     </p>
                   </div>
@@ -369,12 +369,12 @@ const Upload = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 p-4 bg-muted/50 rounded-lg"
+                      className="mt-4 p-4 bg-slate-700/50 rounded-lg"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <ImageIcon className="w-4 h-4" />
-                          <span className="text-sm font-medium">{uploadedFile.name}</span>
+                          <span className="text-sm font-medium text-white">{uploadedFile.name}</span>
                           <Badge variant="secondary">
                             {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
                           </Badge>
@@ -397,12 +397,12 @@ const Upload = () => {
               </Card>
 
               {/* Preview Section */}
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/20 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Preview</CardTitle>
+                  <CardTitle className="text-white">Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="aspect-square bg-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
                     {previewUrl ? (
                       <img 
                         src={previewUrl} 
@@ -410,7 +410,7 @@ const Upload = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                      <ImageIcon className="w-16 h-16 text-gray-400" />
                     )}
                   </div>
                 </CardContent>
@@ -421,16 +421,16 @@ const Upload = () => {
           <TabsContent value="generate" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* AI Generation Form */}
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/20 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Wand2 className="w-5 h-5 text-accent" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Wand2 className="w-5 h-5 text-pink-400" />
                     AI Image Generation
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="prompt">Describe your image</Label>
+                    <Label htmlFor="prompt" className="text-white">Describe your image</Label>
                     <Textarea
                       id="prompt"
                       placeholder="A majestic dragon flying over a crystal mountain at sunset, digital art style..."
@@ -438,17 +438,18 @@ const Upload = () => {
                       onChange={(e) => setAiFormData({...aiFormData, prompt: e.target.value})}
                       rows={4}
                       disabled={!isConnected}
+                      className="bg-slate-700 border-slate-600 text-white placeholder-gray-400"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="style">Style</Label>
+                      <Label htmlFor="style" className="text-white">Style</Label>
                       <select
                         id="style"
                         value={aiFormData.style}
                         onChange={(e) => setAiFormData({...aiFormData, style: e.target.value})}
-                        className="w-full p-2 border rounded-md bg-background"
+                        className="w-full p-2 border rounded-md bg-slate-700 border-slate-600 text-white"
                         disabled={!isConnected}
                       >
                         <option value="realistic">Realistic</option>
@@ -459,12 +460,12 @@ const Upload = () => {
                       </select>
                     </div>
                     <div>
-                      <Label htmlFor="quality">Quality</Label>
+                      <Label htmlFor="quality" className="text-white">Quality</Label>
                       <select
                         id="quality"
                         value={aiFormData.quality}
                         onChange={(e) => setAiFormData({...aiFormData, quality: e.target.value})}
-                        className="w-full p-2 border rounded-md bg-background"
+                        className="w-full p-2 border rounded-md bg-slate-700 border-slate-600 text-white"
                         disabled={!isConnected}
                       >
                         <option value="standard">Standard</option>
@@ -475,12 +476,12 @@ const Upload = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="aspectRatio">Aspect Ratio</Label>
+                    <Label htmlFor="aspectRatio" className="text-white">Aspect Ratio</Label>
                     <select
                       id="aspectRatio"
                       value={aiFormData.aspectRatio}
                       onChange={(e) => setAiFormData({...aiFormData, aspectRatio: e.target.value})}
-                      className="w-full p-2 border rounded-md bg-background"
+                      className="w-full p-2 border rounded-md bg-slate-700 border-slate-600 text-white"
                       disabled={!isConnected}
                     >
                       <option value="1:1">Square (1:1)</option>
@@ -493,7 +494,7 @@ const Upload = () => {
                   <Button 
                     onClick={generateImage}
                     disabled={!isConnected || isGenerating || !aiFormData.prompt.trim()}
-                    className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                    className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90"
                   >
                     {isGenerating ? (
                       <>
@@ -511,8 +512,8 @@ const Upload = () => {
                   {isGenerating && (
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Generating image...</span>
-                        <span>{Math.round(generationProgress)}%</span>
+                        <span className="text-white">Generating image...</span>
+                        <span className="text-white">{Math.round(generationProgress)}%</span>
                       </div>
                       <Progress value={generationProgress} className="w-full" />
                     </div>
@@ -521,17 +522,17 @@ const Upload = () => {
               </Card>
 
               {/* Generated Images Gallery */}
-              <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+              <Card className="border-purple-500/20 bg-slate-800/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Generated Images</CardTitle>
+                  <CardTitle className="text-white">Generated Images</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <AnimatePresence>
                     {generatedImages.length === 0 ? (
-                      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
+                      <div className="aspect-square bg-slate-700 rounded-lg flex items-center justify-center">
                         <div className="text-center">
-                          <Wand2 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">No images generated yet</p>
+                          <Wand2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-400">No images generated yet</p>
                         </div>
                       </div>
                     ) : (
@@ -543,7 +544,7 @@ const Upload = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             className={`relative group cursor-pointer rounded-lg overflow-hidden ${
-                              selectedImage === image.url ? 'ring-2 ring-primary' : ''
+                              selectedImage === image.url ? 'ring-2 ring-purple-500' : ''
                             }`}
                             onClick={() => setSelectedImage(image.url)}
                           >
@@ -599,39 +600,41 @@ const Upload = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mt-8"
           >
-            <Card className="border-primary/10 bg-card/50 backdrop-blur-sm">
+            <Card className="border-purple-500/20 bg-slate-800/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Info className="w-5 h-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Info className="w-5 h-5 text-purple-400" />
                   NFT Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="name">NFT Name *</Label>
+                    <Label htmlFor="name" className="text-white">NFT Name *</Label>
                     <Input
                       id="name"
                       placeholder="My Awesome NFT"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       disabled={!isConnected}
+                      className="bg-slate-700 border-slate-600 text-white placeholder-gray-400"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="collection">Collection</Label>
+                    <Label htmlFor="collection" className="text-white">Collection</Label>
                     <Input
                       id="collection"
                       placeholder="My Collection"
                       value={formData.collection}
                       onChange={(e) => setFormData({...formData, collection: e.target.value})}
                       disabled={!isConnected}
+                      className="bg-slate-700 border-slate-600 text-white placeholder-gray-400"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="text-white">Description</Label>
                   <Textarea
                     id="description"
                     placeholder="Describe your NFT..."
@@ -639,13 +642,14 @@ const Upload = () => {
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     rows={3}
                     disabled={!isConnected}
+                    className="bg-slate-700 border-slate-600 text-white placeholder-gray-400"
                   />
                 </div>
 
-                <div className="flex gap-4 pt-4 border-t">
+                <div className="flex gap-4 pt-4 border-t border-slate-600">
                   <Button 
                     variant="outline" 
-                    className="flex-1"
+                    className="flex-1 border-slate-600 text-white hover:bg-slate-700"
                     disabled={!isConnected}
                     onClick={() => {
                       toast({
@@ -658,7 +662,7 @@ const Upload = () => {
                   </Button>
                   <Button 
                     onClick={handleMintNFT}
-                    className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
                     disabled={!isConnected || isMinting || !formData.name.trim()}
                   >
                     {isMinting ? (

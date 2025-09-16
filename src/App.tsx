@@ -17,6 +17,12 @@ import NFTDetail from "@/pages/NFTDetail";
 import Create from "@/pages/Create";
 import DAO from "@/pages/DAO";
 import Governance from "@/pages/Governance";
+import CreativityShowcase from "@/pages/CreativityShowcase";
+import Upload from "@/pages/Upload";
+import SubgraphDashboard from "@/pages/SubgraphDashboard";
+import Social from "@/pages/Social";
+import Notifications from "@/pages/Notifications";
+import Mobile from "@/pages/Mobile";
 import SimpleWallet from "@/components/SimpleWallet";
 import SimpleRentalFlow from "@/components/SimpleRentalFlow";
 
@@ -43,8 +49,14 @@ const App = () => (
                          <Route path="/profile" element={<Profile />} />
                          <Route path="/nft/:id" element={<NFTDetail />} />
                          <Route path="/create" element={<Create />} />
+                         <Route path="/upload" element={<Upload />} />
                          <Route path="/dao" element={<DAO />} />
                          <Route path="/governance" element={<Governance />} />
+                         <Route path="/creativity" element={<CreativityShowcase />} />
+                         <Route path="/subgraph" element={<SubgraphDashboard />} />
+                         <Route path="/social" element={<Social />} />
+                         <Route path="/notifications" element={<Notifications />} />
+                         <Route path="/mobile" element={<Mobile />} />
                          <Route path="/wallet" element={<SimpleWallet />} />
                          <Route path="/rental" element={<SimpleRentalFlow />} />
                          <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />

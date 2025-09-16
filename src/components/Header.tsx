@@ -30,10 +30,16 @@ const Header = () => {
   const navItems = [
     { label: "Marketplace", href: "/marketplace", icon: "🏪" },
     { label: "Create", href: "/create", icon: "✨" },
+    { label: "Upload", href: "/upload", icon: "📤" },
     { label: "Dashboard", href: "/dashboard", icon: "📊" },
     { label: "Analytics", href: "/analytics", icon: "📈" },
     { label: "DAO", href: "/dao", icon: "🏛️" },
     { label: "Governance", href: "/governance", icon: "👑" },
+    { label: "Creativity", href: "/creativity", icon: "🎨" },
+    { label: "Subgraph", href: "/subgraph", icon: "📊" },
+    { label: "Social", href: "/social", icon: "👥" },
+    { label: "Notifications", href: "/notifications", icon: "🔔" },
+    { label: "Mobile", href: "/mobile", icon: "📱" },
     { label: "Profile", href: "/profile", icon: "👤" }
   ];
 
