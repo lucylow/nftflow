@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import WalletConnect from '@/components/WalletConnect';
-import { Wallet, Zap, Shield, Clock, BarChart3, ShoppingCart, Plus, User } from 'lucide-react';
+import WalletConnectionTest from '@/components/WalletConnectionTest';
+import { Wallet, Zap, Shield, Clock, BarChart3, ShoppingCart, Plus, User, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SimpleIndex = () => {
   const navigate = useNavigate();
+  const [showWalletTest, setShowWalletTest] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950">
@@ -17,9 +19,29 @@ const SimpleIndex = () => {
             <Zap className="h-8 w-8 text-purple-400" />
             <h1 className="text-2xl font-bold text-white">NFTFlow</h1>
           </div>
-          <WalletConnect />
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowWalletTest(!showWalletTest)}
+              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Test Wallet
+            </Button>
+            <WalletConnect />
+          </div>
         </div>
       </header>
+
+      {/* Wallet Connection Test */}
+      {showWalletTest && (
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <WalletConnectionTest />
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">

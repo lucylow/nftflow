@@ -39,187 +39,102 @@ import SocialFeatures from "@/components/SocialFeatures";
 import { useToast } from "@/hooks/use-toast";
 import { useWeb3 } from '@/contexts/Web3Context';
 import { MockDataService } from '@/mockData/mockDataService';
+import { hybridDataService } from '@/services/hybridDataService';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dataSourceInfo, setDataSourceInfo] = useState<any>(null);
   const { toast } = useToast();
   const { account, isConnected, balance, chainId } = useWeb3();
   const navigate = useNavigate();
 
-  // Simulate loading
+  // Load dashboard data
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    const loadDashboardData = async () => {
+      if (account && isConnected) {
+        try {
+          setIsLoading(true);
+          const data = await hybridDataService.getDashboardData(account);
+          const dataInfo = hybridDataService.getDataSourceInfo();
+          setDashboardData(data);
+          setDataSourceInfo(dataInfo);
+          
+          // Show toast if real data is available
+          if (dataInfo.hasRealData) {
+            toast({
+              title: "Real Blockchain Data Loaded",
+              description: "Your dashboard is now showing live data from the blockchain!",
+            });
+          } else {
+            toast({
+              title: "Demo Mode",
+              description: "Showing mock data. Connect to blockchain for real data.",
+              variant: "destructive"
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load dashboard data:', error);
+          toast({
+            title: "Data Load Error",
+            description: "Failed to load dashboard data. Using fallback data.",
+            variant: "destructive"
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [account, isConnected, toast]);
 
   const handleRefresh = async () => {
+    if (!account || !isConnected) return;
+    
     setIsRefreshing(true);
-    // Simulate refresh
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsRefreshing(false);
+    try {
+      const data = await hybridDataService.getDashboardData(account);
+      const dataInfo = hybridDataService.getDataSourceInfo();
+      setDashboardData(data);
+      setDataSourceInfo(dataInfo);
+      
+      toast({
+        title: "Data Refreshed",
+        description: dataInfo.hasRealData ? "Live blockchain data updated!" : "Mock data refreshed.",
+      });
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+      toast({
+        title: "Refresh Failed",
+        description: "Failed to refresh data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
-  const userStats = [
+  // Use real data if available, otherwise fallback to mock data
+  const userStats = dashboardData?.userStats || [
     { label: "Total Earned", value: "156.78 STT", change: "+12.5%" },
     { label: "Active Rentals", value: "8", change: "+2" },
     { label: "Total Rented", value: "47 NFTs", change: "+5" },
     { label: "Reputation Score", value: "4.8/5", change: "+0.1" }
   ];
 
-  const activeRentals = [
-    {
-      id: "1",
-      name: "Cosmic Wizard #1234",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop",
-      collection: "Cosmic Wizards",
-      pricePerHour: 0.5,
-      pricePerSecond: 0.5 / 3600,
-      isRented: true,
-      owner: "0x1234567890abcdef",
-      timeLeft: "2h 15m",
-      rarity: "Rare",
-      utilityType: "Gaming Weapon",
-      rentalStartTime: "2024-01-15T10:30:00Z",
-      totalCost: 1.25
-    },
-    {
-      id: "2",
-      name: "Galaxy Punk #5678", 
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
-      collection: "Galaxy Punks",
-      pricePerHour: 1.2,
-      pricePerSecond: 1.2 / 3600,
-      isRented: true,
-      owner: "0x9876543210fedcba", 
-      timeLeft: "45m",
-      rarity: "Epic",
-      utilityType: "Gaming Avatar",
-      rentalStartTime: "2024-01-15T14:00:00Z",
-      totalCost: 2.4
-    },
-    {
-      id: "3",
-      name: "AI Trading Bot License",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop",
-      collection: "AI Services",
-      pricePerHour: 0.0432,
-      pricePerSecond: 0.000012,
-      isRented: true,
-      owner: "0x7777888899990000",
-      timeLeft: "1d 3h",
-      rarity: "Epic",
-      utilityType: "AI Service",
-      rentalStartTime: "2024-01-14T09:15:00Z",
-      totalCost: 1.08
-    },
-    {
-      id: "4",
-      name: "Virtual Real Estate Plot",
-      image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=400&fit=crop",
-      collection: "Metaverse Land",
-      pricePerHour: 0.0288,
-      pricePerSecond: 0.000008,
-      isRented: true,
-      owner: "0x4444555566667777",
-      timeLeft: "2d 5h",
-      rarity: "Legendary",
-      utilityType: "Virtual Land",
-      rentalStartTime: "2024-01-13T16:45:00Z",
-      totalCost: 1.44
-    },
-    {
-      id: "5",
-      name: "Music Production Studio",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
-      collection: "Creative Tools",
-      pricePerHour: 0.0144,
-      pricePerSecond: 0.000004,
-      isRented: true,
-      owner: "0x2222333344445555",
-      timeLeft: "4h 30m",
-      rarity: "Rare",
-      utilityType: "Creative Tool",
-      rentalStartTime: "2024-01-15T12:00:00Z",
-      totalCost: 0.65
-    }
-  ];
 
-  const recentActivity = [
-    { type: "rental", action: "Rented Cosmic Wizard #1234", time: "2 hours ago", amount: "+1.5 STT", nftId: "1" },
-    { type: "return", action: "Returned Space Ape #456", time: "5 hours ago", amount: "-0.8 STT", nftId: "456" },
-    { type: "rental", action: "Rented AI Trading Bot License", time: "1 day ago", amount: "+1.08 STT", nftId: "3" },
-    { type: "earning", action: "Earned from Virtual Real Estate Plot", time: "2 days ago", amount: "+1.44 STT", nftId: "4" },
-    { type: "rental", action: "Rented Music Production Studio", time: "3 days ago", amount: "+0.65 STT", nftId: "5" },
-    { type: "return", action: "Returned Digital Dragon #777", time: "4 days ago", amount: "-2.5 STT", nftId: "777" },
-    { type: "earning", action: "Earned from Neon Cat #9999", time: "5 days ago", amount: "+3.2 STT", nftId: "9999" },
-    { type: "rental", action: "Rented Galaxy Punk #5678", time: "6 days ago", amount: "+2.4 STT", nftId: "2" },
-    { type: "return", action: "Returned Luxury Car Showroom", time: "1 week ago", amount: "-4.0 STT", nftId: "111" },
-    { type: "earning", action: "Earned from Crypto Trading Signals", time: "1 week ago", amount: "+8.0 STT", nftId: "666" }
-  ];
-
-  const userListings = [
-    {
-      id: "1",
-      name: "Digital Art Gallery Space",
-      image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop",
-      collection: "Virtual Galleries",
-      pricePerSecond: 0.000002,
-      isRented: false,
-      owner: "0x5555666677778888",
-      rarity: "Rare",
-      utilityType: "Art Display",
-      totalEarnings: 12.5,
-      rentalCount: 8,
-      lastRented: "2 days ago"
-    },
-    {
-      id: "2",
-      name: "Fitness Coach AI",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
-      collection: "Health & Wellness",
-      pricePerSecond: 0.000002,
-      isRented: true,
-      owner: "0x6666777788889999",
-      timeLeft: "3h 45m",
-      rarity: "Common",
-      utilityType: "Health Service",
-      totalEarnings: 8.3,
-      rentalCount: 15,
-      lastRented: "Currently rented"
-    },
-    {
-      id: "3",
-      name: "Language Learning Tutor",
-      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=400&fit=crop",
-      collection: "Education Services",
-      pricePerSecond: 0.0000015,
-      isRented: false,
-      owner: "0x0000111122223333",
-      rarity: "Common",
-      utilityType: "Education",
-      totalEarnings: 5.7,
-      rentalCount: 12,
-      lastRented: "1 week ago"
-    }
-  ];
-
-  const earningsHistory = [
-    { date: "2024-01-15", amount: 5.67, rentals: 3 },
-    { date: "2024-01-14", amount: 8.23, rentals: 5 },
-    { date: "2024-01-13", amount: 12.45, rentals: 7 },
-    { date: "2024-01-12", amount: 6.78, rentals: 4 },
-    { date: "2024-01-11", amount: 9.12, rentals: 6 },
-    { date: "2024-01-10", amount: 15.34, rentals: 9 },
-    { date: "2024-01-09", amount: 7.89, rentals: 5 }
-  ];
-
-  // Get mock data
-  const userNFTs = MockDataService.getNFTsByOwner(account || '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59');
-  const activeRentalsMock = MockDataService.getActiveRentals();
-  const analytics = MockDataService.getAnalytics();
+  // Get data from hybrid service
+  const userNFTs = dashboardData?.userNFTs || [];
+  const activeRentals = dashboardData?.activeRentals || [];
+  const recentActivity = dashboardData?.recentActivity || [];
+  const earningsHistory = dashboardData?.earningsHistory || [];
+  const userListings = dashboardData?.userListings || [];
 
   if (!isConnected) {
     return (
@@ -264,6 +179,14 @@ const Dashboard = () => {
               <p className="text-slate-300">Manage your NFT rentals and earnings</p>
             </div>
             <div className="flex gap-3">
+              {dataSourceInfo && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                  <div className={`w-2 h-2 rounded-full ${dataSourceInfo.hasRealData ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                  <span className="text-sm text-slate-300">
+                    {dataSourceInfo.hasRealData ? 'Live Data' : 'Demo Mode'}
+                  </span>
+                </div>
+              )}
               <Button 
                 variant="outline" 
                 size="lg"
@@ -526,21 +449,27 @@ const Dashboard = () => {
               <Card className="bg-slate-800/50 border-slate-700/50">
                 <CardContent className="p-6 text-center">
                   <Wallet className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">156.78 STT</p>
+                  <p className="text-2xl font-bold text-white">
+                    {dashboardData?.realEarnings?.totalEarned?.toFixed(2) || '156.78'} STT
+                  </p>
                   <p className="text-slate-400 text-sm">Total Earned</p>
                 </CardContent>
               </Card>
               <Card className="bg-slate-800/50 border-slate-700/50">
                 <CardContent className="p-6 text-center">
                   <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">23.45 STT</p>
+                  <p className="text-2xl font-bold text-white">
+                    {(dashboardData?.realEarnings?.totalEarned * 0.15)?.toFixed(2) || '23.45'} STT
+                  </p>
                   <p className="text-slate-400 text-sm">This Month</p>
                 </CardContent>
               </Card>
               <Card className="bg-slate-800/50 border-slate-700/50">
                 <CardContent className="p-6 text-center">
                   <Calendar className="w-8 h-8 text-pink-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">5.67 STT</p>
+                  <p className="text-2xl font-bold text-white">
+                    {(dashboardData?.realEarnings?.totalEarned * 0.04)?.toFixed(2) || '5.67'} STT
+                  </p>
                   <p className="text-slate-400 text-sm">Today</p>
                 </CardContent>
               </Card>

@@ -19,6 +19,7 @@ import {
   ensureSomniaNetwork,
   getCurrentNetwork
 } from '@/lib/web3';
+import { somniaService } from '@/services/somniaService';
 
 interface Web3ContextType {
   // Connection state
@@ -31,6 +32,12 @@ interface Web3ContextType {
   // Service status
   isBlockchainReady: boolean;
   serviceStatus: { blockchain: boolean; mock: boolean };
+  
+  // Somnia-specific methods
+  createMicroRental: (nftContract: string, tokenId: string, pricePerSecond: string, duration: number) => Promise<string>;
+  createPaymentStream: (recipient: string, amount: string, duration: number) => Promise<string>;
+  getSomniaMetrics: () => any;
+  getSomniaNetworkInfo: () => Promise<any>;
   
   // Contract instances
   nftFlowContract: ethers.Contract | null;
@@ -393,6 +400,38 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     }
   }, [isConnected, account]);
 
+  // Somnia-specific methods
+  const createMicroRental = useCallback(async (
+    nftContract: string, 
+    tokenId: string, 
+    pricePerSecond: string, 
+    duration: number
+  ): Promise<string> => {
+    if (!isConnected || !somniaService.isReady()) {
+      throw new Error('Wallet not connected or Somnia service not ready');
+    }
+    return await somniaService.createMicroRental(nftContract, tokenId, pricePerSecond, duration);
+  }, [isConnected]);
+
+  const createPaymentStream = useCallback(async (
+    recipient: string, 
+    amount: string, 
+    duration: number
+  ): Promise<string> => {
+    if (!isConnected || !somniaService.isReady()) {
+      throw new Error('Wallet not connected or Somnia service not ready');
+    }
+    return await somniaService.createPaymentStream(recipient, amount, duration);
+  }, [isConnected]);
+
+  const getSomniaMetrics = useCallback(() => {
+    return somniaService.getMetrics();
+  }, []);
+
+  const getSomniaNetworkInfo = useCallback(async () => {
+    return await somniaService.getNetworkInfo();
+  }, []);
+
   const value: Web3ContextType = {
     isConnected,
     isConnecting,
@@ -412,6 +451,10 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     switchNetwork,
     refreshBalance,
     refreshBlockchainConnection,
+    createMicroRental,
+    createPaymentStream,
+    getSomniaMetrics,
+    getSomniaNetworkInfo,
   };
 
   return (

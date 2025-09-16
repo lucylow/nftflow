@@ -69,9 +69,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     { label: 'DAO', href: '/dao', icon: Building2, badge: null },
     { label: 'Governance', href: '/governance', icon: Crown, badge: null },
     { label: 'Creativity', href: '/creativity', icon: Palette, badge: 'Hot' },
+    { label: 'Somnia', href: '/somnia', icon: Zap, badge: 'New' },
     { label: 'Subgraph', href: '/subgraph', icon: Database, badge: null },
     { label: 'Social', href: '/social', icon: Users, badge: null },
-    { label: 'Notifications', href: '/notifications', icon: Bell, badge: null },
   ];
 
   const toolsNavItems = [

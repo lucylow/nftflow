@@ -22,11 +22,11 @@ import CreativityShowcase from "@/pages/CreativityShowcase";
 import Upload from "@/pages/Upload";
 import SubgraphDashboard from "@/pages/SubgraphDashboard";
 import Social from "@/pages/Social";
-import Notifications from "@/pages/Notifications";
 import Mobile from "@/pages/Mobile";
 import SimpleWallet from "@/components/SimpleWallet";
 import SimpleRentalFlow from "@/components/SimpleRentalFlow";
 import WalletTest from "@/pages/WalletTest";
+import Somnia from "@/pages/Somnia";
 
 const queryClient = new QueryClient();
 
@@ -56,10 +56,10 @@ const App = () => (
                          <Route path="/creativity" element={<CreativityShowcase />} />
                          <Route path="/subgraph" element={<SubgraphDashboard />} />
                          <Route path="/social" element={<Social />} />
-                         <Route path="/notifications" element={<Notifications />} />
                          <Route path="/mobile" element={<Mobile />} />
                          <Route path="/wallet" element={<SimpleWallet />} />
                          <Route path="/wallet-test" element={<WalletTest />} />
+                         <Route path="/somnia" element={<Somnia />} />
                          <Route path="/rental" element={<SimpleRentalFlow />} />
                          <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />
                       </Routes>

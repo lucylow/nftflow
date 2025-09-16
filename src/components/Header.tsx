@@ -38,7 +38,6 @@ const Header = () => {
     { label: "Creativity", href: "/creativity", icon: "🎨" },
     { label: "Subgraph", href: "/subgraph", icon: "📊" },
     { label: "Social", href: "/social", icon: "👥" },
-    { label: "Notifications", href: "/notifications", icon: "🔔" },
     { label: "Mobile", href: "/mobile", icon: "📱" },
     { label: "Profile", href: "/profile", icon: "👤" }
   ];
