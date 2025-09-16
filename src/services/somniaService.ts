@@ -200,7 +200,9 @@ export class SomniaService {
       // Update metrics
       this.metrics.blockTime = blockTime;
       this.metrics.averageGasPrice = ethers.formatUnits(gasPrice.gasPrice || 0, 'gwei');
-      this.metrics.lastBlockNumber = blockNumber;
+      
+      // Don't use networkInfo since it doesn't exist, just use the metrics
+      // this.networkInfo.lastBlockNumber = blockNumber;
 
       // Estimate throughput (transactions per second)
       this.metrics.throughputTPS = block.transactions.length / blockTime;

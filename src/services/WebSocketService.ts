@@ -11,6 +11,7 @@ interface WebSocketConfig {
 }
 
 interface RentalEvent {
+  [key: string]: any;
   nftContract: string;
   tokenId: string;
   lender: string;
@@ -22,6 +23,7 @@ interface RentalEvent {
 }
 
 interface PaymentEvent {
+  [key: string]: any;
   streamId: string;
   amount: string;
   txHash: string;
@@ -48,9 +50,8 @@ class WebSocketService {
   async init(): Promise<void> {
     try {
       // Create WebSocket provider for real-time events
-      this.provider = new ethers.BrowserProvider(
-        new ethers.WebSocketProvider(this.config.wssRpcUrl, this.config.chainId)
-      );
+      const wsProvider = new ethers.WebSocketProvider(this.config.wssRpcUrl, this.config.chainId);
+      this.provider = new ethers.BrowserProvider(wsProvider as any);
       
       // Create contract instance for event listening
       this.contract = new ethers.Contract(
@@ -91,8 +92,8 @@ class WebSocketService {
         tenant,
         expires: new Date(Number(expires) * 1000),
         price: ethers.formatEther(price),
-        txHash: event.transactionHash,
-        blockNumber: event.blockNumber
+        txHash: (event as any)?.transactionHash || '',
+        blockNumber: (event as any)?.blockNumber || 0
       });
     });
 
@@ -109,7 +110,7 @@ class WebSocketService {
         tokenId: tokenId.toString(),
         lender,
         tenant,
-        txHash: event.transactionHash
+        txHash: (event as any)?.transactionHash || ''
       });
     });
 
@@ -122,7 +123,7 @@ class WebSocketService {
       this.handleFundsReleased({
         streamId,
         amount: ethers.formatEther(amount),
-        txHash: event.transactionHash
+        txHash: (event as any)?.transactionHash || ''
       });
     });
 
@@ -137,7 +138,7 @@ class WebSocketService {
         user,
         newScore: newScore.toString(),
         success,
-        txHash: event.transactionHash
+        txHash: (event as any)?.transactionHash || ''
       });
     });
   }
@@ -169,14 +170,14 @@ class WebSocketService {
     this.emitToSubscribers('rental-completed', rentalData);
     
     // Send notifications
-    notificationService.sendNotification(rentalData.tenant, {
+    notificationService.sendNotification(rentalData.tenant as string, {
       type: 'rental-completed',
       title: 'Rental Completed',
       message: `Your rental of NFT #${rentalData.tokenId} has ended`,
       data: rentalData
     });
 
-    notificationService.sendNotification(rentalData.lender, {
+    notificationService.sendNotification(rentalData.lender as string, {
       type: 'rental-returned',
       title: 'NFT Returned',
       message: `Your NFT #${rentalData.tokenId} has been returned`,
@@ -204,8 +205,8 @@ class WebSocketService {
     this.emitToSubscribers('reputation-updated', reputationData);
     
     // Send notification if significant change
-    if (parseInt(reputationData.newScore) >= 750) {
-      notificationService.sendNotification(reputationData.user, {
+    if (parseInt(reputationData.newScore as string) >= 750) {
+      notificationService.sendNotification(reputationData.user as string, {
         type: 'reputation-milestone',
         title: 'Reputation Milestone',
         message: `Congratulations! You've reached ${reputationData.newScore} reputation points`,

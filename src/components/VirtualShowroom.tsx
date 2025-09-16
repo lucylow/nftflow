@@ -196,7 +196,7 @@ export function VirtualShowroom({ className }: VirtualShowroomProps) {
     setIsRenting(true);
     try {
       const cost = calculateRentalCost(nft, rentalDuration);
-      await rentNFT(nft.id, rentalDuration, { value: cost });
+      await rentNFT(nft.id, rentalDuration.toString(), cost);
       
       // Update NFT status
       setNfts(prev => prev.map(n => 

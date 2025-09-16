@@ -240,12 +240,12 @@ const Upload = () => {
     }
 
     try {
-      await mintNFT({
-        name: formData.name,
-        description: formData.description,
-        image: selectedImage,
-        attributes: formData.attributes
-      });
+      await mintNFT(
+        formData.name,
+        formData.description,
+        selectedImage,
+        JSON.stringify(formData.attributes)
+      );
 
       toast({
         title: "NFT Minted!",

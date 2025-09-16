@@ -63,20 +63,32 @@ export function RealTimePaymentStream({ streamId, className }: RealTimePaymentSt
       try {
         const stream = await getStream(streamId);
         if (stream) {
-          setStreamData(stream);
-          setCurrentStreamedAmount(stream.streamedAmount);
+          // Convert stream data to PaymentStreamData format with fallbacks
+          const paymentStreamData: PaymentStreamData = {
+            id: (stream as any).id || streamId,
+            sender: (stream as any).sender || '',
+            recipient: (stream as any).recipient || '',
+            totalAmount: (stream as any).deposit || '0',
+            streamedAmount: (stream as any).streamedAmount || '0',
+            ratePerSecond: (stream as any).ratePerSecond || '0',
+            startTime: typeof (stream as any).startTime === 'string' ? parseInt((stream as any).startTime) : ((stream as any).startTime || 0),
+            endTime: typeof (stream as any).stopTime === 'string' ? parseInt((stream as any).stopTime) : ((stream as any).stopTime || 0),
+            isActive: (stream as any).active || false
+          };
+          setStreamData(paymentStreamData);
+          setCurrentStreamedAmount(paymentStreamData.streamedAmount);
           
           // Calculate initial time values
           const now = Math.floor(Date.now() / 1000);
-          const elapsed = Math.max(0, now - stream.startTime);
-          const remaining = Math.max(0, stream.endTime - now);
+          const elapsed = Math.max(0, now - paymentStreamData.startTime);
+          const remaining = Math.max(0, paymentStreamData.endTime - now);
           
           setElapsedTime(elapsed);
           setRemainingTime(remaining);
           
           // Calculate progress
-          const totalDuration = stream.endTime - stream.startTime;
-          const progress = Math.min(100, (elapsed / totalDuration) * 100);
+          const totalDuration = paymentStreamData.endTime - paymentStreamData.startTime;
+          const progress = Math.min(100, totalDuration > 0 ? (elapsed / totalDuration) * 100 : 0);
           setStreamProgress(progress);
         }
       } catch (error) {

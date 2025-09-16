@@ -51,7 +51,7 @@ export class SomniaWebSocketService {
         console.log('🔌 Connected to Somnia WebSocket');
         this.isConnected = true;
         this.reconnectAttempts = 0;
-        this.emit('connection', { type: 'connection', data: { status: 'connected' }, timestamp: Date.now() });
+        this.emit('block', { type: 'block', data: { status: 'connected' }, timestamp: Date.now() });
         
         // Start monitoring blocks
         this.startBlockMonitoring();
@@ -69,7 +69,7 @@ export class SomniaWebSocketService {
       this.ws.onclose = () => {
         console.log('🔌 Disconnected from Somnia WebSocket');
         this.isConnected = false;
-        this.emit('connection', { type: 'connection', data: { status: 'disconnected' }, timestamp: Date.now() });
+        this.emit('block', { type: 'block', data: { status: 'disconnected' }, timestamp: Date.now() });
         this.scheduleReconnect();
       };
 

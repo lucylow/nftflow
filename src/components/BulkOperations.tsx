@@ -191,7 +191,7 @@ const BulkOperations: React.FC = () => {
             case 'unlist':
               return { ...nft, isRented: false };
             case 'update_price':
-              return { ...nft, pricePerSecond: operationParams.newPrice || nft.pricePerSecond };
+              return { ...nft, pricePerSecond: (operationParams.newPrice as number) || nft.pricePerSecond };
             case 'delete':
               return nft; // Don't actually delete, just mark as processed
             default:

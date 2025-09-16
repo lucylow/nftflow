@@ -64,7 +64,10 @@ class HybridDataService {
 
     if (realDataService.isReady()) {
       try {
-        realData = await realDataService.getDashboardData(userAddress);
+        realData = {
+          ...realData,
+          realEarnings: (await realDataService.getDashboardData(userAddress)).earnings
+        };
         console.log('✅ Real blockchain data loaded');
       } catch (error) {
         console.warn('⚠️ Failed to load real blockchain data, using mock data:', error);

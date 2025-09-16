@@ -88,8 +88,8 @@ const PaymentStreamManagement = () => {
       recipient: "0x1234567890123456789012345678901234567890",
       deposit: "2.5",
       ratePerSecond: "0.0001",
-      startTime: Date.now() - 3600000, // 1 hour ago
-      stopTime: Date.now() + 86400000, // 24 hours from start
+      startTime: (Date.now() - 3600000).toString(), // 1 hour ago
+      stopTime: (Date.now() + 86400000).toString(), // 24 hours from start
       remainingBalance: "1.8",
       active: true
     },
@@ -99,8 +99,8 @@ const PaymentStreamManagement = () => {
       recipient: account || "0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59",
       deposit: "1.0",
       ratePerSecond: "0.00005",
-      startTime: Date.now() - 7200000, // 2 hours ago
-      stopTime: Date.now() + 43200000, // 12 hours from start
+      startTime: (Date.now() - 7200000).toString(), // 2 hours ago
+      stopTime: (Date.now() + 43200000).toString(), // 12 hours from start
       remainingBalance: "0.7",
       active: true
     }
