@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { ethers } from 'ethers';
+import { hybridNFTService } from '@/services/hybridNFTService';
 import { 
   getProvider, 
   getSigner, 
@@ -28,6 +29,10 @@ interface Web3ContextType {
   balance: string | null;
   chainId: number | null;
   
+  // Service status
+  isBlockchainReady: boolean;
+  serviceStatus: { blockchain: boolean; mock: boolean };
+  
   // Contract instances
   nftFlowContract: ethers.Contract | null;
   paymentStreamContract: ethers.Contract | null;
@@ -47,6 +52,7 @@ interface Web3ContextType {
   disconnectWallet: () => void;
   switchNetwork: (chainId: number) => Promise<void>;
   refreshBalance: () => Promise<void>;
+  refreshBlockchainConnection: () => Promise<void>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -62,6 +68,10 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   const [balance, setBalance] = useState<string | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   
+  // Service status
+  const [isBlockchainReady, setIsBlockchainReady] = useState(false);
+  const [serviceStatus, setServiceStatus] = useState({ blockchain: false, mock: true });
+  
   const [nftFlowContract, setNftFlowContract] = useState<ethers.Contract | null>(null);
   const [paymentStreamContract, setPaymentStreamContract] = useState<ethers.Contract | null>(null);
   const [reputationSystemContract, setReputationSystemContract] = useState<ethers.Contract | null>(null);
@@ -72,134 +82,120 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   // Initialize contracts when connected
   const initializeContracts = async () => {
     try {
+      console.log('🔧 Initializing contracts...');
+      
       // Check if contract addresses are set (not zero addresses)
       if (CONTRACT_ADDRESSES.NFTFlow === '0x0000000000000000000000000000000000000000') {
-        console.warn('Contract addresses not set. Please deploy contracts first.');
+        console.warn('⚠️ Contract addresses not set. Running in mock mode.');
         return;
       }
 
-      const nftFlow = await getNFTFlowContract();
-      const paymentStream = await getPaymentStreamContract();
-      const reputationSystem = await getReputationSystemContract();
-      const priceOracle = await getMockPriceOracleContract();
+      // Initialize core contracts with error handling
+      const contracts = await Promise.allSettled([
+        getNFTFlowContract(),
+        getPaymentStreamContract(),
+        getReputationSystemContract(),
+        getMockPriceOracleContract()
+      ]);
+
+      const [nftFlowResult, paymentStreamResult, reputationSystemResult, priceOracleResult] = contracts;
+
+      if (nftFlowResult.status === 'fulfilled') {
+        setNftFlowContract(nftFlowResult.value);
+        console.log('✅ NFTFlow contract initialized');
+      } else {
+        console.warn('⚠️ Failed to initialize NFTFlow contract:', nftFlowResult.reason);
+      }
+
+      if (paymentStreamResult.status === 'fulfilled') {
+        setPaymentStreamContract(paymentStreamResult.value);
+        console.log('✅ PaymentStream contract initialized');
+      } else {
+        console.warn('⚠️ Failed to initialize PaymentStream contract:', paymentStreamResult.reason);
+      }
+
+      if (reputationSystemResult.status === 'fulfilled') {
+        setReputationSystemContract(reputationSystemResult.value);
+        console.log('✅ ReputationSystem contract initialized');
+      } else {
+        console.warn('⚠️ Failed to initialize ReputationSystem contract:', reputationSystemResult.reason);
+      }
+
+      if (priceOracleResult.status === 'fulfilled') {
+        setPriceOracleContract(priceOracleResult.value);
+        console.log('✅ MockPriceOracle contract initialized');
+      } else {
+        console.warn('⚠️ Failed to initialize MockPriceOracle contract:', priceOracleResult.reason);
+      }
       
       // Only initialize these if addresses are set (not zero addresses)
-      let dynamicPricing = null;
-      let utilityTracker = null;
-      
       if (CONTRACT_ADDRESSES.DynamicPricing !== '0x0000000000000000000000000000000000000000') {
         try {
-          dynamicPricing = await getDynamicPricingContract();
+          const dynamicPricing = await getDynamicPricingContract();
+          setDynamicPricingContract(dynamicPricing);
+          console.log('✅ DynamicPricing contract initialized');
         } catch (error) {
-          console.warn('Failed to initialize DynamicPricing contract:', error);
+          console.warn('⚠️ Failed to initialize DynamicPricing contract:', error);
         }
       }
       
       if (CONTRACT_ADDRESSES.UtilityTracker !== '0x0000000000000000000000000000000000000000') {
         try {
-          utilityTracker = await getUtilityTrackerContract();
+          const utilityTracker = await getUtilityTrackerContract();
+          setUtilityTrackerContract(utilityTracker);
+          console.log('✅ UtilityTracker contract initialized');
         } catch (error) {
-          console.warn('Failed to initialize UtilityTracker contract:', error);
+          console.warn('⚠️ Failed to initialize UtilityTracker contract:', error);
         }
       }
-      
-      setNftFlowContract(nftFlow);
-      setPaymentStreamContract(paymentStream);
-      setReputationSystemContract(reputationSystem);
-      setPriceOracleContract(priceOracle);
-      setDynamicPricingContract(dynamicPricing);
-      setUtilityTrackerContract(utilityTracker);
+
+      console.log('🎉 Contract initialization completed');
     } catch (error) {
-      console.error('Failed to initialize contracts:', error);
+      console.error('❌ Failed to initialize contracts:', error);
       // Don't throw error - allow wallet connection without contracts
+      console.log('🔄 Continuing in mock mode...');
     }
   };
 
-  // Connect wallet
+  // Connect wallet using hybrid service
   const connectWallet = async () => {
     console.log('🔌 Starting wallet connection process...');
-    
-    if (typeof window === 'undefined' || !window.ethereum) {
-      console.error('❌ MetaMask not available');
-      throw new Error('MetaMask not installed. Please install MetaMask to connect your wallet.');
-    }
-
-    console.log('✅ MetaMask detected');
     setIsConnecting(true);
     
     try {
-      // First, try to get accounts without requesting access
-      let accounts;
-      try {
-        console.log('🔍 Checking for existing accounts...');
-        accounts = await window.ethereum.request({
-          method: 'eth_accounts',
-        });
-        console.log('📋 Existing accounts:', accounts);
-      } catch (error) {
-        console.warn('⚠️ Failed to get existing accounts:', error);
-        accounts = [];
-      }
-
-      // If no accounts are available, request access
-      if (!accounts || accounts.length === 0) {
-        console.log('🔐 No existing accounts, requesting access...');
-        try {
-          accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts',
-          });
-          console.log('✅ Account access granted:', accounts);
-        } catch (requestError: unknown) {
-          console.error('❌ Account access denied:', requestError);
-          // Handle specific MetaMask errors
-          const error = requestError as { code?: number; message?: string };
-          if (error.code === 4001) {
-            throw new Error('Connection rejected. Please approve the connection in MetaMask.');
-          } else if (error.code === -32002) {
-            throw new Error('Connection request already pending. Please check MetaMask and try again.');
-          } else if (error.code === -32603) {
-            throw new Error('Internal MetaMask error. Please refresh the page and try again.');
-          } else if (error.message?.includes('User denied') || error.message?.includes('denied')) {
-            throw new Error('Connection denied. Please try again and approve the connection.');
-          } else if (error.message?.includes('locked') || error.message?.includes('unlock')) {
-            throw new Error('MetaMask is locked. Please unlock your wallet and try again.');
-          } else {
-            throw new Error('Failed to connect to MetaMask. Please ensure MetaMask is unlocked and try again.');
-          }
-        }
-      }
-
-      if (!accounts || accounts.length === 0) {
-        console.error('❌ No accounts found after request');
-        throw new Error('No accounts found. Please create an account in MetaMask or unlock your wallet.');
-      }
-
-      console.log('🌐 Ensuring Somnia network connection...');
-      // Ensure we're on the Somnia network
-      await ensureSomniaNetwork();
-
-      const provider = getProvider();
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-      const network = await provider.getNetwork();
+      // Use hybrid service to connect
+      const address = await hybridNFTService.connectWallet();
+      
+      // Update service status
+      const status = hybridNFTService.getServiceStatus();
+      setServiceStatus(status);
+      setIsBlockchainReady(hybridNFTService.isBlockchainReady());
+      
+      // Get account and balance
+      const account = await hybridNFTService.getAccount();
+      const balance = await hybridNFTService.getBalance();
+      const network = await hybridNFTService.getNetwork();
       
       console.log('✅ Wallet connected successfully:', {
-        address,
-        chainId: Number(network.chainId),
-        networkName: network.name
+        address: account,
+        chainId: network.chainId,
+        networkName: network.name,
+        blockchainReady: hybridNFTService.isBlockchainReady(),
+        balance
       });
       
-      setAccount(address);
-      setChainId(Number(network.chainId));
+      setAccount(account);
+      setBalance(balance);
+      setChainId(network.chainId);
       setIsConnected(true);
       
-      console.log('📋 Initializing contracts...');
-      // Initialize contracts (this won't fail the connection if contracts aren't deployed)
-      await initializeContracts();
-      
-      console.log('💰 Refreshing balance...');
-      // Get initial balance
-      await refreshBalance();
+      // Initialize contracts if blockchain is ready
+      if (hybridNFTService.isBlockchainReady()) {
+        console.log('📋 Initializing blockchain contracts...');
+        await initializeContracts();
+      } else {
+        console.log('🎭 Running in mock mode');
+      }
       
       console.log('🎉 Wallet connection process completed successfully');
       
@@ -244,14 +240,27 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
 
   // Refresh balance
   const refreshBalance = async () => {
-    if (!account) return;
-    
     try {
-      const provider = getProvider();
-      const balance = await provider.getBalance(account);
-      setBalance(formatEther(balance));
+      const balance = await hybridNFTService.getBalance();
+      setBalance(balance);
     } catch (error) {
       console.error('Failed to refresh balance:', error);
+    }
+  };
+
+  // Refresh blockchain connection
+  const refreshBlockchainConnection = async () => {
+    try {
+      await hybridNFTService.refreshBlockchainConnection();
+      const status = hybridNFTService.getServiceStatus();
+      setServiceStatus(status);
+      setIsBlockchainReady(hybridNFTService.isBlockchainReady());
+      
+      if (hybridNFTService.isBlockchainReady()) {
+        await initializeContracts();
+      }
+    } catch (error) {
+      console.error('Failed to refresh blockchain connection:', error);
     }
   };
 
@@ -355,6 +364,8 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     account,
     balance,
     chainId,
+    isBlockchainReady,
+    serviceStatus,
     nftFlowContract,
     paymentStreamContract,
     reputationSystemContract,
@@ -365,6 +376,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     disconnectWallet,
     switchNetwork,
     refreshBalance,
+    refreshBlockchainConnection,
   };
 
   return (

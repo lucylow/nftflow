@@ -249,14 +249,20 @@ export const ensureSomniaNetwork = async (): Promise<void> => {
     // If not on Somnia testnet, switch to it
     if (currentChainId !== 50312) {
       console.log(`🔄 Switching from ${currentChainId} to Somnia Testnet (50312)`);
-      await switchToNetwork(50312);
-      console.log('✅ Successfully switched to Somnia Testnet');
+      try {
+        await switchToNetwork(50312);
+        console.log('✅ Successfully switched to Somnia Testnet');
+      } catch (switchError) {
+        console.warn('⚠️ Network switch failed, continuing with current network:', switchError);
+        // Don't throw error - allow connection on any network for testing
+      }
     } else {
       console.log('✅ Already on Somnia Testnet');
     }
   } catch (error) {
     console.error('❌ Failed to ensure Somnia network:', error);
-    throw error;
+    // Don't throw error - allow connection on any network for testing
+    console.warn('⚠️ Continuing with current network for testing purposes');
   }
 };
 

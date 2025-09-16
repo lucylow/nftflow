@@ -10,6 +10,8 @@ import { ThemeProvider } from "./hooks/use-theme";
 import Index from "@/pages/SimpleIndex";
 import Analytics from "@/pages/Analytics";
 import EnhancedMarketplace from "@/pages/EnhancedMarketplace";
+import Marketplace from "@/pages/Marketplace";
+import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import NFTDetail from "@/pages/NFTDetail";
 import SimpleWallet from "@/components/SimpleWallet";
@@ -31,6 +33,8 @@ const App = () => (
                     <main>
                         <Routes>
                          <Route path="/" element={<Index />} />
+                         <Route path="/marketplace" element={<Marketplace />} />
+                         <Route path="/dashboard" element={<Dashboard />} />
                          <Route path="/analytics" element={<Analytics />} />
                          <Route path="/enhanced-marketplace" element={<EnhancedMarketplace />} />
                          <Route path="/profile" element={<Profile />} />
