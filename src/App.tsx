@@ -7,6 +7,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import WalletErrorBoundary from "@/components/WalletErrorBoundary";
 import { ThemeProvider } from "./hooks/use-theme";
+import Layout from "@/components/Layout";
 import Index from "@/pages/SimpleIndex";
 import Analytics from "@/pages/Analytics";
 import EnhancedMarketplace from "@/pages/EnhancedMarketplace";
@@ -25,6 +26,7 @@ import Notifications from "@/pages/Notifications";
 import Mobile from "@/pages/Mobile";
 import SimpleWallet from "@/components/SimpleWallet";
 import SimpleRentalFlow from "@/components/SimpleRentalFlow";
+import WalletTest from "@/pages/WalletTest";
 
 const queryClient = new QueryClient();
 
@@ -38,8 +40,7 @@ const App = () => (
               <TooltipProvider>
                 <Toaster />
                 <BrowserRouter>
-                  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950">
-                    <main>
+                  <Layout>
                         <Routes>
                          <Route path="/" element={<Index />} />
                          <Route path="/marketplace" element={<Marketplace />} />
@@ -58,11 +59,11 @@ const App = () => (
                          <Route path="/notifications" element={<Notifications />} />
                          <Route path="/mobile" element={<Mobile />} />
                          <Route path="/wallet" element={<SimpleWallet />} />
+                         <Route path="/wallet-test" element={<WalletTest />} />
                          <Route path="/rental" element={<SimpleRentalFlow />} />
                          <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />
                       </Routes>
-                    </main>
-                  </div>
+                  </Layout>
                 </BrowserRouter>
               </TooltipProvider>
             </NotificationProvider>

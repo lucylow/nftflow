@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { hybridNFTService } from '@/services/hybridNFTService';
 import { 
   getProvider, 
   getSigner, 
@@ -80,7 +79,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   const [utilityTrackerContract, setUtilityTrackerContract] = useState<ethers.Contract | null>(null);
 
   // Initialize contracts when connected
-  const initializeContracts = async () => {
+  const initializeContracts = useCallback(async () => {
     try {
       console.log('🔧 Initializing contracts...');
       
@@ -155,52 +154,76 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       // Don't throw error - allow wallet connection without contracts
       console.log('🔄 Continuing in mock mode...');
     }
-  };
+  }, []);
 
-  // Connect wallet using hybrid service
+  // Connect wallet using direct MetaMask connection
   const connectWallet = async () => {
     console.log('🔌 Starting wallet connection process...');
     setIsConnecting(true);
     
     try {
-      // Use hybrid service to connect
-      const address = await hybridNFTService.connectWallet();
+      // Check if MetaMask is installed
+      if (!isMetaMaskInstalled()) {
+        throw new Error('MetaMask not installed. Please install MetaMask browser extension.');
+      }
+
+      // Request account access
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
       
-      // Update service status
-      const status = hybridNFTService.getServiceStatus();
-      setServiceStatus(status);
-      setIsBlockchainReady(hybridNFTService.isBlockchainReady());
+      // Get provider and signer
+      const provider = getProvider();
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
       
-      // Get account and balance
-      const account = await hybridNFTService.getAccount();
-      const balance = await hybridNFTService.getBalance();
-      const network = await hybridNFTService.getNetwork();
+      // Get network info
+      const network = await provider.getNetwork();
+      const chainId = Number(network.chainId);
+      
+      // Get balance
+      const balance = await provider.getBalance(address);
+      const formattedBalance = formatEther(balance);
       
       console.log('✅ Wallet connected successfully:', {
-        address: account,
-        chainId: network.chainId,
+        address,
+        chainId,
         networkName: network.name,
-        blockchainReady: hybridNFTService.isBlockchainReady(),
-        balance
+        balance: formattedBalance
       });
       
-      setAccount(account);
-      setBalance(balance);
-      setChainId(network.chainId);
+      // Update state
+      setAccount(address);
+      setBalance(formattedBalance);
+      setChainId(chainId);
       setIsConnected(true);
       
-      // Initialize contracts if blockchain is ready
-      if (hybridNFTService.isBlockchainReady()) {
-        console.log('📋 Initializing blockchain contracts...');
-        await initializeContracts();
-      } else {
-        console.log('🎭 Running in mock mode');
+      // Try to ensure Somnia network (but don't fail if it doesn't work)
+      try {
+        await ensureSomniaNetwork();
+        console.log('🌐 Switched to Somnia network');
+      } catch (networkError) {
+        console.warn('⚠️ Could not switch to Somnia network, continuing with current network:', networkError);
       }
+      
+      // Initialize contracts
+      console.log('📋 Initializing contracts...');
+      await initializeContracts();
+      
+      // Update service status
+      setServiceStatus({ blockchain: true, mock: false });
+      setIsBlockchainReady(true);
       
       console.log('🎉 Wallet connection process completed successfully');
       
     } catch (error: unknown) {
       console.error('❌ Failed to connect wallet:', error);
+      
+      // Reset state on error
+      setIsConnected(false);
+      setAccount(null);
+      setBalance(null);
+      setChainId(null);
+      setServiceStatus({ blockchain: false, mock: true });
+      setIsBlockchainReady(false);
       
       // Re-throw the error with proper message
       if (error instanceof Error && error.message) {
@@ -239,28 +262,40 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   };
 
   // Refresh balance
-  const refreshBalance = async () => {
+  const refreshBalance = useCallback(async () => {
     try {
-      const balance = await hybridNFTService.getBalance();
-      setBalance(balance);
+      if (account && isConnected) {
+        const provider = getProvider();
+        const balance = await provider.getBalance(account);
+        const formattedBalance = formatEther(balance);
+        setBalance(formattedBalance);
+      }
     } catch (error) {
       console.error('Failed to refresh balance:', error);
     }
-  };
+  }, [account, isConnected]);
 
   // Refresh blockchain connection
   const refreshBlockchainConnection = async () => {
     try {
-      await hybridNFTService.refreshBlockchainConnection();
-      const status = hybridNFTService.getServiceStatus();
-      setServiceStatus(status);
-      setIsBlockchainReady(hybridNFTService.isBlockchainReady());
-      
-      if (hybridNFTService.isBlockchainReady()) {
+      if (isConnected && account) {
+        // Re-initialize contracts
         await initializeContracts();
+        
+        // Update service status
+        setServiceStatus({ blockchain: true, mock: false });
+        setIsBlockchainReady(true);
+        
+        // Refresh balance
+        await refreshBalance();
+      } else {
+        setServiceStatus({ blockchain: false, mock: true });
+        setIsBlockchainReady(false);
       }
     } catch (error) {
       console.error('Failed to refresh blockchain connection:', error);
+      setServiceStatus({ blockchain: false, mock: true });
+      setIsBlockchainReady(false);
     }
   };
 
