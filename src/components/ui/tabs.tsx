@@ -62,7 +62,14 @@ const TabsList = React.forwardRef<
           </Button>
         )}
         <TabsPrimitive.List
-          ref={ref}
+          ref={(node) => {
+            scrollRef.current = node;
+            if (typeof ref === 'function') {
+              ref(node);
+            } else if (ref) {
+              ref.current = node;
+            }
+          }}
           className={cn(
             "flex h-10 items-center rounded-md bg-muted p-1 text-muted-foreground overflow-x-auto scrollbar-hide",
             "scroll-smooth",
