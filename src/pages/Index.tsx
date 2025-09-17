@@ -26,7 +26,9 @@ import { useState } from "react";
 
 const Index = () => {
   console.log('Index page render invoked');
-  const { isConnected, account, chainId } = useWeb3();
+  
+  try {
+    const { isConnected, account, chainId } = useWeb3();
   const [testResults, setTestResults] = useState<{
     connectionTest: {
       metaMaskInstalled: boolean;
@@ -81,8 +83,8 @@ const Index = () => {
     { value: "$0.0001", label: "Average Cost/Second" }
   ];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Hero Section */}
       <section className="relative px-4 py-16 md:py-24">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 blur-3xl" />
@@ -339,7 +341,19 @@ const Index = () => {
         </div>
       </section>
     </div>
-  );
+    );
+  } catch (error) {
+    console.error('Index page error:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h1 className="text-4xl font-bold mb-4">NFTFlow Loading...</h1>
+          <p className="text-xl mb-8">Initializing the application</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Index;

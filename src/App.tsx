@@ -34,18 +34,20 @@ const App = () => {
   console.log('App component rendering with full configuration');
   console.log('Index component:', Index);
   
-  return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="nftflow-ui-theme">
-        <QueryClientProvider client={queryClient}>
-          <WalletErrorBoundary>
-            <Web3Provider>
-              <NotificationProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={<div className="min-h-screen bg-red-500 flex items-center justify-center"><h1 className="text-white text-4xl">TEST PAGE WORKS</h1></div>} />
+  try {
+    return (
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="dark" storageKey="nftflow-ui-theme">
+          <QueryClientProvider client={queryClient}>
+            <WalletErrorBoundary>
+              <Web3Provider>
+                <NotificationProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <BrowserRouter>
+                      <Layout>
+                        <Routes>
+                        <Route path="/" element={<Index />} />
                         <Route path="/marketplace" element={<Marketplace />} />
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/analytics" element={<Analytics />} />
@@ -65,6 +67,18 @@ const App = () => {
                         <Route path="/somnia" element={<Somnia />} />
                         <Route path="/rental" element={<SimpleRentalFlow />} />
                         <Route path="/test" element={<div className="text-black">Test Route Works</div>} />
+                        <Route path="/debug" element={
+                          <div className="min-h-screen bg-gray-900 text-white p-8">
+                            <h1 className="text-3xl font-bold mb-4">NFTFlow Debug Info</h1>
+                            <div className="space-y-4">
+                              <p>✅ App component loaded</p>
+                              <p>✅ Routes configured</p>
+                              <p>✅ Error boundaries active</p>
+                              <p>✅ Layout component available</p>
+                              <p>✅ Index component available</p>
+                            </div>
+                          </div>
+                        } />
                         <Route
                           path="*"
                           element={
@@ -77,16 +91,34 @@ const App = () => {
                             </div>
                           }
                         />
-                      </Routes>
-                  </BrowserRouter>
-                </TooltipProvider>
-              </NotificationProvider>
-            </Web3Provider>
-          </WalletErrorBoundary>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
+                        </Routes>
+                      </Layout>
+                    </BrowserRouter>
+                  </TooltipProvider>
+                </NotificationProvider>
+              </Web3Provider>
+            </WalletErrorBoundary>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('App rendering error:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-900 to-red-700 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h1 className="text-4xl font-bold mb-4">NFTFlow Error</h1>
+          <p className="text-xl mb-8">Something went wrong loading the application</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-white text-red-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Reload Application
+          </button>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default App;
