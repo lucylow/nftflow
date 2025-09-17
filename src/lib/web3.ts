@@ -255,6 +255,7 @@ export const ensureSomniaNetwork = async (): Promise<void> => {
       } catch (switchError) {
         console.warn('⚠️ Network switch failed, continuing with current network:', switchError);
         // Don't throw error - allow connection on any network for testing
+        return; // Exit gracefully instead of throwing
       }
     } else {
       console.log('✅ Already on Somnia Testnet');
@@ -263,6 +264,7 @@ export const ensureSomniaNetwork = async (): Promise<void> => {
     console.error('❌ Failed to ensure Somnia network:', error);
     // Don't throw error - allow connection on any network for testing
     console.warn('⚠️ Continuing with current network for testing purposes');
+    return; // Exit gracefully instead of throwing
   }
 };
 

@@ -174,23 +174,20 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         throw new Error('MetaMask not installed. Please install MetaMask browser extension.');
       }
 
-      // Check if MetaMask is locked
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' }) as string[];
-        if (!accounts || accounts.length === 0) {
-          // Request account access
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-        }
-      } catch (requestError: unknown) {
-        const error = requestError as { code?: number; message?: string };
-        if (error.code === 4001) {
-          throw new Error('User rejected the connection request');
-        } else if (error.code === -32002) {
-          throw new Error('Connection request already pending. Please check MetaMask');
-        } else {
-          throw new Error(`Failed to request account access: ${error.message || 'Unknown error'}`);
-        }
+      // Request account access with timeout
+      console.log('🔑 Requesting account access...');
+      const accounts = await Promise.race([
+        window.ethereum.request({ method: 'eth_requestAccounts' }) as Promise<string[]>,
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), 30000)
+        )
+      ]);
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found. Please unlock MetaMask and try again.');
       }
+
+      console.log('✅ Account access granted:', accounts[0]);
       
       // Get provider and signer
       const provider = getProvider();
@@ -212,7 +209,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         balance: formattedBalance
       });
       
-      // Update state
+      // Update state first
       setAccount(address);
       setBalance(formattedBalance);
       setChainId(chainId);
@@ -220,10 +217,12 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       
       // Try to ensure Somnia network (but don't fail if it doesn't work)
       try {
+        console.log('🌐 Attempting to switch to Somnia network...');
         await ensureSomniaNetwork();
-        console.log('🌐 Switched to Somnia network');
+        console.log('✅ Switched to Somnia network');
       } catch (networkError) {
         console.warn('⚠️ Could not switch to Somnia network, continuing with current network:', networkError);
+        // Don't throw - allow connection on any network
       }
       
       // Initialize contracts
