@@ -6,14 +6,12 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
-interface TabsListProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
-  scrollable?: boolean;
-  showScrollButtons?: boolean;
-}
-
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  TabsListProps
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> & {
+    scrollable?: boolean;
+    showScrollButtons?: boolean;
+  }
 >(({ className, scrollable = false, showScrollButtons = false, ...props }, ref) => {
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
@@ -105,15 +103,13 @@ const TabsList = React.forwardRef<
 });
 TabsList.displayName = TabsPrimitive.List.displayName;
 
-interface TabsTriggerProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> {
-  icon?: React.ReactNode;
-  badge?: string | number;
-  variant?: "default" | "pills" | "underline";
-}
-
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
-  TabsTriggerProps
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & {
+    icon?: React.ReactNode;
+    badge?: string | number;
+    variant?: "default" | "pills" | "underline";
+  }
 >(({ className, icon, badge, variant = "default", children, ...props }, ref) => {
   const baseClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
   

@@ -161,7 +161,7 @@ export const useHighContrast = () => {
     };
     
     // Initial check
-    handleContrastChange(mediaQuery);
+    handleContrastChange({ matches: mediaQuery.matches } as MediaQueryListEvent);
     
     // Listen for changes
     mediaQuery.addEventListener('change', handleContrastChange);
@@ -186,7 +186,7 @@ export const useReducedMotion = () => {
     };
     
     // Initial check
-    handleMotionChange(mediaQuery);
+    handleMotionChange({ matches: mediaQuery.matches } as MediaQueryListEvent);
     
     // Listen for changes
     mediaQuery.addEventListener('change', handleMotionChange);
