@@ -1,0 +1,345 @@
+// Mock data for development and testing
+export const mockNFTs = [
+  {
+    id: 1,
+    contractAddress: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+    tokenId: '1',
+    name: 'Cosmic Explorer #001',
+    collection: 'Space Adventures',
+    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop',
+    pricePerSecond: 0.0001,
+    pricePerHour: 0.36,
+    pricePerDay: 8.64,
+    collectionColor: '#6366f1',
+    uptimePercentage: 98,
+    traits: ['Rare', 'Space', 'Explorer'],
+    listDate: '2024-01-15T10:30:00Z',
+    owner: '0x1234567890123456789012345678901234567890',
+    isRentable: true,
+    description: 'A cosmic explorer NFT perfect for space adventures',
+    rarity: 'Rare',
+    utility: 'Gaming, Art, Collectible'
+  },
+  {
+    id: 2,
+    contractAddress: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+    tokenId: '2',
+    name: 'Digital Dreamer #042',
+    collection: 'Cyber Dreams',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=400&fit=crop',
+    pricePerSecond: 0.00005,
+    pricePerHour: 0.18,
+    pricePerDay: 4.32,
+    collectionColor: '#8b5cf6',
+    uptimePercentage: 95,
+    traits: ['Common', 'Digital', 'Dream'],
+    listDate: '2024-01-14T15:45:00Z',
+    owner: '0x2345678901234567890123456789012345678901',
+    isRentable: true,
+    description: 'A digital dreamer NFT for virtual experiences',
+    rarity: 'Common',
+    utility: 'Art, Collectible'
+  },
+  {
+    id: 3,
+    contractAddress: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+    tokenId: '3',
+    name: 'Neon Warrior #128',
+    collection: 'Cyber Warriors',
+    image: 'https://images.unsplash.com/photo-1635070041408-e363dbe005cb?w=400&h=400&fit=crop',
+    pricePerSecond: 0.0002,
+    pricePerHour: 0.72,
+    pricePerDay: 17.28,
+    collectionColor: '#ec4899',
+    uptimePercentage: 92,
+    traits: ['Epic', 'Neon', 'Warrior'],
+    listDate: '2024-01-13T09:20:00Z',
+    owner: '0x3456789012345678901234567890123456789012',
+    isRentable: true,
+    description: 'A neon warrior NFT for epic battles',
+    rarity: 'Epic',
+    utility: 'Gaming, Combat'
+  },
+  {
+    id: 4,
+    contractAddress: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+    tokenId: '4',
+    name: 'Crystal Guardian #256',
+    collection: 'Mystic Guardians',
+    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop',
+    pricePerSecond: 0.00015,
+    pricePerHour: 0.54,
+    pricePerDay: 12.96,
+    collectionColor: '#06b6d4',
+    uptimePercentage: 99,
+    traits: ['Legendary', 'Crystal', 'Guardian'],
+    listDate: '2024-01-12T14:10:00Z',
+    owner: '0x4567890123456789012345678901234567890123',
+    isRentable: true,
+    description: 'A crystal guardian NFT with mystical powers',
+    rarity: 'Legendary',
+    utility: 'Gaming, Defense, Collectible'
+  },
+  {
+    id: 5,
+    contractAddress: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+    tokenId: '5',
+    name: 'Pixel Artist #512',
+    collection: 'Pixel Art Masters',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=400&fit=crop',
+    pricePerSecond: 0.00008,
+    pricePerHour: 0.288,
+    pricePerDay: 6.912,
+    collectionColor: '#f59e0b',
+    uptimePercentage: 96,
+    traits: ['Rare', 'Pixel', 'Artist'],
+    listDate: '2024-01-11T11:30:00Z',
+    owner: '0x5678901234567890123456789012345678901234',
+    isRentable: true,
+    description: 'A pixel artist NFT for creative endeavors',
+    rarity: 'Rare',
+    utility: 'Art, Creative'
+  },
+  {
+    id: 6,
+    contractAddress: '0x742d35Cc6634C893292Ce8bB6239C002Ad8e6b59',
+    tokenId: '6',
+    name: 'Quantum Explorer #1024',
+    collection: 'Quantum Realms',
+    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop',
+    pricePerSecond: 0.0003,
+    pricePerHour: 1.08,
+    pricePerDay: 25.92,
+    collectionColor: '#10b981',
+    uptimePercentage: 97,
+    traits: ['Mythic', 'Quantum', 'Explorer'],
+    listDate: '2024-01-10T16:45:00Z',
+    owner: '0x6789012345678901234567890123456789012345',
+    isRentable: true,
+    description: 'A quantum explorer NFT for dimensional travel',
+    rarity: 'Mythic',
+    utility: 'Gaming, Exploration, Sci-Fi'
+  }
+];
+
+export const mockUserData = {
+  address: '0x1234567890123456789012345678901234567890',
+  ensName: 'nftrenter.eth',
+  ensAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+  completedRentals: 12,
+  earned: '45.6',
+  rentalStreak: 5,
+  totalSpent: '23.4',
+  favoriteCollections: ['Space Adventures', 'Cyber Dreams'],
+  rentalHistory: [
+    {
+      id: 1,
+      nftName: 'Cosmic Explorer #001',
+      nftImage: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=100&h=100&fit=crop',
+      startTime: '2024-01-15T10:30:00Z',
+      endTime: '2024-01-15T12:30:00Z',
+      duration: 2,
+      cost: '0.72',
+      status: 'completed',
+      collection: 'Space Adventures'
+    },
+    {
+      id: 2,
+      nftName: 'Digital Dreamer #042',
+      nftImage: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=100&h=100&fit=crop',
+      startTime: '2024-01-14T15:45:00Z',
+      endTime: '2024-01-14T18:45:00Z',
+      duration: 3,
+      cost: '0.54',
+      status: 'completed',
+      collection: 'Cyber Dreams'
+    },
+    {
+      id: 3,
+      nftName: 'Neon Warrior #128',
+      nftImage: 'https://images.unsplash.com/photo-1635070041408-e363dbe005cb?w=100&h=100&fit=crop',
+      startTime: '2024-01-13T09:20:00Z',
+      endTime: '2024-01-13T11:20:00Z',
+      duration: 2,
+      cost: '1.44',
+      status: 'completed',
+      collection: 'Cyber Warriors'
+    },
+    {
+      id: 4,
+      nftName: 'Crystal Guardian #256',
+      nftImage: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=100&h=100&fit=crop',
+      startTime: '2024-01-12T14:10:00Z',
+      endTime: '2024-01-12T16:10:00Z',
+      duration: 2,
+      cost: '1.08',
+      status: 'completed',
+      collection: 'Mystic Guardians'
+    },
+    {
+      id: 5,
+      nftName: 'Pixel Artist #512',
+      nftImage: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=100&h=100&fit=crop',
+      startTime: '2024-01-11T11:30:00Z',
+      endTime: '2024-01-11T13:30:00Z',
+      duration: 2,
+      cost: '0.576',
+      status: 'completed',
+      collection: 'Pixel Art Masters'
+    }
+  ],
+  achievements: [
+    {
+      id: 'FIRST_RENTAL',
+      name: 'First Rental',
+      description: 'Rent your first NFT',
+      icon: '🏆',
+      points: 100,
+      unlockedAt: '2024-01-11T13:30:00Z'
+    },
+    {
+      id: 'THREE_DAY_STREAK',
+      name: 'Consistent Renter',
+      description: 'Rent NFTs for 3 consecutive days',
+      icon: '🔥',
+      points: 250,
+      unlockedAt: '2024-01-13T11:20:00Z'
+    }
+  ],
+  stats: {
+    totalRentals: 12,
+    totalHours: 24,
+    averageRentalDuration: 2,
+    favoriteCollection: 'Space Adventures',
+    mostExpensiveRental: '2.16',
+    cheapestRental: '0.36'
+  }
+};
+
+export const mockCollections = [
+  {
+    id: 1,
+    name: 'Space Adventures',
+    description: 'Explore the cosmos with these amazing space-themed NFTs',
+    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=300&h=300&fit=crop',
+    floorPrice: 0.00005,
+    totalSupply: 1000,
+    owners: 456,
+    volume24h: 12.5,
+    color: '#6366f1'
+  },
+  {
+    id: 2,
+    name: 'Cyber Dreams',
+    description: 'Digital dreams come to life in this cyberpunk collection',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300&h=300&fit=crop',
+    floorPrice: 0.00003,
+    totalSupply: 5000,
+    owners: 2341,
+    volume24h: 8.7,
+    color: '#8b5cf6'
+  },
+  {
+    id: 3,
+    name: 'Cyber Warriors',
+    description: 'Battle-ready warriors for the digital realm',
+    image: 'https://images.unsplash.com/photo-1635070041408-e363dbe005cb?w=300&h=300&fit=crop',
+    floorPrice: 0.0001,
+    totalSupply: 2500,
+    owners: 1234,
+    volume24h: 15.2,
+    color: '#ec4899'
+  },
+  {
+    id: 4,
+    name: 'Mystic Guardians',
+    description: 'Guardians of the mystical realms',
+    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=300&h=300&fit=crop',
+    floorPrice: 0.00008,
+    totalSupply: 1000,
+    owners: 567,
+    volume24h: 6.8,
+    color: '#06b6d4'
+  },
+  {
+    id: 5,
+    name: 'Pixel Art Masters',
+    description: 'Masterpieces in pixel art form',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300&h=300&fit=crop',
+    floorPrice: 0.00004,
+    totalSupply: 3000,
+    owners: 1789,
+    volume24h: 9.3,
+    color: '#f59e0b'
+  },
+  {
+    id: 6,
+    name: 'Quantum Realms',
+    description: 'Explore the quantum dimensions',
+    image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=300&h=300&fit=crop',
+    floorPrice: 0.00015,
+    totalSupply: 500,
+    owners: 234,
+    volume24h: 4.1,
+    color: '#10b981'
+  }
+];
+
+export const mockAchievements = {
+  FIRST_RENTAL: {
+    name: 'First Rental',
+    description: 'Rent your first NFT',
+    icon: '🏆',
+    points: 100,
+    notification: true,
+  },
+  THREE_DAY_STREAK: {
+    name: 'Consistent Renter',
+    description: 'Rent NFTs for 3 consecutive days',
+    icon: '🔥',
+    points: 250,
+    notification: true,
+  },
+  WEEK_STREAK: {
+    name: 'Dedicated Renter',
+    description: 'Rent NFTs for 7 consecutive days',
+    icon: '💎',
+    points: 500,
+    notification: true,
+  },
+  MONTH_STREAK: {
+    name: 'NFT Enthusiast',
+    description: 'Rent NFTs for 30 consecutive days',
+    icon: '👑',
+    points: 1000,
+    notification: true,
+  },
+  COLLECTOR: {
+    name: 'Collection Explorer',
+    description: 'Rent NFTs from 5 different collections',
+    icon: '🎨',
+    points: 300,
+    notification: true,
+  },
+  HIGH_ROLLER: {
+    name: 'High Roller',
+    description: 'Spend over 100 STT on rentals',
+    icon: '💰',
+    points: 400,
+    notification: true,
+  },
+  SPEED_DEMON: {
+    name: 'Speed Demon',
+    description: 'Complete 10 rentals in a single day',
+    icon: '⚡',
+    points: 600,
+    notification: true,
+  },
+  EXPLORER: {
+    name: 'Digital Explorer',
+    description: 'Rent NFTs for over 100 hours total',
+    icon: '🗺️',
+    points: 350,
+    notification: true,
+  }
+};

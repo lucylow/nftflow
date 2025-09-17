@@ -1,0 +1,139 @@
+name: Deploy to Production
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      percentage:
+        description: 'Traffic percentage (production only)'
+        required: false
+        default: '5'
+        type: string
+
+jobs:
+  pre-deployment-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests
+        run: npm test
+        
+      - name: Security audit
+        run: |
+          npm audit --audit-level moderate
+          npx slither . --exclude-dependencies
+          
+      - name: Gas benchmark
+        run: npx hardhat test test/GasBenchmark.test.js --network hardhat
+        
+      - name: Build artifacts
+        run: npx hardhat compile
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            artifacts/
+            cache/
+            typechain-types/
+
+  deploy-contracts:
+    runs-on: ubuntu-latest
+    needs: pre-deployment-checks
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Deploy contracts
+        run: npx hardhat run scripts/deploy.js --network ${{ github.event.inputs.environment }}
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          
+      - name: Verify contracts
+        run: bash scripts/verify-contracts.sh ${{ github.event.inputs.environment }}
+        
+      - name: Initialize contracts
+        run: npx hardhat run scripts/initialize.js --network ${{ github.event.inputs.environment }}
+        
+      - name: Transfer ownership to multisig
+        run: npx hardhat run scripts/transfer-ownership.js --network ${{ github.event.inputs.environment }}
+
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    needs: deploy-contracts
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          
+      - name: Terraform Init
+        run: terraform init -backend-config=environments/${{ github.event.inputs.environment }}/backend.tfvars
+        
+      - name: Terraform Plan
+        run: terraform plan -var-file=environments/${{ github.event.inputs.environment }}/variables.tfvars -out=tfplan
+          
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        
+      - name: Update deployment registry
+        run: |
+          # Update deployment registry with new contract addresses
+          python scripts/update-registry.py --env ${{ github.event.inputs.environment }}
+
+  canary-release:
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    if: github.event.inputs.environment == 'production'
+    steps:
+      - name: Configure canary release
+        run: |
+          # Update load balancer routing for canary release
+          aws elbv2 modify-listener --listener-arn $LB_LISTENER_ARN \
+            --default-actions Type=forward,TargetGroupArn=$CANARY_TG_ARN,Weight=${{ github.event.inputs.percentage }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          LB_LISTENER_ARN: ${{ secrets.LB_LISTENER_ARN }}
+          CANARY_TG_ARN: ${{ secrets.CANARY_TG_ARN }}
+          
+      - name: Monitor canary
+        run: |
+          # Monitor metrics for canary deployment
+          python scripts/monitor-canary.py --percentage ${{ github.event.inputs.percentage }} --duration 3600
