@@ -2,7 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createRedisStore } from 'rate-limit-redis';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 
 // Initialize Redis client
 const redis = new Redis(process.env['REDIS_URL']);

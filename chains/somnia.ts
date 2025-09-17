@@ -1,7 +1,5 @@
-import { defineChain } from 'viem';
-
-// Somnia Testnet Configuration
-export const somniaTestnet = defineChain({
+// Somnia Chain Configurations
+export const somniaTestnet = {
   id: 50312,
   name: 'Somnia Testnet',
   nativeCurrency: {
@@ -26,10 +24,10 @@ export const somniaTestnet = defineChain({
     },
   },
   testnet: true,
-});
+} as const;
 
 // Somnia Mainnet Configuration (for future use)
-export const somniaMainnet = defineChain({
+export const somniaMainnet = {
   id: 1,
   name: 'Somnia Mainnet',
   nativeCurrency: {
@@ -54,7 +52,7 @@ export const somniaMainnet = defineChain({
     },
   },
   testnet: false,
-});
+} as const;
 
 // Contract addresses for different networks
 export const contractAddresses = {

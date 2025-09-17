@@ -1,5 +1,5 @@
 import { Client } from 'pg';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import { CacheService } from './cache';
 import { MetadataService } from './metadata';
 import { somniaTestnet } from '../chains/somnia';

@@ -1,6 +1,6 @@
 import express from 'express';
 import { Client } from 'pg';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import { CacheService } from '../services/cache';
 import { somniaTestnet } from '../chains/somnia';
 

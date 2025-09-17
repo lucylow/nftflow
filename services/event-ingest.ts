@@ -1,6 +1,6 @@
 import { Client } from 'pg';
 import { createPublicClient, webSocket, parseAbiItem, formatUnits } from 'viem';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import { somniaTestnet } from '../chains/somnia';
 import { EventLog } from '../types';
 
