@@ -25,6 +25,7 @@ import { runFullWalletTest } from "@/utils/walletTest";
 import { useState } from "react";
 
 const Index = () => {
+  console.log('Index page render invoked');
   const { isConnected, account, chainId } = useWeb3();
   const [testResults, setTestResults] = useState<{
     connectionTest: {
