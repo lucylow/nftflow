@@ -16,7 +16,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['framer-motion', '@tanstack/react-query'],
+    include: ['framer-motion'],
+    exclude: ['@tanstack/react-query'],
   },
   build: {
     rollupOptions: {
@@ -24,6 +25,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           // Separate ethers.js into its own chunk
           ethers: ['ethers'],
+          framer: ['framer-motion'],
         },
       },
     },
@@ -31,6 +33,7 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     commonjsOptions: {
       include: [/node_modules/],
+      transformMixedEsModules: true,
     },
   },
 }));
