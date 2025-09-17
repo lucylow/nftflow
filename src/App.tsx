@@ -8,7 +8,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import WalletErrorBoundary from "@/components/WalletErrorBoundary";
 import { ThemeProvider } from "./hooks/use-theme";
 import Layout from "@/components/Layout";
-import Index from "@/pages/SimpleIndex";
+import Index from "@/pages/Index";
 import Analytics from "@/pages/Analytics";
 import EnhancedMarketplace from "@/pages/EnhancedMarketplace";
 import Marketplace from "@/pages/Marketplace";
@@ -32,6 +32,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   console.log('App component rendering with full configuration');
+  console.log('Index component:', Index);
   
   return (
     <ErrorBoundary>
@@ -43,9 +44,8 @@ const App = () => {
                 <TooltipProvider>
                   <Toaster />
                   <BrowserRouter>
-                    <Layout>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
+                    <Routes>
+                        <Route path="/" element={<div className="min-h-screen bg-red-500 flex items-center justify-center"><h1 className="text-white text-4xl">TEST PAGE WORKS</h1></div>} />
                         <Route path="/marketplace" element={<Marketplace />} />
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/analytics" element={<Analytics />} />
@@ -78,7 +78,6 @@ const App = () => {
                           }
                         />
                       </Routes>
-                    </Layout>
                   </BrowserRouter>
                 </TooltipProvider>
               </NotificationProvider>
