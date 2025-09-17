@@ -11,6 +11,7 @@ interface ActivityItem {
 }
 
 interface ActivityFeedProps {
+  address?: string;
   activities?: ActivityItem[];
 }
 

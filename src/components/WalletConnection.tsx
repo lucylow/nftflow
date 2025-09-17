@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useNetwork } from 'wagmi';
-import { MetaMaskConnector, WalletConnectConnector } from 'wagmi/connectors';
+// Wagmi connectors are configured in the main config
 
 export const WalletConnection: React.FC = () => {
   const { address, isConnected } = useAccount();

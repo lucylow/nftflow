@@ -14,6 +14,7 @@ interface Collection {
 }
 
 interface UserCollectionsProps {
+  address?: string;
   collections?: Collection[];
 }
 

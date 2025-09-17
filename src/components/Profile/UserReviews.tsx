@@ -16,6 +16,7 @@ interface Review {
 }
 
 interface UserReviewsProps {
+  address?: string;
   reviews?: Review[];
   averageRating?: number;
   totalReviews?: number;

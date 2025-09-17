@@ -3,6 +3,7 @@ import { UserPlus, UserMinus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FollowButtonProps {
+  address?: string;
   isFollowing?: boolean;
   onFollow?: () => void;
   onUnfollow?: () => void;

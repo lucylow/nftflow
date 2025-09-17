@@ -1,24 +1,20 @@
-import { useTheme } from "next-themes";
-import { Toaster as Sonner, toast } from "sonner";
+import React from "react";
 
-type ToasterProps = React.ComponentProps<typeof Sonner>;
+// Mock theme hook for now
+const useTheme = () => ({ theme: "system" });
+
+type ToasterProps = React.HTMLAttributes<HTMLDivElement>;
+
+const toast = {
+  success: (message: string) => console.log("Success:", message),
+  error: (message: string) => console.log("Error:", message),
+  info: (message: string) => console.log("Info:", message),
+};
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
-
   return (
-    <Sonner
-      theme={theme as ToasterProps["theme"]}
-      className="toaster group"
-      toastOptions={{
-        classNames: {
-          toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          description: "group-[.toast]:text-muted-foreground",
-          actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
-          cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
-        },
-      }}
+    <div
+      className="fixed bottom-4 right-4 z-50"
       {...props}
     />
   );

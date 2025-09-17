@@ -5,6 +5,8 @@ import { Grid, Heart, Star, Activity } from 'lucide-react';
 interface ProfileTabsProps {
   children?: React.ReactNode;
   defaultValue?: string;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({ 

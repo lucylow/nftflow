@@ -12,7 +12,7 @@ import {
   RotateCcw, 
   ZoomIn, 
   ZoomOut,
-  Move3D,
+  Move3d,
   Headphones,
   Volume2,
   VolumeX,
@@ -255,7 +255,7 @@ export function VirtualShowroom({ className }: VirtualShowroomProps) {
             {/* 3D placeholder */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <Move3D className="w-16 h-16 mx-auto text-gray-400 mb-2" />
+                <Move3d className="w-16 h-16 mx-auto text-gray-400 mb-2" />
                 <p className="text-gray-600">3D Model Loading...</p>
                 <p className="text-sm text-gray-500">Rotation: {rotation}°</p>
               </div>
