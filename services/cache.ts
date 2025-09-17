@@ -4,7 +4,11 @@ export class CacheService {
   private redis: Redis;
   
   constructor() {
-    this.redis = new Redis(process.env.REDIS_URL!, {
+    if (!process.env.REDIS_URL) {
+      throw new Error('REDIS_URL environment variable is required');
+    }
+
+    this.redis = new Redis(process.env.REDIS_URL, {
       // Connection options
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);

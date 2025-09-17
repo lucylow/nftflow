@@ -1,32 +1,10 @@
 import { Client } from 'pg';
-import { createPublicClient, webSocket, http, parseAbiItem, formatUnits } from 'viem';
+import { createPublicClient, webSocket, parseAbiItem, formatUnits } from 'viem';
 import { Redis } from 'ioredis';
 import { somniaTestnet } from '../chains/somnia';
-import { keccak256, toHex } from 'viem';
+import { EventLog } from '../types';
 
-// ABI definitions for events we want to track
-const NFTFlowCoreABI = [
-  parseAbiItem('event RentalStarted(bytes32 rentalId, address nftContract, uint256 tokenId, address lender, address tenant, uint256 startTime, uint256 endTime, uint256 totalPrice)'),
-  parseAbiItem('event RentalCompleted(bytes32 rentalId)'),
-  parseAbiItem('event RentalCancelled(bytes32 rentalId, address cancelledBy)'),
-  parseAbiItem('event NFTListed(address nftContract, uint256 tokenId, address owner, uint256 pricePerSecond, uint256 minDuration, uint256 maxDuration)'),
-  parseAbiItem('event NFTDelisted(address nftContract, uint256 tokenId)'),
-  parseAbiItem('event DisputeCreated(bytes32 indexed rentalId, address indexed disputer, string disputeType)'),
-  parseAbiItem('event DisputeResolved(bytes32 indexed rentalId, bool inFavorOfRenter)')
-];
-
-const PaymentStreamABI = [
-  parseAbiItem('event StreamCreated(address streamId, address lender, address renter, uint256 totalAmount, uint256 startTime, uint256 endTime)'),
-  parseAbiItem('event FundsReleased(address streamId, uint256 amount)'),
-  parseAbiItem('event StreamCancelled(address streamId, address cancelledBy)')
-];
-
-interface EventLog {
-  blockNumber: bigint;
-  transactionHash: string;
-  logIndex: number;
-  args: any;
-}
+type EventHandler = (logs: EventLog[]) => Promise<void>;
 
 export class EventIngestService {
   private db: Client;
@@ -36,13 +14,23 @@ export class EventIngestService {
   private chainId: number;
 
   constructor() {
-    this.db = new Client({ connectionString: process.env.DATABASE_URL });
-    this.redis = new Redis(process.env.REDIS_URL);
+    if (!process.env['DATABASE_URL']) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
+    if (!process.env['REDIS_URL']) {
+      throw new Error('REDIS_URL environment variable is required');
+    }
+    if (!process.env['SOMNIA_WS_RPC']) {
+      throw new Error('SOMNIA_WS_RPC environment variable is required');
+    }
+
+    this.db = new Client({ connectionString: process.env['DATABASE_URL'] });
+    this.redis = new Redis(process.env['REDIS_URL']);
     this.chainId = somniaTestnet.id;
     
     this.client = createPublicClient({
       chain: somniaTestnet,
-      transport: webSocket(process.env.SOMNIA_WS_RPC!),
+      transport: webSocket(process.env['SOMNIA_WS_RPC']),
     });
   }
 
@@ -53,7 +41,7 @@ export class EventIngestService {
       
       console.log('Starting event ingestion service...');
       console.log(`Chain ID: ${this.chainId}`);
-      console.log(`RPC URL: ${process.env.SOMNIA_WS_RPC}`);
+      console.log(`RPC URL: ${process.env['SOMNIA_WS_RPC']}`);
       
       // Subscribe to blockchain events
       await this.subscribeToEvents();
@@ -76,8 +64,8 @@ export class EventIngestService {
   }
 
   private async subscribeToEvents() {
-    const nftFlowCoreAddress = process.env.NFTFLOW_CORE_ADDRESS as `0x${string}`;
-    const paymentStreamFactoryAddress = process.env.PAYMENT_STREAM_FACTORY_ADDRESS as `0x${string}`;
+    const nftFlowCoreAddress = process.env['NFTFLOW_CORE_ADDRESS'] as `0x${string}`;
+    const paymentStreamFactoryAddress = process.env['PAYMENT_STREAM_FACTORY_ADDRESS'] as `0x${string}`;
 
     // Watch for Rental events
     this.client.watchEvent({
@@ -126,7 +114,7 @@ export class EventIngestService {
     console.log('Event subscriptions established');
   }
 
-  private async handleRentalStarted(logs: EventLog[]) {
+  private async handleRentalStarted(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { rentalId, nftContract, tokenId, lender, tenant, startTime, endTime, totalPrice } = log.args;
@@ -181,7 +169,7 @@ export class EventIngestService {
     }
   }
 
-  private async handleRentalCompleted(logs: EventLog[]) {
+  private async handleRentalCompleted(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { rentalId } = log.args;
@@ -210,7 +198,7 @@ export class EventIngestService {
     }
   }
 
-  private async handleRentalCancelled(logs: EventLog[]) {
+  private async handleRentalCancelled(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { rentalId, cancelledBy } = log.args;
@@ -231,7 +219,7 @@ export class EventIngestService {
     }
   }
 
-  private async handleNFTListed(logs: EventLog[]) {
+  private async handleNFTListed(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { nftContract, tokenId, owner, pricePerSecond, minDuration, maxDuration } = log.args;
@@ -280,7 +268,7 @@ export class EventIngestService {
     }
   }
 
-  private async handleNFTDelisted(logs: EventLog[]) {
+  private async handleNFTDelisted(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { nftContract, tokenId } = log.args;
@@ -303,7 +291,7 @@ export class EventIngestService {
     }
   }
 
-  private async handleStreamCreated(logs: EventLog[]) {
+  private async handleStreamCreated(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { streamId, lender, renter, totalAmount, startTime, endTime } = log.args;
@@ -353,7 +341,7 @@ export class EventIngestService {
     }
   }
 
-  private async handleFundsReleased(logs: EventLog[]) {
+  private async handleFundsReleased(logs: EventLog[]): Promise<void> {
     for (const log of logs) {
       try {
         const { streamId, amount } = log.args;
@@ -486,7 +474,7 @@ export class EventIngestService {
 
   private async processBlockRange(fromBlock: bigint, toBlock: bigint) {
     try {
-      const nftFlowCoreAddress = process.env.NFTFLOW_CORE_ADDRESS as `0x${string}`;
+      const nftFlowCoreAddress = process.env['NFTFLOW_CORE_ADDRESS'] as `0x${string}`;
       
       // Get all events in the block range
       const logs = await this.client.getLogs({

@@ -13,23 +13,35 @@ export class MetadataService {
 
   constructor() {
     // Initialize NFT.Storage
-    if (process.env.NFT_STORAGE_TOKEN) {
-      this.nftStorage = new NFTStorage({ token: process.env.NFT_STORAGE_TOKEN });
+    if (process.env['NFT_STORAGE_TOKEN']) {
+      try {
+        this.nftStorage = new NFTStorage({ token: process.env['NFT_STORAGE_TOKEN'] });
+      } catch (error) {
+        console.warn('Failed to initialize NFT.Storage:', error);
+      }
     }
 
     // Initialize Web3.Storage
-    if (process.env.WEB3_STORAGE_TOKEN) {
-      this.web3Storage = new Web3Storage({ token: process.env.WEB3_STORAGE_TOKEN });
+    if (process.env['WEB3_STORAGE_TOKEN']) {
+      try {
+        this.web3Storage = new Web3Storage({ token: process.env['WEB3_STORAGE_TOKEN'] });
+      } catch (error) {
+        console.warn('Failed to initialize Web3.Storage:', error);
+      }
     }
     
     // Initialize Arweave
-    this.arweave = Arweave.init({
-      host: 'arweave.net',
-      port: 443,
-      protocol: 'https',
-      timeout: 20000,
-      logging: false,
-    });
+    try {
+      this.arweave = Arweave.init({
+        host: 'arweave.net',
+        port: 443,
+        protocol: 'https',
+        timeout: 20000,
+        logging: false,
+      });
+    } catch (error) {
+      console.warn('Failed to initialize Arweave:', error);
+    }
     
     this.initIPFS();
   }
@@ -123,7 +135,7 @@ export class MetadataService {
     
     return {
       cid: primaryCid || '',
-      arweaveId: results.arweave,
+      arweaveId: results.arweave || undefined,
       uris
     };
   }
@@ -193,9 +205,9 @@ export class MetadataService {
         console.log(`Retrieved metadata from Arweave: ${arweaveId}`);
         return metadata;
       }
-    } catch (error) {
-      console.error(`Failed to retrieve from Arweave: ${arweaveId}`, error);
-    }
+      } catch (error) {
+        console.error(`Failed to retrieve from Arweave: ${arweaveId}`, error instanceof Error ? error : new Error(String(error)));
+      }
     
     throw new Error(`Failed to retrieve metadata from Arweave ${arweaveId}`);
   }
@@ -272,7 +284,7 @@ export class MetadataService {
         primaryCid = cid;
         console.log(`Stored image on NFT.Storage: ${cid}`);
       } catch (error) {
-        console.error('Failed to store image on NFT.Storage:', error);
+        console.error('Failed to store image on NFT.Storage:', error instanceof Error ? error : new Error(String(error)));
       }
     }
     
@@ -287,7 +299,7 @@ export class MetadataService {
         if (!primaryCid) primaryCid = cid;
         console.log(`Stored image on Web3.Storage: ${cid}`);
       } catch (error) {
-        console.error('Failed to store image on Web3.Storage:', error);
+        console.error('Failed to store image on Web3.Storage:', error instanceof Error ? error : new Error(String(error)));
       }
     }
     
@@ -299,7 +311,7 @@ export class MetadataService {
         if (!primaryCid) primaryCid = cid.toString();
         console.log(`Stored image on local IPFS: ${cid}`);
       } catch (error) {
-        console.error('Failed to store image on local IPFS:', error);
+        console.error('Failed to store image on local IPFS:', error instanceof Error ? error : new Error(String(error)));
       }
     }
     
@@ -340,7 +352,7 @@ export class MetadataService {
         console.log(`Retrieved image from local IPFS: ${cid}`);
         return buffer;
       } catch (error) {
-        console.error(`Failed to retrieve image from local IPFS: ${cid}`, error);
+        console.error(`Failed to retrieve image from local IPFS: ${cid}`, error instanceof Error ? error : new Error(String(error)));
       }
     }
     

@@ -12,6 +12,18 @@ import { CacheService } from '../services/cache';
 import { MetadataService } from '../services/metadata';
 
 const app = express();
+
+// Validate required environment variables
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+if (!process.env.REDIS_URL) {
+  throw new Error('REDIS_URL environment variable is required');
+}
+if (!process.env.SOMNIA_HTTP_RPC) {
+  throw new Error('SOMNIA_HTTP_RPC environment variable is required');
+}
+
 const db = new Client({ connectionString: process.env.DATABASE_URL });
 const redis = new Redis(process.env.REDIS_URL);
 const cacheService = new CacheService();
@@ -19,7 +31,7 @@ const metadataService = new MetadataService();
 
 const client = createPublicClient({
   chain: somniaTestnet,
-  transport: http(process.env.SOMNIA_HTTP_RPC!),
+  transport: http(process.env.SOMNIA_HTTP_RPC),
 });
 
 // Security middleware

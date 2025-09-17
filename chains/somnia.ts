@@ -181,7 +181,7 @@ export function isMainnet(chainId: number): boolean {
   return chainId === somniaMainnet.id;
 }
 
-export function getContractAddress(chainId: number, contractName: keyof typeof contractAddresses[number]): `0x${string}` {
+export function getContractAddress(chainId: number, contractName: keyof typeof contractAddresses[50312]): `0x${string}` {
   const contracts = contractAddresses[chainId as keyof typeof contractAddresses];
   if (!contracts) {
     throw new Error(`No contracts found for chain ID ${chainId}`);
