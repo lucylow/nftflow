@@ -30,48 +30,52 @@ import Somnia from "@/pages/Somnia";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <ErrorBoundary>
-    <ThemeProvider defaultTheme="dark" storageKey="nftflow-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <WalletErrorBoundary>
-          <Web3Provider>
-            <NotificationProvider>
-              <TooltipProvider>
-                <Toaster />
-                <BrowserRouter>
-                  <Layout>
-                        <Routes>
-                         <Route path="/" element={<Index />} />
-                         <Route path="/marketplace" element={<Marketplace />} />
-                         <Route path="/dashboard" element={<Dashboard />} />
-                         <Route path="/analytics" element={<Analytics />} />
-                         <Route path="/enhanced-marketplace" element={<EnhancedMarketplace />} />
-                         <Route path="/profile" element={<Profile />} />
-                         <Route path="/nft/:id" element={<NFTDetail />} />
-                         <Route path="/create" element={<Create />} />
-                         <Route path="/upload" element={<Upload />} />
-                         <Route path="/dao" element={<DAO />} />
-                         <Route path="/governance" element={<Governance />} />
-                         <Route path="/creativity" element={<CreativityShowcase />} />
-                         <Route path="/subgraph" element={<SubgraphDashboard />} />
-                         <Route path="/social" element={<Social />} />
-                         <Route path="/mobile" element={<Mobile />} />
-                         <Route path="/wallet" element={<SimpleWallet />} />
-                         <Route path="/wallet-test" element={<WalletTest />} />
-                         <Route path="/somnia" element={<Somnia />} />
-                         <Route path="/rental" element={<SimpleRentalFlow />} />
-                         <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />
+const App = () => {
+  console.log('App component rendering with full configuration');
+  
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark" storageKey="nftflow-ui-theme">
+        <QueryClientProvider client={queryClient}>
+          <WalletErrorBoundary>
+            <Web3Provider>
+              <NotificationProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <BrowserRouter>
+                    <Layout>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/marketplace" element={<Marketplace />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/analytics" element={<Analytics />} />
+                        <Route path="/enhanced-marketplace" element={<EnhancedMarketplace />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/nft/:id" element={<NFTDetail />} />
+                        <Route path="/create" element={<Create />} />
+                        <Route path="/upload" element={<Upload />} />
+                        <Route path="/dao" element={<DAO />} />
+                        <Route path="/governance" element={<Governance />} />
+                        <Route path="/creativity" element={<CreativityShowcase />} />
+                        <Route path="/subgraph" element={<SubgraphDashboard />} />
+                        <Route path="/social" element={<Social />} />
+                        <Route path="/mobile" element={<Mobile />} />
+                        <Route path="/wallet" element={<SimpleWallet />} />
+                        <Route path="/wallet-test" element={<WalletTest />} />
+                        <Route path="/somnia" element={<Somnia />} />
+                        <Route path="/rental" element={<SimpleRentalFlow />} />
+                        <Route path="*" element={<div className="text-center text-white py-20">Page not found</div>} />
                       </Routes>
-                  </Layout>
-                </BrowserRouter>
-              </TooltipProvider>
-            </NotificationProvider>
-          </Web3Provider>
-        </WalletErrorBoundary>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </ErrorBoundary>
-);
+                    </Layout>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </NotificationProvider>
+            </Web3Provider>
+          </WalletErrorBoundary>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

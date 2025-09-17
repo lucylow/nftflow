@@ -107,7 +107,10 @@ const SimpleIndex = () => {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() => navigate('/marketplace')}
+              onClick={() => {
+                console.log('Marketplace button clicked, navigating to /marketplace');
+                window.location.href = '/marketplace';
+              }}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
               Explore Marketplace
@@ -116,7 +119,10 @@ const SimpleIndex = () => {
               size="lg" 
               variant="outline" 
               className="border-slate-600 text-slate-300 hover:bg-slate-800"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => {
+                console.log('Dashboard button clicked, navigating to /dashboard');
+                window.location.href = '/dashboard';
+              }}
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               View Dashboard
