@@ -28,18 +28,23 @@ const Header = () => {
   const { notifications, unreadCount, isOpen, setIsOpen, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
 
   const navItems = [
+    { label: "Home", href: "/", icon: "🏠" },
     { label: "Marketplace", href: "/marketplace", icon: "🏪" },
-    { label: "Create", href: "/create", icon: "✨" },
+    { label: "Create", href: "/create", icon: "✨", badge: "New" },
     { label: "Upload", href: "/upload", icon: "📤" },
     { label: "Dashboard", href: "/dashboard", icon: "📊" },
     { label: "Analytics", href: "/analytics", icon: "📈" },
     { label: "DAO", href: "/dao", icon: "🏛️" },
     { label: "Governance", href: "/governance", icon: "👑" },
-    { label: "Creativity", href: "/creativity", icon: "🎨" },
+    { label: "Creativity", href: "/creativity", icon: "🎨", badge: "Hot" },
+    { label: "Somnia", href: "/somnia", icon: "⚡", badge: "New" },
     { label: "Subgraph", href: "/subgraph", icon: "📊" },
     { label: "Social", href: "/social", icon: "👥" },
-    { label: "Mobile", href: "/mobile", icon: "📱" },
-    { label: "Profile", href: "/profile", icon: "👤" }
+    { label: "Wallet", href: "/wallet", icon: "💳" },
+    { label: "Wallet Test", href: "/wallet-test", icon: "🧪", badge: "Test" },
+    { label: "Rental Flow", href: "/rental", icon: "💸" },
+    { label: "Profile", href: "/profile", icon: "👤" },
+    { label: "Mobile", href: "/mobile", icon: "📱" }
   ];
 
   useEffect(() => {
@@ -99,23 +104,28 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 relative group ${
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-md transition-all duration-200 relative group ${
                   location.pathname === item.href
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
-                <span className="text-sm">{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className="text-xs">{item.icon}</span>
+                <span className="text-xs font-medium">{item.label}</span>
+                {item.badge && (
+                  <Badge variant="secondary" className="text-xs px-1 py-0 ml-1">
+                    {item.badge}
+                  </Badge>
+                )}
                 {location.pathname === item.href && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-primary/10 rounded-lg -z-10"
+                    className="absolute inset-0 bg-primary/10 rounded-md -z-10"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -328,7 +338,12 @@ const Header = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <span className="text-lg">{item.icon}</span>
-                      <span className="font-medium">{item.label}</span>
+                      <span className="font-medium flex-1">{item.label}</span>
+                      {item.badge && (
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                          {item.badge}
+                        </Badge>
+                      )}
                     </Link>
                   ))}
                 </div>

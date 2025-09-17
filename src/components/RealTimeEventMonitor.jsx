@@ -1,6 +1,6 @@
 // src/components/RealTimeEventMonitor.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import SomniaWebSocketService from '../services/somniaWebSocketService';
+import { somniaWebSocketService as SomniaWebSocketService } from '../services/somniaWebSocketService';
 
 const RealTimeEventMonitor = () => {
   const [events, setEvents] = useState([]);

@@ -8,6 +8,22 @@ export const SOMNIA_CONFIG = {
   WS_URL: "wss://dream-rpc.somnia.network/ws",
   BLOCK_EXPLORER_URL: "https://shannon-explorer.somnia.network/",
   
+  // Testnet Configuration
+  TESTNET: {
+    RPC_URL: "https://dream-rpc.somnia.network/",
+    WS_URL: "wss://dream-rpc.somnia.network/ws",
+    CHAIN_ID: 50312,
+    BLOCK_EXPLORER_URL: "https://shannon-explorer.somnia.network/"
+  },
+  
+  // Mainnet Configuration (for future use)
+  MAINNET: {
+    RPC_URL: "https://mainnet-rpc.somnia.network/",
+    WS_URL: "wss://mainnet-rpc.somnia.network/ws",
+    CHAIN_ID: 50313,
+    BLOCK_EXPLORER_URL: "https://explorer.somnia.network/"
+  },
+  
   // Somnia-Specific Optimizations
   BLOCK_TIME: 1, // 1 second block time
   MAX_TPS: 1000000, // 1M+ TPS capability

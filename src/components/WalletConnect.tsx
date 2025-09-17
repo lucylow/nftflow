@@ -32,15 +32,42 @@ const WalletConnect = () => {
     }
 
     try {
+      console.log('🔌 Attempting to connect wallet...');
       await connectWallet();
-      toast({
-        title: "Wallet Connected",
-        description: "Successfully connected to MetaMask",
-      });
+      
+      // Check if we're on the right network
+      if (chainId && chainId !== 50312) {
+        toast({
+          title: "Wallet Connected",
+          description: "Connected to MetaMask, but please switch to Somnia Testnet for full functionality",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Wallet Connected",
+          description: "Successfully connected to MetaMask on Somnia Testnet",
+        });
+      }
     } catch (error: unknown) {
+      console.error('❌ Wallet connection failed:', error);
+      
+      let errorMessage = "Failed to connect wallet";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("User rejected")) {
+          errorMessage = "Connection cancelled by user";
+        } else if (error.message.includes("MetaMask not installed")) {
+          errorMessage = "MetaMask not installed. Please install MetaMask browser extension";
+        } else if (error.message.includes("network")) {
+          errorMessage = "Network connection failed. Please check your internet connection";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Connection Failed",
-        description: error instanceof Error ? error.message : "Failed to connect wallet",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -66,16 +93,30 @@ const WalletConnect = () => {
 
   const handleSwitchNetwork = async () => {
     try {
-      // Switch to Somnia testnet (Chain ID: 50312)
+      console.log('🌐 Attempting to switch to Somnia Testnet...');
       await switchNetwork(50312);
       toast({
         title: "Network Switched",
         description: "Successfully connected to Somnia Testnet",
       });
     } catch (error: unknown) {
+      console.error('❌ Network switch failed:', error);
+      
+      let errorMessage = "Failed to switch network";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("User rejected")) {
+          errorMessage = "Network switch cancelled by user";
+        } else if (error.message.includes("not found")) {
+          errorMessage = "Somnia Testnet not found in MetaMask. Please add it manually";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Network Switch Failed",
-        description: error instanceof Error ? error.message : "Failed to switch network",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -88,19 +129,35 @@ const WalletConnect = () => {
           onClick={handleConnect}
           disabled={isConnecting}
           size="sm"
-          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
+          title={!isMetaMaskInstalled() ? "Install MetaMask to connect wallet" : "Connect your MetaMask wallet"}
         >
           {isConnecting ? (
-            <LoadingSpinner size="sm" className="mr-2 text-white" />
+            <>
+              <LoadingSpinner size="sm" className="mr-2 text-white" />
+              Connecting...
+            </>
           ) : (
-            <Wallet className="w-4 h-4 mr-2" />
+            <>
+              <Wallet className="w-4 h-4 mr-2" />
+              Connect Wallet
+            </>
           )}
-          {isConnecting ? "Connecting..." : "Connect Wallet"}
         </Button>
         {!isMetaMaskInstalled() && (
-          <p className="text-xs text-yellow-500 text-center">
-            MetaMask not detected
-          </p>
+          <div className="text-center">
+            <p className="text-xs text-yellow-500 mb-1">
+              MetaMask not detected
+            </p>
+            <a 
+              href="https://metamask.io/download/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:text-blue-300 underline"
+            >
+              Install MetaMask
+            </a>
+          </div>
         )}
       </div>
     );
@@ -119,6 +176,7 @@ const WalletConnect = () => {
               <button 
                 onClick={copyAddress}
                 className="p-1 hover:bg-slate-600 rounded transition-colors"
+                title="Copy wallet address"
               >
                 <Copy className="w-3 h-3 text-slate-400" />
               </button>
@@ -165,6 +223,7 @@ const WalletConnect = () => {
           size="sm"
           onClick={handleDisconnect}
           className="border-slate-600 text-slate-300 hover:bg-red-500/10 hover:border-red-500/50 hover:text-red-400"
+          title="Disconnect wallet"
         >
           <LogOut className="w-4 h-4" />
         </Button>

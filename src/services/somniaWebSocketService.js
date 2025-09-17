@@ -10,7 +10,7 @@ import { SOMNIA_CONFIG } from '../config/somniaConfig';
 class SomniaWebSocketService {
   constructor(network = 'testnet') {
     this.network = network;
-    this.wsUrl = SOMNIA_CONFIG[network.toUpperCase()].WS_URL;
+    this.wsUrl = SOMNIA_CONFIG[network.toUpperCase()]?.WS_URL || SOMNIA_CONFIG.WS_URL;
     this.provider = null;
     this.contracts = new Map();
     this.isConnected = false;
@@ -492,7 +492,6 @@ class SomniaWebSocketService {
           recipient: parsedLog.args.recipient,
           amountSOMI: ethers.formatEther(parsedLog.args.amountSOMI),
           totalWithdrawnSOMI: ethers.formatEther(parsedLog.args.totalWithdrawnSOMI),
-          timestamp: parsedLog.args.timestamp.toString(),
           gasUsed: parsedLog.args.gasUsed.toString(),
           timestamp: new Date().toISOString()
         };
@@ -522,7 +521,6 @@ class SomniaWebSocketService {
           streamId: parsedLog.args.streamId.toString(),
           milestoneIndex: parsedLog.args.milestoneIndex.toString(),
           amountSOMI: ethers.formatEther(parsedLog.args.amountSOMI),
-          timestamp: parsedLog.args.timestamp.toString(),
           timestamp: new Date().toISOString()
         };
         
