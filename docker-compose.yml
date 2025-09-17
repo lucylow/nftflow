@@ -1,0 +1,249 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14
+    container_name: nftflow-postgres
+    environment:
+      POSTGRES_DB: nftflow
+      POSTGRES_USER: nftflow
+      POSTGRES_PASSWORD: nftflow
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nftflow -d nftflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: nftflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # IPFS Node
+  ipfs-node:
+    image: ipfs/kubo:latest
+    container_name: nftflow-ipfs
+    ports:
+      - "4001:4001"   # Peer-to-peer
+      - "5001:5001"   # API
+      - "8080:8080"   # Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      IPFS_PROFILE: server
+    command: daemon --migrate=true --agent-version-suffix=docker
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5001/api/v0/id"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # API Server
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nftflow-api
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://nftflow:nftflow@postgres:5432/nftflow
+      REDIS_URL: redis://redis:6379
+      SOMNIA_HTTP_RPC: https://dream-rpc.somnia.network/
+      SOMNIA_WS_RPC: wss://dream-rpc.somnia.network/ws
+      NFTFLOW_CORE_ADDRESS: ${NFTFLOW_CORE_ADDRESS}
+      PAYMENT_STREAM_FACTORY_ADDRESS: ${PAYMENT_STREAM_FACTORY_ADDRESS}
+      NFT_STORAGE_TOKEN: ${NFT_STORAGE_TOKEN}
+      WEB3_STORAGE_TOKEN: ${WEB3_STORAGE_TOKEN}
+      FRONTEND_URL: http://localhost:3000
+      IPFS_GATEWAY: http://ipfs-node:8080
+      IPFS_API: http://ipfs-node:5001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ipfs-node:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Event Ingestion Service
+  event-ingest:
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nftflow-event-ingest
+    command: npm run event-ingest
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://nftflow:nftflow@postgres:5432/nftflow
+      REDIS_URL: redis://redis:6379
+      SOMNIA_HTTP_RPC: https://dream-rpc.somnia.network/
+      SOMNIA_WS_RPC: wss://dream-rpc.somnia.network/ws
+      NFTFLOW_CORE_ADDRESS: ${NFTFLOW_CORE_ADDRESS}
+      PAYMENT_STREAM_FACTORY_ADDRESS: ${PAYMENT_STREAM_FACTORY_ADDRESS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Background Job Worker
+  worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nftflow-worker
+    command: npm run worker
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://nftflow:nftflow@postgres:5432/nftflow
+      REDIS_URL: redis://redis:6379
+      SOMNIA_HTTP_RPC: https://dream-rpc.somnia.network/
+      NFTFLOW_CORE_ADDRESS: ${NFTFLOW_CORE_ADDRESS}
+      PAYMENT_STREAM_FACTORY_ADDRESS: ${PAYMENT_STREAM_FACTORY_ADDRESS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: nftflow-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: nftflow-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  # Monitoring with Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: nftflow-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # Log aggregation with ELK Stack
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: nftflow-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    container_name: nftflow-logstash
+    volumes:
+      - ./monitoring/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: nftflow-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  ipfs_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+networks:
+  default:
+    name: nftflow-network
+    driver: bridge
