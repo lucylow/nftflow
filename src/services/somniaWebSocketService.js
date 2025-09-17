@@ -1,6 +1,6 @@
 // src/services/somniaWebSocketService.js
 import { ethers } from 'ethers';
-import { SOMNIA_CONFIG } from '../config/somniaConfig';
+import SOMNIA_CONFIG from '../config/somniaConfig';
 
 /**
  * SomniaWebSocketService
