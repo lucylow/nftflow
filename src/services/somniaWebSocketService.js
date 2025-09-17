@@ -10,7 +10,7 @@ import { SOMNIA_CONFIG } from '../config/somniaConfig';
 class SomniaWebSocketService {
   constructor(network = 'testnet') {
     this.network = network;
-    this.wsUrl = SOMNIA_CONFIG[network.toUpperCase()].WS_URL;
+    this.wsUrl = SOMNIA_CONFIG.WS_URL;
     this.provider = null;
     this.contracts = new Map();
     this.isConnected = false;
