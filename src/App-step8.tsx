@@ -21,6 +21,11 @@ import WalletTest from "@/pages/WalletTest";
 import DAO from "@/pages/DAO";
 import Governance from "@/pages/Governance";
 import Somnia from "@/pages/Somnia";
+import Creativity from "@/pages/Creativity";
+import Subgraph from "@/pages/Subgraph";
+import Social from "@/pages/Social";
+import Rental from "@/pages/Rental";
+import Mobile from "@/pages/Mobile";
 
 // Simple working Index component
 const WorkingIndex = () => {
@@ -98,11 +103,11 @@ const AppStep8 = () => {
                         <Route path="/dao" element={<DAO />} />
                         <Route path="/governance" element={<Governance />} />
                         <Route path="/analytics" element={<Analytics />} />
-                        <Route path="/creativity" element={<SimplePage title="Creativity" />} />
-                        <Route path="/subgraph" element={<SimplePage title="Subgraph" />} />
-                        <Route path="/social" element={<SimplePage title="Social" />} />
-                        <Route path="/mobile" element={<SimplePage title="Mobile" />} />
-                        <Route path="/rental" element={<SimplePage title="Rental" />} />
+                        <Route path="/creativity" element={<Creativity />} />
+                        <Route path="/subgraph" element={<Subgraph />} />
+                        <Route path="/social" element={<Social />} />
+                        <Route path="/mobile" element={<Mobile />} />
+                        <Route path="/rental" element={<Rental />} />
                         <Route path="/test" element={<div className="text-black">Test Route Works</div>} />
                         <Route
                           path="*"
