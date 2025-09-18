@@ -366,3 +366,4 @@ export class SomniaWebSocketService {
 
 // Export singleton instance
 export const somniaWebSocketService = new SomniaWebSocketService();
+

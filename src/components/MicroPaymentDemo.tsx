@@ -373,3 +373,4 @@ const MicroPaymentDemo: React.FC<MicroPaymentDemoProps> = ({ className }) => {
 };
 
 export default MicroPaymentDemo;
+
