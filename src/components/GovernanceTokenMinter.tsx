@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
-import { useWeb3 } from '../contexts/Web3Context';
+import { useWeb3 } from '../contexts/Web3Context-minimal';
 import { useToast } from '../hooks/use-toast';
 import { 
   Crown, 

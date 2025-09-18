@@ -17,6 +17,10 @@ import Dashboard from "@/pages/Dashboard";
 import Profile from "@/pages/Profile";
 import Upload from "@/pages/Upload";
 import Analytics from "@/pages/Analytics";
+import WalletTest from "@/pages/WalletTest";
+import DAO from "@/pages/DAO";
+import Governance from "@/pages/Governance";
+import Somnia from "@/pages/Somnia";
 
 // Simple working Index component
 const WorkingIndex = () => {
@@ -89,10 +93,10 @@ const AppStep8 = () => {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/wallet" element={<SimpleWallet />} />
                         <Route path="/upload" element={<Upload />} />
-                        <Route path="/wallet-test" element={<SimplePage title="Wallet Test" />} />
-                        <Route path="/somnia" element={<SimplePage title="Somnia" />} />
-                        <Route path="/dao" element={<SimplePage title="DAO" />} />
-                        <Route path="/governance" element={<SimplePage title="Governance" />} />
+                        <Route path="/wallet-test" element={<WalletTest />} />
+                        <Route path="/somnia" element={<Somnia />} />
+                        <Route path="/dao" element={<DAO />} />
+                        <Route path="/governance" element={<Governance />} />
                         <Route path="/analytics" element={<Analytics />} />
                         <Route path="/creativity" element={<SimplePage title="Creativity" />} />
                         <Route path="/subgraph" element={<SimplePage title="Subgraph" />} />

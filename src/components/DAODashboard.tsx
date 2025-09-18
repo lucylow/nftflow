@@ -9,7 +9,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Alert, AlertDescription } from './ui/alert';
-import { useWeb3 } from '../contexts/Web3Context';
+import { useWeb3 } from '../contexts/Web3Context-minimal';
 import { useToast } from '../hooks/use-toast';
 import { 
   Clock, 
