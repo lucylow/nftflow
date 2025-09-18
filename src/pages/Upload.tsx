@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { useWeb3 } from "@/contexts/Web3Context";
+import { useWeb3 } from "@/contexts/Web3Context-minimal";
 import { useNFTManagement } from "@/hooks/useNFTManagement";
 import { useToast } from "@/hooks/use-toast";
 

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { useWeb3 } from '@/contexts/Web3Context';
+import { useWeb3 } from '@/contexts/Web3Context-minimal';
 import { parseEther, formatEther } from '@/lib/web3';
 import { useToast } from '@/hooks/use-toast';
 

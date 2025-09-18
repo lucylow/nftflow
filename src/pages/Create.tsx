@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useWeb3 } from "@/contexts/Web3Context";
+import { useWeb3 } from "@/contexts/Web3Context-minimal";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 

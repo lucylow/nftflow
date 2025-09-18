@@ -35,7 +35,7 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import { useWeb3 } from '@/contexts/Web3Context';
+import { useWeb3 } from '@/contexts/Web3Context-minimal';
 import { useToast } from '@/hooks/use-toast';
 
 interface AnalyticsData {

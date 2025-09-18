@@ -19,12 +19,10 @@ export default defineConfig(({ mode }) => ({
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['framer-motion', 'react-router-dom', 'lucide-react'],
-    exclude: ['@tanstack/query-core'],
+    include: ['framer-motion', 'react-router-dom', 'lucide-react', '@tanstack/react-query', '@tanstack/query-core'],
   },
   build: {
     rollupOptions: {
-      external: ['@tanstack/query-core'],
       output: {
         manualChunks: {
           // Separate ethers.js into its own chunk

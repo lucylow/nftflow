@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WalletConnect from '@/components/WalletConnect';
-import { useWeb3 } from '@/contexts/Web3Context';
+import { useWeb3 } from '@/contexts/Web3Context-minimal';
 import { Shield, CheckCircle, AlertCircle } from 'lucide-react';
 
 const SimpleWallet = () => {

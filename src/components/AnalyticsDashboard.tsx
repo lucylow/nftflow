@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useWeb3 } from '@/contexts/Web3Context-minimal';
 
 interface AnalyticsData {
   userStats: {
@@ -46,7 +46,7 @@ interface ChartData {
 }
 
 const AnalyticsDashboard: React.FC = () => {
-  const { address } = useAccount();
+  const { account: address } = useWeb3();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
