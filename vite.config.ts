@@ -13,22 +13,23 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['lucide-react'],
   },
   define: {
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['framer-motion', 'lucide-react', 'react-router-dom'],
-    exclude: ['@tanstack/react-query'],
+    include: ['framer-motion', 'react-router-dom', 'lucide-react'],
+    exclude: ['@tanstack/query-core'],
   },
   build: {
     rollupOptions: {
+      external: ['@tanstack/query-core'],
       output: {
         manualChunks: {
           // Separate ethers.js into its own chunk
           ethers: ['ethers'],
           framer: ['framer-motion'],
-          lucide: ['lucide-react'],
         },
       },
     },
