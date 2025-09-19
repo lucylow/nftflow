@@ -24,15 +24,15 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { notifications, unreadCount, isOpen, setIsOpen, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
 
   const navItems = getMainNavItems().concat([
     { label: "DAO", href: "/dao", icon: "🏛️", badge: undefined },
-    { label: "Creativity", href: "/creativity", icon: "🎨", badge: "Hot" },
-    { label: "Profile", href: "/profile", icon: "👤", badge: undefined },
-    { label: "Wallet", href: "/wallet", icon: "💳", badge: undefined }
+    { label: "Create", href: "/creativity", icon: "🎨", badge: "Hot" }
   ]);
 
   const userItems = getUserNavItems();
@@ -62,40 +62,45 @@ const Header = () => {
           : 'bg-background/80 backdrop-blur-md border-b border-border/50'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+        {/* Main Header Row */}
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          {/* Logo - Always visible */}
+          <Link to="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <motion.div
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.5 }}
-              className="p-2 bg-gradient-to-r from-primary to-accent rounded-lg"
+              className="p-1.5 sm:p-2 bg-gradient-to-r from-primary to-accent rounded-lg"
             >
-              <Zap className="w-5 h-5 text-white" />
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </motion.div>
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-lg sm:text-xl font-bold">
               NFTFlow
             </span>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          {/* Search Bar - Responsive */}
+          <div className={`flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-4 lg:mx-6 transition-all duration-300 ${
+            showSearch || isSearchFocused ? 'block' : 'hidden sm:block'
+          }`}>
             <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-3 h-3 sm:w-4 sm:h-4" />
                 <Input
-                  placeholder="Search NFTs, collections..."
+                  placeholder="Search NFTs..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  className="pl-7 sm:pl-10 h-8 sm:h-9 text-sm bg-muted/50 border-border/50 focus:bg-background transition-colors"
                 />
               </div>
             </form>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
+          {/* Desktop Navigation - Hidden on smaller screens */}
+          <nav className="hidden xl:flex items-center gap-1">
+            {navItems.slice(0, 4).map((item) => (
               <Link
                 key={item.label}
                 to={item.href}
@@ -106,7 +111,7 @@ const Header = () => {
                 }`}
               >
                 <span className="text-xs">{item.icon}</span>
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="text-xs font-medium hidden 2xl:inline">{item.label}</span>
                 {item.badge && (
                   <Badge variant="secondary" className="text-xs px-1 py-0 ml-1">
                     {item.badge}
@@ -121,63 +126,33 @@ const Header = () => {
                 )}
               </Link>
             ))}
-            
-            {/* User Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-muted/50"
-                >
-                  <span className="text-xs">👤</span>
-                  <span className="text-xs font-medium">User</span>
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {userItems.map((item) => (
-                  <DropdownMenuItem key={item.label} asChild>
-                    <Link
-                      to={item.href}
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <span className="text-sm">{item.icon}</span>
-                      <span className="flex-1">{item.label}</span>
-                      {item.badge && (
-                        <Badge variant="secondary" className="text-xs">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </nav>
 
-          {/* Right Side Actions */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Right Side Actions - Responsive */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Search Toggle - Only on mobile */}
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={() => setShowSearch(!showSearch)}
-              className="relative"
+              className="sm:hidden h-8 w-8 p-0"
             >
               <Search className="w-4 h-4" />
             </Button>
+
+            {/* Notifications */}
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
+                <Button variant="ghost" size="sm" className="relative h-8 w-8 sm:h-9 sm:w-9 p-0">
                   <Bell className="w-4 h-4" />
                   {unreadCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-primary">
-                      {unreadCount > 99 ? '99+' : unreadCount}
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-primary">
+                      {unreadCount > 9 ? '9+' : unreadCount}
                     </Badge>
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center justify-between">
                     Notifications
@@ -266,10 +241,13 @@ const Header = () => {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4" />
@@ -277,24 +255,54 @@ const Header = () => {
                 <Moon className="w-4 h-4" />
               )}
             </Button>
-            <WalletConnect />
-          </div>
 
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </Button>
+            {/* Wallet Connect - Responsive */}
+            <div className="hidden sm:block">
+              <WalletConnect />
+            </div>
+
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              ) : (
+                <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
+            </Button>
+          </div>
         </div>
 
+        {/* Mobile Search Bar - Shows when toggled */}
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ 
+            height: showSearch ? 'auto' : 0, 
+            opacity: showSearch ? 1 : 0 
+          }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden sm:hidden border-t border-border/50"
+        >
+          <div className="py-3">
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search NFTs, collections..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  className="pl-10 bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                />
+              </div>
+            </form>
+          </div>
+        </motion.div>
 
         {/* Mobile Navigation */}
         <MobileNavigation 

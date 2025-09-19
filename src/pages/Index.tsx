@@ -83,7 +83,7 @@ const Index: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="relative z-10 container mx-auto px-6 pt-20 pb-32">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-24 sm:pb-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ const Index: React.FC = () => {
             🚀 Powered by Somnia Network
           </Badge>
           
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight">
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
               Netflix
             </span>
@@ -102,28 +102,28 @@ const Index: React.FC = () => {
             <span className="text-white">for NFTs</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 sm:mb-12 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed px-4">
             Rent premium NFTs by the second. Access exclusive content instantly. 
             Experience the future of digital ownership.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link to="/netflix-marketplace">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
+            <Link to="/netflix-marketplace" className="w-full sm:w-auto">
               <Button 
                 size="lg" 
-                className="px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
               >
-                <Play className="w-5 h-5 mr-2" />
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Start Exploring
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
             
-            <Link to="/onboarding">
+            <Link to="/onboarding" className="w-full sm:w-auto">
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="px-8 py-4 text-lg border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white transition-all duration-200"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white transition-all duration-200"
               >
                 Learn How It Works
               </Button>
@@ -136,7 +136,7 @@ const Index: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="grid md:grid-cols-3 gap-8 mb-20"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-20 px-4"
         >
           {features.map((feature, index) => (
             <motion.div
@@ -168,7 +168,7 @@ const Index: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-16 sm:mb-20 px-4"
         >
           {stats.map((stat, index) => (
             <motion.div
@@ -192,20 +192,20 @@ const Index: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-center"
+          className="text-center px-4"
         >
-          <div className="flex justify-center items-center gap-8 text-gray-400">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-gray-400">
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
-              <span>Premium Quality</span>
+              <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
+              <span className="text-sm sm:text-base">Premium Quality</span>
             </div>
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-blue-400" />
-              <span>Instant Access</span>
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+              <span className="text-sm sm:text-base">Instant Access</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-green-400" />
-              <span>Pay Per Second</span>
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+              <span className="text-sm sm:text-base">Pay Per Second</span>
             </div>
           </div>
         </motion.div>

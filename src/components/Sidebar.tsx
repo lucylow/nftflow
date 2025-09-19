@@ -109,7 +109,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const quickActions = [
     { label: 'Connect Wallet', icon: Wallet, action: 'connect' },
     { label: 'Browse NFTs', icon: Store, action: 'browse' },
-    { label: 'Create NFT', icon: Plus, action: 'create' },
     { label: 'View Analytics', icon: BarChart3, action: 'analytics' },
   ];
 

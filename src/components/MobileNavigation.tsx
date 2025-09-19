@@ -32,6 +32,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { navigationConfig, getNavItemsByCategory } from '@/config/navigation';
+import WalletConnect from './WalletConnect';
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -119,7 +120,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed left-0 top-0 h-full w-80 bg-background border-r border-border z-50 lg:hidden"
+            className="fixed left-0 top-0 h-full w-72 sm:w-80 bg-background border-r border-border z-50 xl:hidden"
           >
             <div className="flex flex-col h-full">
               {/* Header */}
@@ -213,6 +214,14 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
                   ))}
                 </div>
               </ScrollArea>
+
+              {/* Wallet Connect Section */}
+              <div className="p-4 border-t border-border">
+                <div className="space-y-3">
+                  <div className="text-sm font-medium">Connect Wallet</div>
+                  <WalletConnect />
+                </div>
+              </div>
 
               {/* Footer */}
               <div className="p-4 border-t border-border">

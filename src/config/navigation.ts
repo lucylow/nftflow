@@ -24,14 +24,6 @@ export const navigationConfig: NavItem[] = [
     category: 'main'
   },
   { 
-    label: 'Create', 
-    href: '/create', 
-    icon: '✨', 
-    badge: 'New',
-    description: 'Create new NFTs',
-    category: 'main'
-  },
-  { 
     label: 'Upload', 
     href: '/upload', 
     icon: '📤', 
@@ -69,7 +61,7 @@ export const navigationConfig: NavItem[] = [
     category: 'features'
   },
   { 
-    label: 'Creativity', 
+    label: 'Create', 
     href: '/creativity', 
     icon: '🎨', 
     badge: 'Hot',

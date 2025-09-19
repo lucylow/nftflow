@@ -160,16 +160,6 @@ const SimpleIndex = () => {
               </CardContent>
             </Card>
 
-            <Card 
-              className="bg-slate-800/50 border-slate-700/50 hover:border-green-500/50 transition-all cursor-pointer"
-              onClick={() => navigate('/create')}
-            >
-              <CardContent className="p-6 text-center">
-                <Plus className="h-8 w-8 text-green-400 mx-auto mb-3" />
-                <h4 className="text-lg font-semibold text-white mb-2">Create</h4>
-                <p className="text-sm text-slate-300">Mint and list new NFTs</p>
-              </CardContent>
-            </Card>
 
             <Card 
               className="bg-slate-800/50 border-slate-700/50 hover:border-pink-500/50 transition-all cursor-pointer"
