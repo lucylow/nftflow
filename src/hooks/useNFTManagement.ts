@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 import { useToast } from '@/hooks/use-toast';
 
 export interface UserNFT {
