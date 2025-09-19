@@ -64,6 +64,8 @@ src/contracts/
 
 ### Technical Stack
 
+![](https://cdn.dorahacks.io/static/files/19962adb4a55322037c0d2a4cff9e184.png)
+
 **Blockchain Layer:**
 - **Somnia Network** (EVM-compatible L1)
 - **Solidity 0.8.19** (Smart Contracts)
