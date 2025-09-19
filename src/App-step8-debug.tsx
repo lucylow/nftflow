@@ -9,26 +9,12 @@ import WalletErrorBoundary from "@/components/WalletErrorBoundary";
 import { ThemeProvider } from "./hooks/use-theme";
 import Layout from "@/components/Layout";
 
-// Import working components
-import Marketplace from "@/pages/Marketplace";
-import SimpleWallet from "@/components/SimpleWallet";
-import Create from "@/pages/Create";
-import Dashboard from "@/pages/Dashboard";
-import Profile from "@/pages/Profile";
-import Upload from "@/pages/Upload";
-import Analytics from "@/pages/Analytics";
-import WalletTest from "@/pages/WalletTest";
-import DAO from "@/pages/DAO";
-import Governance from "@/pages/Governance";
-import Somnia from "@/pages/Somnia";
-import Creativity from "@/pages/Creativity";
-import Subgraph from "@/pages/Subgraph";
-import Social from "@/pages/Social";
-import Rental from "@/pages/Rental";
-import Mobile from "@/pages/Mobile";
+// Import working components one by one
+import MarketplaceSimple from "@/pages/Marketplace-simple";
 
 // Simple working Index component
 const WorkingIndex = () => {
+  console.log('🏠 WorkingIndex: Rendering home page...');
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <section className="relative px-4 py-16 md:py-24">
@@ -64,23 +50,27 @@ const WorkingIndex = () => {
 };
 
 // Simple working components for other routes
-const SimplePage = ({ title }: { title: string }) => (
-  <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center">
-    <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">{title}</h1>
-      <p className="text-xl text-muted-foreground mb-8">This page is coming soon!</p>
-      <Link to="/" className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
-        Go Home
-      </Link>
+const SimplePage = ({ title }: { title: string }) => {
+  console.log(`📄 SimplePage: Rendering ${title}...`);
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">{title}</h1>
+        <p className="text-xl text-muted-foreground mb-8">This page is coming soon!</p>
+        <Link to="/" className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
+          Go Home
+        </Link>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-const AppStep8 = () => {
-  console.log('AppStep8 component rendering - testing with simplified Web3Context');
+const AppStep8Debug = () => {
+  console.log('🔧 AppStep8Debug: Starting render process...');
   
   try {
-    console.log('✅ AppStep8: Starting render process...');
+    console.log('✅ AppStep8Debug: All imports successful, starting component render...');
+    
     return (
       <ErrorBoundary>
         <ThemeProvider defaultTheme="dark" storageKey="nftflow-ui-theme">
@@ -93,23 +83,10 @@ const AppStep8 = () => {
                     <Layout>
                       <Routes>
                         <Route path="/" element={<WorkingIndex />} />
-                        <Route path="/marketplace" element={<Marketplace />} />
-                        <Route path="/create" element={<Create />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/wallet" element={<SimpleWallet />} />
-                        <Route path="/upload" element={<Upload />} />
-                        <Route path="/wallet-test" element={<WalletTest />} />
-                        <Route path="/somnia" element={<Somnia />} />
-                        <Route path="/dao" element={<DAO />} />
-                        <Route path="/governance" element={<Governance />} />
-                        <Route path="/analytics" element={<Analytics />} />
-                        <Route path="/creativity" element={<Creativity />} />
-                        <Route path="/subgraph" element={<Subgraph />} />
-                        <Route path="/social" element={<Social />} />
-                        <Route path="/mobile" element={<Mobile />} />
-                        <Route path="/rental" element={<Rental />} />
-                        <Route path="/test" element={<div className="text-black">Test Route Works</div>} />
+                        <Route path="/marketplace" element={<MarketplaceSimple />} />
+                        <Route path="/create" element={<SimplePage title="Create NFT" />} />
+                        <Route path="/profile" element={<SimplePage title="Profile" />} />
+                        <Route path="/wallet" element={<SimplePage title="Wallet" />} />
                         <Route
                           path="*"
                           element={
@@ -133,12 +110,12 @@ const AppStep8 = () => {
       </ErrorBoundary>
     );
   } catch (error) {
-    console.error('❌ AppStep8 rendering error:', error);
+    console.error('❌ AppStep8Debug rendering error:', error);
     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-900 to-red-700 flex items-center justify-center">
         <div className="text-center text-white">
-          <h1 className="text-4xl font-bold mb-4">AppStep8 Error</h1>
+          <h1 className="text-4xl font-bold mb-4">AppStep8Debug Error</h1>
           <p className="text-xl mb-8">{error instanceof Error ? error.message : 'Unknown error'}</p>
           <button 
             onClick={() => window.location.reload()} 
@@ -152,4 +129,4 @@ const AppStep8 = () => {
   }
 };
 
-export default AppStep8;
+export default AppStep8Debug;

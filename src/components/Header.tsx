@@ -31,20 +31,8 @@ const Header = () => {
     { label: "Home", href: "/", icon: "🏠" },
     { label: "Marketplace", href: "/marketplace", icon: "🏪" },
     { label: "Create", href: "/create", icon: "✨", badge: "New" },
-    { label: "Upload", href: "/upload", icon: "📤" },
-    { label: "Dashboard", href: "/dashboard", icon: "📊" },
-    { label: "Analytics", href: "/analytics", icon: "📈" },
-    { label: "DAO", href: "/dao", icon: "🏛️" },
-    { label: "Governance", href: "/governance", icon: "👑" },
-    { label: "Creativity", href: "/creativity", icon: "🎨", badge: "Hot" },
-    { label: "Somnia", href: "/somnia", icon: "⚡", badge: "New" },
-    { label: "Subgraph", href: "/subgraph", icon: "📊" },
-    { label: "Social", href: "/social", icon: "👥" },
-    { label: "Wallet", href: "/wallet", icon: "💳" },
-    { label: "Wallet Test", href: "/wallet-test", icon: "🧪", badge: "Test" },
-    { label: "Rental Flow", href: "/rental", icon: "💸" },
     { label: "Profile", href: "/profile", icon: "👤" },
-    { label: "Mobile", href: "/mobile", icon: "📱" }
+    { label: "Wallet", href: "/wallet", icon: "💳" }
   ];
 
   useEffect(() => {

@@ -19,7 +19,18 @@ import {
   Search,
   Play,
   Pause,
-  CheckCircle
+  CheckCircle,
+  Stream,
+  Activity,
+  Eye,
+  Heart,
+  Star,
+  Download,
+  Share2,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Settings
 } from 'lucide-react';
 import { useNFTFlow } from '@/hooks/useNFTFlow';
 import { useEnhancedNFTFlow } from '@/hooks/useEnhancedNFTFlow';
@@ -42,6 +53,14 @@ interface NFTRental {
   collection: string;
   isRented: boolean;
   reputationScore?: number;
+  streamingEnabled?: boolean;
+  streamUrl?: string;
+  streamQuality?: 'HD' | '4K' | '8K';
+  streamType?: 'video' | 'audio' | 'interactive' | 'vr';
+  currentViewers?: number;
+  totalViews?: number;
+  likes?: number;
+  streamDuration?: number;
 }
 
 interface RentalMarketplaceProps {
@@ -67,6 +86,14 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
   const [selectedNFT, setSelectedNFT] = useState<NFTRental | null>(null);
   const [rentalDuration, setRentalDuration] = useState(3600); // 1 hour default
   const [isRenting, setIsRenting] = useState(false);
+  
+  // Streaming state
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamQuality, setStreamQuality] = useState<'HD' | '4K' | '8K'>('HD');
+  const [streamVolume, setStreamVolume] = useState(100);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentStreamTime, setCurrentStreamTime] = useState(0);
 
   // Enhanced mock data with realistic images and diverse NFTs
   const mockNFTs: NFTRental[] = [
@@ -83,7 +110,15 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
       name: 'Cosmic Wizard #1234',
       collection: 'Cosmic Wizards',
       isRented: false,
-      reputationScore: 875
+      reputationScore: 875,
+      streamingEnabled: true,
+      streamUrl: 'https://stream.example.com/cosmic-wizard-1234',
+      streamQuality: '4K',
+      streamType: 'video',
+      currentViewers: 42,
+      totalViews: 1250,
+      likes: 89,
+      streamDuration: 3600
     },
     {
       id: '2',
@@ -355,12 +390,42 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                   alt={nft.name}
                   className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                 />
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex gap-2">
                   <Badge variant="secondary" className="bg-primary/20 text-primary">
                     <Zap className="w-3 h-3 mr-1" />
                     Available
                   </Badge>
+                  {nft.streamingEnabled && (
+                    <Badge variant="secondary" className="bg-green-500/20 text-green-400">
+                      <Stream className="w-3 h-3 mr-1" />
+                      Live
+                    </Badge>
+                  )}
                 </div>
+                
+                {/* Streaming overlay */}
+                {nft.streamingEnabled && (
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <div className="bg-black/70 backdrop-blur-sm rounded-lg p-2">
+                      <div className="flex items-center justify-between text-white text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            <span>{nft.currentViewers}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Heart className="w-3 h-3" />
+                            <span>{nft.likes}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Activity className="w-3 h-3 text-red-400" />
+                          <span className="text-red-400">{nft.streamQuality}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <CardContent className="p-4 space-y-4">
@@ -393,6 +458,20 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Streaming info */}
+                  {nft.streamingEnabled && (
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1">
+                        <Stream className="w-4 h-4 text-green-400" />
+                        <span className="text-green-400">{nft.streamType?.toUpperCase()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Eye className="w-4 h-4 text-muted-foreground" />
+                        <span>{nft.totalViews} views</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <Dialog>
@@ -440,6 +519,42 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                               </SelectContent>
                             </Select>
                           </div>
+                          
+                          {/* Streaming options */}
+                          {selectedNFT.streamingEnabled && (
+                            <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Stream className="w-5 h-5 text-green-400" />
+                                <h4 className="font-medium text-green-400">Streaming Options</h4>
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="stream-quality">Stream Quality</Label>
+                                <Select value={streamQuality} onValueChange={(value: 'HD' | '4K' | '8K') => setStreamQuality(value)}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="HD">HD (1080p)</SelectItem>
+                                    <SelectItem value="4K">4K (2160p)</SelectItem>
+                                    <SelectItem value="8K">8K (4320p)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div className="flex items-center justify-between text-sm">
+                                <span>Stream Type:</span>
+                                <Badge variant="secondary" className="bg-green-500/20 text-green-400">
+                                  {selectedNFT.streamType?.toUpperCase()}
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center justify-between text-sm">
+                                <span>Current Viewers:</span>
+                                <span className="text-green-400">{selectedNFT.currentViewers}</span>
+                              </div>
+                            </div>
+                          )}
                           
                           <div className="bg-muted/50 p-3 rounded-lg space-y-2">
                             <div className="flex justify-between text-sm">
