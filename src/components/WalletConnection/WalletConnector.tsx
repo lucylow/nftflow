@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, Shield, Zap, HelpCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import { Wallet, Shield, Zap, HelpCircle, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,9 +17,11 @@ interface WalletOption {
 }
 
 const WalletConnector: React.FC = () => {
-  const [step, setStep] = useState<'intro' | 'choose' | 'connecting' | 'success'>('intro');
+  const [step, setStep] = useState<'intro' | 'choose' | 'connecting' | 'success' | 'error'>('intro');
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [connectionProgress, setConnectionProgress] = useState(0);
   const { connectWallet, isConnected, isConnecting } = useWeb3();
 
   const walletOptions: WalletOption[] = [
@@ -50,13 +52,36 @@ const WalletConnector: React.FC = () => {
   const handleWalletSelect = async (walletId: string) => {
     setSelectedWallet(walletId);
     setStep('connecting');
+    setConnectionProgress(0);
+    setErrorMessage('');
     
     try {
+      // Simulate progress steps
+      const progressSteps = [
+        { progress: 20, message: 'Initializing connection...' },
+        { progress: 40, message: 'Requesting wallet access...' },
+        { progress: 60, message: 'Verifying network...' },
+        { progress: 80, message: 'Finalizing connection...' },
+        { progress: 100, message: 'Connected successfully!' }
+      ];
+
+      for (const step of progressSteps) {
+        setConnectionProgress(step.progress);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
       await connectWallet();
       setStep('success');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Wallet connection failed:', error);
-      setStep('intro');
+      setErrorMessage(error?.message || 'Failed to connect wallet. Please try again.');
+      setStep('error');
+    }
+  };
+
+  const retryConnection = () => {
+    if (selectedWallet) {
+      handleWalletSelect(selectedWallet);
     }
   };
 
@@ -220,10 +245,66 @@ const WalletConnector: React.FC = () => {
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   className="w-16 h-16 mx-auto mb-6 border-4 border-purple-500 border-t-transparent rounded-full"
                 />
-                <h3 className="text-xl font-semibold text-white mb-2">Connecting...</h3>
-                <p className="text-gray-400">
-                  Please check your wallet and approve the connection
+                <h3 className="text-xl font-semibold text-white mb-2">Connecting to {selectedWallet}...</h3>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-4">
+                  <motion.div
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${connectionProgress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+                
+                <p className="text-gray-400 mb-4">
+                  {connectionProgress < 40 && 'Please check your wallet and approve the connection'}
+                  {connectionProgress >= 40 && connectionProgress < 80 && 'Verifying network connection...'}
+                  {connectionProgress >= 80 && 'Almost done...'}
                 </p>
+                
+                <div className="text-sm text-purple-400">
+                  {connectionProgress}% complete
+                </div>
+              </CardContent>
+            </motion.div>
+          )}
+
+          {step === 'error' && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
+              <CardContent className="text-center py-12">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="w-16 h-16 mx-auto mb-6 bg-red-500 rounded-full flex items-center justify-center"
+                >
+                  <X className="w-8 h-8 text-white" />
+                </motion.div>
+                <h3 className="text-xl font-semibold text-white mb-2">Connection Failed</h3>
+                <p className="text-gray-400 mb-6">
+                  {errorMessage}
+                </p>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={retryConnection}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    Try Again
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setStep('choose')}
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
+                  >
+                    Choose Different Wallet
+                  </Button>
+                </div>
               </CardContent>
             </motion.div>
           )}

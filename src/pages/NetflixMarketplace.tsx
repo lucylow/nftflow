@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Clock, Star, Heart, Share, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Clock, Star, Heart, Share, ChevronLeft, ChevronRight, Search, Filter, SortAsc, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface NFTItem {
   id: string;
@@ -19,6 +21,12 @@ interface NFTItem {
 
 const NetflixMarketplace: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('trending');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10]);
+  const [showFilters, setShowFilters] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const categories = [
@@ -30,6 +38,50 @@ const NetflixMarketplace: React.FC = () => {
   ];
 
   const featuredNFT = mockNFTs[0];
+
+  // Filter and sort NFTs based on search and filters
+  const filteredNFTs = useMemo(() => {
+    let filtered = mockNFTs;
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(nft => 
+        nft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        nft.creator.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        nft.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(nft => nft.category === selectedCategory);
+    }
+
+    // Price range filter
+    filtered = filtered.filter(nft => {
+      const price = parseFloat(nft.price);
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
+    // Sort
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        break;
+      case 'rating':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'trending':
+      default:
+        // Keep original order for trending
+        break;
+    }
+
+    return filtered;
+  }, [searchQuery, selectedCategory, sortBy, priceRange]);
 
   const scroll = (direction: 'left' | 'right', categoryIndex: number) => {
     const container = document.getElementById(`category-${categoryIndex}`);
@@ -44,6 +96,115 @@ const NetflixMarketplace: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Search and Filter Bar */}
+      <div className="sticky top-16 z-40 bg-black/90 backdrop-blur-lg border-b border-gray-800">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            {/* Search */}
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search NFTs, creators, categories..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:border-purple-500"
+                />
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-40 bg-gray-900 border-gray-700 text-white">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-gray-700">
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="Digital Art">Digital Art</SelectItem>
+                  <SelectItem value="Gaming">Gaming</SelectItem>
+                  <SelectItem value="Music">Music</SelectItem>
+                  <SelectItem value="Virtual Worlds">Virtual Worlds</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40 bg-gray-900 border-gray-700 text-white">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-gray-700">
+                  <SelectItem value="trending">Trending</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="rating">Highest Rated</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+
+              <div className="flex border border-gray-700 rounded-lg">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none border-r border-gray-700"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 pt-4 border-t border-gray-700"
+            >
+              <div className="flex gap-4 items-center">
+                <span className="text-sm text-gray-400">Price Range:</span>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="number"
+                    placeholder="Min"
+                    value={priceRange[0]}
+                    onChange={(e) => setPriceRange([parseFloat(e.target.value) || 0, priceRange[1]])}
+                    className="w-20 bg-gray-900 border-gray-700 text-white"
+                  />
+                  <span className="text-gray-400">-</span>
+                  <Input
+                    type="number"
+                    placeholder="Max"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], parseFloat(e.target.value) || 10])}
+                    className="w-20 bg-gray-900 border-gray-700 text-white"
+                  />
+                  <span className="text-gray-400">STT/hr</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </div>
+
       {/* Hero Section - Featured NFT */}
       <div className="relative h-screen flex items-center">
         <div 
@@ -128,9 +289,89 @@ const NetflixMarketplace: React.FC = () => {
         </div>
       </div>
 
-      {/* Category Rows */}
+      {/* Search Results or Category Rows */}
       <div className="relative z-10 -mt-32 pb-20">
-        {categories.map((category, categoryIndex) => (
+        {searchQuery || selectedCategory !== 'all' ? (
+          /* Filtered Results */
+          <div className="container mx-auto px-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">
+                {searchQuery ? `Search Results for "${searchQuery}"` : `Category: ${selectedCategory}`}
+              </h2>
+              <p className="text-gray-400">
+                {filteredNFTs.length} NFT{filteredNFTs.length !== 1 ? 's' : ''} found
+              </p>
+            </div>
+
+            <div className={`grid gap-6 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                : 'grid-cols-1'
+            }`}>
+              {filteredNFTs.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={viewMode === 'list' ? 'flex gap-4' : ''}
+                >
+                  <Card className={`bg-gray-900 border-gray-700 hover:border-purple-500 transition-all duration-300 overflow-hidden ${
+                    viewMode === 'list' ? 'flex-1' : ''
+                  }`}>
+                    <div className="relative">
+                      <img 
+                        src={item.image} 
+                        alt={item.title}
+                        className={`object-cover ${viewMode === 'list' ? 'w-32 h-20' : 'w-full h-48'}`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                      
+                      <div className="absolute top-3 right-3 flex space-x-2">
+                        <Button size="sm" className="bg-white text-black hover:bg-gray-200">
+                          <Play className="w-3 h-3 mr-1" />
+                          Rent
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <CardContent className={`${viewMode === 'list' ? 'flex-1' : 'p-4'}`}>
+                      <h3 className="font-semibold text-lg mb-2 truncate">{item.title}</h3>
+                      <p className="text-gray-400 text-sm mb-3">by {item.creator}</p>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="text-green-400 font-bold">{item.price}</div>
+                        <div className="text-gray-400 text-sm flex items-center">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {item.duration}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {filteredNFTs.length === 0 && (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold mb-2">No NFTs found</h3>
+                <p className="text-gray-400 mb-6">
+                  Try adjusting your search or filters to find what you're looking for.
+                </p>
+                <Button onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                  setPriceRange([0, 10]);
+                }}>
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Original Category Rows */
+          categories.map((category, categoryIndex) => (
           <div key={category.name} className="mb-12">
             <div className="container mx-auto px-6">
               <h2 className="text-2xl font-bold mb-6">{category.name}</h2>

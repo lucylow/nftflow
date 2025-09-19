@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Wallet, Play, Clock, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Wallet, Play, Clock, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { LoadingSpinner } from '@/components/ui/loading-states';
 
 interface OnboardingStep {
   id: number;
@@ -17,6 +18,7 @@ interface OnboardingStep {
 const OnboardingFlow: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [isInteracting, setIsInteracting] = useState(false);
 
   const steps: OnboardingStep[] = [
     {
@@ -103,8 +105,26 @@ const OnboardingFlow: React.FC = () => {
                   <Button 
                     size="lg"
                     className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    onClick={() => {
+                      setIsInteracting(true);
+                      setTimeout(() => {
+                        setIsInteracting(false);
+                        nextStep();
+                      }, 2000);
+                    }}
+                    disabled={isInteracting}
                   >
-                    {steps[currentStep].action}
+                    {isInteracting ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        {steps[currentStep].action}
+                      </>
+                    )}
                   </Button>
                 </div>
               )}
