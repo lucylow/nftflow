@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X, Bell, Search, Sun, Moon, Settings, Check, X as XIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import { Zap, Menu, X, Bell, Search, Sun, Moon, Settings, Check, X as XIcon, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import WalletConnect from "./WalletConnect";
 import { Button } from "@/components/ui/button";
@@ -17,23 +17,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getMainNavItems, getUserNavItems } from '@/config/navigation';
+import MobileNavigation from './MobileNavigation';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { notifications, unreadCount, isOpen, setIsOpen, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
 
-  const navItems = [
-    { label: "Home", href: "/", icon: "🏠" },
-    { label: "Marketplace", href: "/marketplace", icon: "🏪" },
-    { label: "Create", href: "/create", icon: "✨", badge: "New" },
-    { label: "Profile", href: "/profile", icon: "👤" },
-    { label: "Wallet", href: "/wallet", icon: "💳" }
-  ];
+  const navItems = getMainNavItems().concat([
+    { label: "DAO", href: "/dao", icon: "🏛️", badge: undefined },
+    { label: "Creativity", href: "/creativity", icon: "🎨", badge: "Hot" },
+    { label: "Profile", href: "/profile", icon: "👤", badge: undefined },
+    { label: "Wallet", href: "/wallet", icon: "💳", badge: undefined }
+  ]);
+
+  const userItems = getUserNavItems();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -119,6 +121,39 @@ const Header = () => {
                 )}
               </Link>
             ))}
+            
+            {/* User Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-md transition-all duration-200 hover:bg-muted/50"
+                >
+                  <span className="text-xs">👤</span>
+                  <span className="text-xs font-medium">User</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {userItems.map((item) => (
+                  <DropdownMenuItem key={item.label} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center gap-2 w-full"
+                    >
+                      <span className="text-sm">{item.icon}</span>
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge && (
+                        <Badge variant="secondary" className="text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* Right Side Actions */}
@@ -260,120 +295,12 @@ const Header = () => {
           </Button>
         </div>
 
-        {/* Animated Search Bar */}
-        <AnimatePresence>
-          {showSearch && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="hidden md:block overflow-hidden border-t border-border"
-            >
-              <div className="py-4">
-                <form onSubmit={handleSearch} className="max-w-md mx-auto">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Search NFTs, collections, creators..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-muted/50 border-border/50 focus:bg-background transition-colors"
-                      autoFocus
-                    />
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden border-t border-border"
-            >
-              <div className="py-4 space-y-4">
-                {/* Mobile Search */}
-                <form onSubmit={handleSearch} className="px-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Search NFTs..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-muted/50 border-border/50"
-                    />
-                  </div>
-                </form>
-
-                {/* Mobile Navigation */}
-                <div className="space-y-2 px-4">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 ${
-                        location.pathname === item.href
-                          ? 'text-primary bg-primary/10'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <span className="text-lg">{item.icon}</span>
-                      <span className="font-medium flex-1">{item.label}</span>
-                      {item.badge && (
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Mobile Actions */}
-                <div className="px-4 pt-4 border-t border-border space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Notifications</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="relative"
-                      onClick={() => setIsOpen(!isOpen)}
-                    >
-                      <Bell className="w-4 h-4" />
-                      {unreadCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-primary">
-                          {unreadCount > 99 ? '99+' : unreadCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Theme</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    >
-                      {theme === 'dark' ? (
-                        <Sun className="w-4 h-4" />
-                      ) : (
-                        <Moon className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <WalletConnect />
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Mobile Navigation */}
+        <MobileNavigation 
+          isOpen={isMobileMenuOpen} 
+          onClose={() => setIsMobileMenuOpen(false)} 
+        />
       </div>
     </motion.header>
   );

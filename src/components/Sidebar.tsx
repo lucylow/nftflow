@@ -33,6 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useWeb3 } from '@/contexts/Web3Context';
+import { getMainNavItems, getFeatureNavItems, getUserNavItems, getToolNavItems } from '@/config/navigation';
 
 interface SidebarProps {
   className?: string;
@@ -56,31 +57,54 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const mainNavItems = [
-    { label: 'Home', href: '/', icon: Home, badge: null },
-    { label: 'Marketplace', href: '/marketplace', icon: Store, badge: null },
-    { label: 'Create', href: '/create', icon: Plus, badge: 'New' },
-    { label: 'Upload', href: '/upload', icon: Upload, badge: null },
-    { label: 'Dashboard', href: '/dashboard', icon: BarChart3, badge: null },
-    { label: 'Analytics', href: '/analytics', icon: TrendingUp, badge: null },
-  ];
+  // Icon mapping for navigation items
+  const iconMap: { [key: string]: any } = {
+    '🏠': Home,
+    '🏪': Store,
+    '✨': Plus,
+    '📤': Upload,
+    '📊': BarChart3,
+    '📈': TrendingUp,
+    '🏛️': Building2,
+    '👑': Crown,
+    '🎨': Palette,
+    '⚡': Zap,
+    '🗄️': Database,
+    '👥': Users,
+    '💳': Wallet,
+    '🧪': Zap,
+    '🔄': CreditCard,
+    '👤': User,
+    '📱': Globe,
+  };
 
-  const featuresNavItems = [
-    { label: 'DAO', href: '/dao', icon: Building2, badge: null },
-    { label: 'Governance', href: '/governance', icon: Crown, badge: null },
-    { label: 'Creativity', href: '/creativity', icon: Palette, badge: 'Hot' },
-    { label: 'Somnia', href: '/somnia', icon: Zap, badge: 'New' },
-    { label: 'Subgraph', href: '/subgraph', icon: Database, badge: null },
-    { label: 'Social', href: '/social', icon: Users, badge: null },
-  ];
+  const mainNavItems = getMainNavItems().map(item => ({
+    label: item.label,
+    href: item.href,
+    icon: iconMap[item.icon] || Home,
+    badge: item.badge || null,
+  }));
 
-  const toolsNavItems = [
-    { label: 'Wallet', href: '/wallet', icon: Wallet, badge: null },
-    { label: 'Wallet Test', href: '/wallet-test', icon: Zap, badge: 'Test' },
-    { label: 'Rental Flow', href: '/rental', icon: CreditCard, badge: null },
-    { label: 'Profile', href: '/profile', icon: User, badge: null },
-    { label: 'Mobile', href: '/mobile', icon: Globe, badge: null },
-  ];
+  const featuresNavItems = getFeatureNavItems().map(item => ({
+    label: item.label,
+    href: item.href,
+    icon: iconMap[item.icon] || Home,
+    badge: item.badge || null,
+  }));
+
+  const userNavItems = getUserNavItems().map(item => ({
+    label: item.label,
+    href: item.href,
+    icon: iconMap[item.icon] || Home,
+    badge: item.badge || null,
+  }));
+
+  const toolsNavItems = getToolNavItems().map(item => ({
+    label: item.label,
+    href: item.href,
+    icon: iconMap[item.icon] || Home,
+    badge: item.badge || null,
+  }));
 
   const quickActions = [
     { label: 'Connect Wallet', icon: Wallet, action: 'connect' },
@@ -234,6 +258,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           <NavSection title="Main" items={mainNavItems} />
           <Separator />
           <NavSection title="Features" items={featuresNavItems} />
+          <Separator />
+          <NavSection title="User" items={userNavItems} />
           <Separator />
           <NavSection title="Tools" items={toolsNavItems} />
         </div>

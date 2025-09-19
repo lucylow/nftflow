@@ -13,7 +13,7 @@ import {
   Filter,
   Search,
   Play,
-  Stream,
+  Radio,
   Activity,
   Eye,
   Heart,
@@ -145,7 +145,7 @@ export default function MarketplaceSimple() {
                     </Badge>
                     {nft.streamingEnabled && (
                       <Badge variant="secondary" className="bg-green-500/20 text-green-400">
-                        <Stream className="w-3 h-3 mr-1" />
+                        <Radio className="w-3 h-3 mr-1" />
                         Live
                       </Badge>
                     )}
@@ -207,11 +207,11 @@ export default function MarketplaceSimple() {
                     
                     {/* Streaming info */}
                     {nft.streamingEnabled && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Stream className="w-4 h-4 text-green-400" />
-                          <span className="text-green-400">{nft.streamType?.toUpperCase()}</span>
-                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-1">
+                            <Radio className="w-4 h-4 text-green-400" />
+                            <span className="text-green-400">{nft.streamType?.toUpperCase()}</span>
+                          </div>
                         <div className="flex items-center gap-1">
                           <Eye className="w-4 h-4 text-muted-foreground" />
                           <span>{nft.totalViews} views</span>

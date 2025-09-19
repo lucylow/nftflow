@@ -2,40 +2,34 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
+export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ['lucide-react'],
-  },
-  define: {
-    global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['framer-motion', 'react-router-dom', 'lucide-react', '@tanstack/react-query', '@tanstack/query-core'],
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom'
+    ],
+    exclude: ['@tanstack/react-query']
   },
   build: {
     rollupOptions: {
       output: {
         manualChunks: {
-          // Separate ethers.js into its own chunk
-          ethers: ['ethers'],
-          framer: ['framer-motion'],
-        },
-      },
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom']
+        }
+      }
     },
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000,
-    commonjsOptions: {
-      include: [/node_modules/],
-      transformMixedEsModules: true,
-    },
+    chunkSizeWarningLimit: 1000
   },
-}));
+  server: {
+    port: 8080,
+    host: true
+  }
+});

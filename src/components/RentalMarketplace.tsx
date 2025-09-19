@@ -20,7 +20,7 @@ import {
   Play,
   Pause,
   CheckCircle,
-  Stream,
+  Zap,
   Activity,
   Eye,
   Heart,

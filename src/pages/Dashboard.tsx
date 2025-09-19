@@ -1,32 +1,22 @@
 import React from 'react';
-import UserDashboard from '@/components/UserDashboard';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function Dashboard() {
+const Dashboard: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/50 to-slate-950">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">User Dashboard</h1>
-          <p className="text-gray-300 text-lg">
-            Manage your NFTs, track rentals, and view analytics
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 to-blue-900 flex items-center justify-center">
+      <div className="text-center text-white">
+        <h1 className="text-4xl font-bold mb-4">User Dashboard</h1>
+        <p className="text-xl mb-8">Manage your NFTs, track rentals, and view analytics</p>
+        <div className="space-x-4">
+          <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition-colors">
+            My NFTs
+          </button>
+          <button className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-lg font-semibold transition-colors">
+            Rental History
+          </button>
         </div>
-        
-        <Tabs defaultValue="user" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="user">My Dashboard</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
-          <TabsContent value="user" className="mt-6">
-            <UserDashboard />
-          </TabsContent>
-          <TabsContent value="analytics" className="mt-6">
-            <AnalyticsDashboard />
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
