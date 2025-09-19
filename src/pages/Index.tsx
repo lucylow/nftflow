@@ -72,7 +72,7 @@ const Index: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link to="/marketplace">
+            <Link to="/netflix-marketplace">
               <Button 
                 size="lg" 
                 className="px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
@@ -83,13 +83,15 @@ const Index: React.FC = () => {
               </Button>
             </Link>
             
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="px-8 py-4 text-lg border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white transition-all duration-200"
-            >
-              Watch Demo
-            </Button>
+            <Link to="/onboarding">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-8 py-4 text-lg border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white transition-all duration-200"
+              >
+                Learn How It Works
+              </Button>
+            </Link>
           </div>
         </motion.div>
 

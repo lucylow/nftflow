@@ -5,10 +5,13 @@ import Layout from '@/components/Layout';
 // Lazy load all page components to prevent circular dependencies
 const Index = lazy(() => import('@/pages/Index'));
 const Marketplace = lazy(() => import('@/pages/Marketplace-simple'));
+const NetflixMarketplace = lazy(() => import('@/pages/NetflixMarketplace'));
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Create = lazy(() => import('@/pages/Create'));
 const Wallet = lazy(() => import('@/components/SimpleWallet'));
+const OnboardingFlow = lazy(() => import('@/components/Onboarding/OnboardingFlow'));
+const WalletConnector = lazy(() => import('@/components/WalletConnection/WalletConnector'));
 
 // Additional pages referenced in navigation
 const Upload = lazy(() => import('@/pages/Upload'));
@@ -40,6 +43,9 @@ export const AppRoutes: React.FC = () => {
         {/* Main Navigation Routes */}
         <Route path="/" element={<Index />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/netflix-marketplace" element={<NetflixMarketplace />} />
+        <Route path="/onboarding" element={<OnboardingFlow />} />
+        <Route path="/wallet-connect" element={<WalletConnector />} />
         <Route path="/create" element={<Create />} />
         <Route path="/upload" element={<Upload />} />
         <Route path="/dashboard" element={<Dashboard />} />
