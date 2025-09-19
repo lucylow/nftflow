@@ -3,7 +3,7 @@ import { Wallet, User, LogOut, Copy, ExternalLink, CheckCircle, AlertCircle } fr
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useWeb3 } from "@/contexts/Web3Context";
+import { useWeb3 } from "@/contexts/Web3Context-minimal";
 import { LoadingSpinner } from "@/components/ui/skeleton";
 import { isMetaMaskInstalled, getCurrentNetwork } from "@/lib/web3";
 

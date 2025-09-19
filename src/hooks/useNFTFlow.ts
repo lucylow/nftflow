@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { parseEther } from 'ethers';
-import { useWeb3 } from '@/contexts/Web3Context';
+import { useWeb3 } from '@/contexts/Web3Context-minimal';
 import { useToast } from '@/hooks/use-toast';
 
 export const useNFTFlow = () => {
