@@ -372,7 +372,7 @@ const NetflixMarketplace: React.FC = () => {
         ) : (
           /* Original Category Rows */
           categories.map((category, categoryIndex) => (
-          <div key={category.name} className="mb-12">
+            <div key={category.name} className="mb-12">
             <div className="container mx-auto px-6">
               <h2 className="text-2xl font-bold mb-6">{category.name}</h2>
               
@@ -444,8 +444,9 @@ const NetflixMarketplace: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
