@@ -97,20 +97,20 @@ const Header = () => {
             </form>
           </div>
 
-          {/* Desktop Navigation - Hidden on smaller screens */}
-          <nav className="hidden xl:flex items-center gap-1">
-            {navItems.slice(0, 4).map((item) => (
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.href}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-md transition-all duration-200 relative group ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 relative group ${
                   location.pathname === item.href
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
-                <span className="text-xs">{item.icon}</span>
-                <span className="text-xs font-medium hidden 2xl:inline">{item.label}</span>
+                <span className="text-sm">{item.icon}</span>
+                <span className="text-sm font-medium">{item.label}</span>
                 {item.badge && (
                   <Badge variant="secondary" className="text-xs px-1 py-0 ml-1">
                     {item.badge}
