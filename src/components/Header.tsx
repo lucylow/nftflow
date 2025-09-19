@@ -24,7 +24,6 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const location = useLocation();
   const { theme, setTheme } = useTheme();
@@ -81,7 +80,7 @@ const Header = () => {
 
           {/* Search Bar - Responsive */}
           <div className={`flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-4 lg:mx-6 transition-all duration-300 ${
-            showSearch || isSearchFocused ? 'block' : 'hidden sm:block'
+            isSearchFocused ? 'block' : 'hidden sm:block'
           }`}>
             <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
@@ -130,15 +129,6 @@ const Header = () => {
 
           {/* Right Side Actions - Responsive */}
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Search Toggle - Only on mobile */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setShowSearch(!showSearch)}
-              className="sm:hidden h-8 w-8 p-0"
-            >
-              <Search className="w-4 h-4" />
-            </Button>
 
             {/* Notifications */}
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -277,32 +267,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar - Shows when toggled */}
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ 
-            height: showSearch ? 'auto' : 0, 
-            opacity: showSearch ? 1 : 0 
-          }}
-          transition={{ duration: 0.2 }}
-          className="overflow-hidden sm:hidden border-t border-border/50"
-        >
-          <div className="py-3">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input
-                  placeholder="Search NFTs, collections..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  className="pl-10 bg-muted/50 border-border/50 focus:bg-background transition-colors"
-                />
-              </div>
-            </form>
-          </div>
-        </motion.div>
 
         {/* Mobile Navigation */}
         <MobileNavigation 
