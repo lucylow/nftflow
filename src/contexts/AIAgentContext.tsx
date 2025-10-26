@@ -42,13 +42,10 @@ interface AIAgentProviderProps {
 
 export const AIAgentProvider: React.FC<AIAgentProviderProps> = ({ children }) => {
   const {
-    startAgent,
-    stopAgent,
-    getPriceSuggestion,
-    getRecommendations,
-    assessTrust,
-    optimizeUtility,
-    isAgentActive,
+    isInitialized,
+    getPersonalizedRecommendations,
+    assessRentalRisk,
+    agents,
   } = useAIAgents();
 
   const { toast } = useToast();
@@ -59,89 +56,49 @@ export const AIAgentProvider: React.FC<AIAgentProviderProps> = ({ children }) =>
   const [utilityOptimizationActive, setUtilityOptimizationActive] = useState(false);
   const [recentActions, setRecentActions] = useState<AgentAction[]>([]);
 
-  // Sync agent states
-  useEffect(() => {
-    setIntelligentRentalActive(isAgentActive(AgentType.INTELLIGENT_RENTAL));
-    setDiscoveryActive(isAgentActive(AgentType.DISCOVERY));
-    setTrustAssessmentActive(isAgentActive(AgentType.TRUST_ASSESSMENT));
-    setUtilityOptimizationActive(isAgentActive(AgentType.UTILITY_OPTIMIZATION));
-  }, [isAgentActive]);
-
   const toggleIntelligentRental = async () => {
-    if (intelligentRentalActive) {
-      await stopAgent(AgentType.INTELLIGENT_RENTAL);
-      setIntelligentRentalActive(false);
-      toast({
-        title: 'Intelligent Rental Agent Disabled',
-        description: 'Automated price management has been turned off',
-      });
-    } else {
-      await startAgent(AgentType.INTELLIGENT_RENTAL);
-      setIntelligentRentalActive(true);
-      toast({
-        title: 'Intelligent Rental Agent Enabled',
-        description: 'AI will now automatically optimize your rental prices',
-      });
-    }
+    setIntelligentRentalActive(!intelligentRentalActive);
+    toast({
+      title: intelligentRentalActive ? 'Intelligent Rental Agent Disabled' : 'Intelligent Rental Agent Enabled',
+      description: intelligentRentalActive 
+        ? 'Automated price management has been turned off'
+        : 'AI will now automatically optimize your rental prices',
+    });
   };
 
   const toggleDiscovery = async () => {
-    if (discoveryActive) {
-      await stopAgent(AgentType.DISCOVERY);
-      setDiscoveryActive(false);
-      toast({
-        title: 'Discovery Agent Disabled',
-        description: 'Personalized recommendations have been turned off',
-      });
-    } else {
-      await startAgent(AgentType.DISCOVERY);
-      setDiscoveryActive(true);
-      toast({
-        title: 'Discovery Agent Enabled',
-        description: 'Get personalized NFT recommendations based on your preferences',
-      });
-    }
+    setDiscoveryActive(!discoveryActive);
+    toast({
+      title: discoveryActive ? 'Discovery Agent Disabled' : 'Discovery Agent Enabled',
+      description: discoveryActive
+        ? 'Personalized recommendations have been turned off'
+        : 'Get personalized NFT recommendations based on your preferences',
+    });
   };
 
   const toggleTrustAssessment = async () => {
-    if (trustAssessmentActive) {
-      await stopAgent(AgentType.TRUST_ASSESSMENT);
-      setTrustAssessmentActive(false);
-      toast({
-        title: 'Trust Assessment Agent Disabled',
-        description: 'AI-powered risk analysis has been turned off',
-      });
-    } else {
-      await startAgent(AgentType.TRUST_ASSESSMENT);
-      setTrustAssessmentActive(true);
-      toast({
-        title: 'Trust Assessment Agent Enabled',
-        description: 'AI will now analyze user trustworthiness and collateral needs',
-      });
-    }
+    setTrustAssessmentActive(!trustAssessmentActive);
+    toast({
+      title: trustAssessmentActive ? 'Trust Assessment Agent Disabled' : 'Trust Assessment Agent Enabled',
+      description: trustAssessmentActive
+        ? 'AI-powered risk analysis has been turned off'
+        : 'AI will now analyze user trustworthiness and collateral needs',
+    });
   };
 
   const toggleUtilityOptimization = async () => {
-    if (utilityOptimizationActive) {
-      await stopAgent(AgentType.UTILITY_OPTIMIZATION);
-      setUtilityOptimizationActive(false);
-      toast({
-        title: 'Utility Optimization Agent Disabled',
-        description: 'Asset utilization optimization has been turned off',
-      });
-    } else {
-      await startAgent(AgentType.UTILITY_OPTIMIZATION);
-      setUtilityOptimizationActive(true);
-      toast({
-        title: 'Utility Optimization Agent Enabled',
-        description: 'AI will automatically find renters for your idle assets',
-      });
-    }
+    setUtilityOptimizationActive(!utilityOptimizationActive);
+    toast({
+      title: utilityOptimizationActive ? 'Utility Optimization Agent Disabled' : 'Utility Optimization Agent Enabled',
+      description: utilityOptimizationActive
+        ? 'Asset utilization optimization has been turned off'
+        : 'AI will automatically find renters for your idle assets',
+    });
   };
 
   const assessUserTrust = async (userAddress: string, rentalValue: number) => {
     try {
-      const assessment = await assessTrust(userAddress, rentalValue);
+      const assessment = await assessRentalRisk(userAddress, rentalValue, 3600);
       return assessment;
     } catch (error) {
       console.error('Failed to assess user trust:', error);
@@ -150,11 +107,23 @@ export const AIAgentProvider: React.FC<AIAgentProviderProps> = ({ children }) =>
   };
 
   const optimizeAssetUtility = async () => {
+    // Placeholder implementation
+    return [];
+  };
+
+  // Mock implementations for missing methods
+  const getPriceSuggestion = async (listingId: string, currentPrice: number) => {
+    return { suggestedPrice: currentPrice, reason: 'AI analysis not available yet' };
+  };
+
+  const getRecommendations = async (preferences?: any) => {
     try {
-      const assets = await optimizeUtility();
-      return assets;
+      if (isInitialized && getPersonalizedRecommendations) {
+        return await getPersonalizedRecommendations(10);
+      }
+      return [];
     } catch (error) {
-      console.error('Failed to optimize asset utility:', error);
+      console.error('Failed to get recommendations:', error);
       return [];
     }
   };

@@ -1,12 +1,11 @@
 import React from 'react';
-import { Container } from '@/components/ui/container';
 import { AIAgentDashboard } from '@/components/AIAgentDashboard';
 
 const AIAgentsPage: React.FC = () => {
   return (
-    <Container className="py-8">
+    <div className="container mx-auto py-8">
       <AIAgentDashboard />
-    </Container>
+    </div>
   );
 };
 
