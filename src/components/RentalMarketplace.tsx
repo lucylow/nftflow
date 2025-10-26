@@ -20,7 +20,6 @@ import {
   Play,
   Pause,
   CheckCircle,
-  Zap,
   Activity,
   Eye,
   Heart,
@@ -30,7 +29,8 @@ import {
   Volume2,
   VolumeX,
   Maximize,
-  Settings
+  Settings,
+  Radio
 } from 'lucide-react';
 import { useNFTFlow } from '@/hooks/useNFTFlow';
 import { useEnhancedNFTFlow } from '@/hooks/useEnhancedNFTFlow';
@@ -397,7 +397,7 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                   </Badge>
                   {nft.streamingEnabled && (
                     <Badge variant="secondary" className="bg-green-500/20 text-green-400">
-                      <Stream className="w-3 h-3 mr-1" />
+                      <Radio className="w-3 h-3 mr-1" />
                       Live
                     </Badge>
                   )}
@@ -463,7 +463,7 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                   {nft.streamingEnabled && (
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-1">
-                        <Stream className="w-4 h-4 text-green-400" />
+                        <Radio className="w-4 h-4 text-green-400" />
                         <span className="text-green-400">{nft.streamType?.toUpperCase()}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -524,7 +524,7 @@ export function RentalMarketplace({ className }: RentalMarketplaceProps) {
                           {selectedNFT.streamingEnabled && (
                             <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
                               <div className="flex items-center gap-2">
-                                <Stream className="w-5 h-5 text-green-400" />
+                                <Radio className="w-5 h-5 text-green-400" />
                                 <h4 className="font-medium text-green-400">Streaming Options</h4>
                               </div>
                               

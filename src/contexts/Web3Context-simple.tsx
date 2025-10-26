@@ -17,6 +17,7 @@ interface Web3ContextType {
   account: string | null;
   balance: string | null;
   chainId: number | null;
+  refreshBlockchainConnection?: () => Promise<void>;
   
   // Service status
   isBlockchainReady: boolean;
@@ -217,11 +218,6 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     switchNetwork,
     refreshBalance,
     refreshBlockchainConnection,
-    // Mock implementations
-    createMicroRental,
-    createPaymentStream,
-    getSomniaMetrics,
-    getSomniaNetworkInfo,
   };
 
   return (

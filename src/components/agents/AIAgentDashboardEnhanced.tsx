@@ -296,19 +296,19 @@ export const AIAgentDashboardEnhanced: React.FC<AIAgentDashboardEnhancedProps> =
                     <span className="text-white font-semibold">{metrics.actions}</span>
                   </div>
 
-                  {agent.key === 'pricing' && (
+                  {agent.key === 'pricing' && 'revenue' in metrics && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">Revenue Impact</span>
                       <span className="text-green-400 font-bold">{metrics.revenue}</span>
                     </div>
                   )}
-                  {agent.key === 'recommendation' && (
+                  {agent.key === 'recommendation' && 'matches' in metrics && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">Successful Matches</span>
                       <span className="text-purple-400 font-bold">{metrics.matches}</span>
                     </div>
                   )}
-                  {agent.key === 'collateral' && (
+                  {agent.key === 'collateral' && 'riskPrevented' in metrics && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-400">Risks Prevented</span>
                       <span className="text-green-400 font-bold">{metrics.riskPrevented}</span>

@@ -172,7 +172,7 @@ Return JSON:
       for (const step of plan.steps) {
         try {
           console.log(`📋 Executing step: ${step.agent}.${step.action}`);
-          const stepResult = await this.executeStep(step);
+          const stepResult = await this.executor.processWorkflowStep(step);
           results[`${step.agent}_${step.action}`] = stepResult;
         } catch (error) {
           console.error(`Step execution failed:`, error);
@@ -183,7 +183,7 @@ Return JSON:
       return results;
     },
 
-    executeStep: async (step: WorkflowStep): Promise<any> => {
+    processWorkflowStep: async (step: WorkflowStep): Promise<any> => {
       const { agent, action, parameters } = step;
 
       switch (agent) {

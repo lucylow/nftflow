@@ -20,35 +20,28 @@ export const useAIAgents = () => {
   });
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize AI agents
+  // Initialize AI agents - API key is now handled server-side through Supabase
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    
-    if (!apiKey) {
-      console.warn('OpenAI API key not found. AI agents will not function.');
-      setIsInitialized(false);
-      return;
-    }
-
     if (!account || !nftFlowContract) {
       setIsInitialized(false);
       return;
     }
 
     try {
-      // Initialize agents
+      // Initialize agents with placeholder - actual API calls go through edge functions
       const rentalAgent = new RentalIntelligenceAgent(
-        apiKey,
-        null, // provider will be set later
+        'server-side', // API key managed by Supabase
+        null,
         CONTRACT_ADDRESSES.NFTFlow,
-        [] // ABI will be set later
+        []
       );
 
-      const recommendationAgent = new RecommendationAgent(apiKey, null);
+      const recommendationAgent = new RecommendationAgent('server-side', null);
 
       const collateralAgent = new CollateralAgent(
-        apiKey,
-        reputationSystemContract || null
+        'server-side',
+        null,
+        CONTRACT_ADDRESSES.ReputationSystem
       );
 
       setAgents({
@@ -58,7 +51,7 @@ export const useAIAgents = () => {
       });
 
       setIsInitialized(true);
-      console.log('✅ AI Agents initialized successfully');
+      console.log('✅ AI Agents initialized - using secure backend');
     } catch (error) {
       console.error('Failed to initialize AI agents:', error);
       setIsInitialized(false);
@@ -96,7 +89,7 @@ export const useAIAgents = () => {
       throw new Error('AI agents not initialized');
     }
 
-    return await agents.collateral.assessRentalRisk(renterAddress, nftValue, rentalDuration);
+    return await agents.collateral.assessRisk(renterAddress, nftValue, rentalDuration);
   }, [agents]);
 
   // Get collateral requirement
@@ -109,11 +102,16 @@ export const useAIAgents = () => {
       throw new Error('AI agents not initialized');
     }
 
-    return await agents.collateral.getCollateralRequirement(
+    const riskAssessment = await agents.collateral.assessRisk(
       renterAddress,
       nftValue,
       rentalDuration
     );
+    
+    return {
+      amount: riskAssessment.recommendedCollateral,
+      reasoning: riskAssessment.explanation
+    };
   }, [agents]);
 
   return {

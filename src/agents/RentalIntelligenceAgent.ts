@@ -238,10 +238,14 @@ Respond in JSON format:
     const priceInWei = ethers.parseEther(newPrice.toString());
     
     try {
-      const tx = await contract.updateRentalPrice(nftContract, tokenId, priceInWei);
-      await tx.wait();
-      
-      console.log(`✅ AI Agent automatically adjusted price to ${newPrice} STT/second`);
+      // Note: updateRentalPrice method needs to be implemented in contract
+      if ('updateRentalPrice' in contract) {
+        const tx = await (contract as any).updateRentalPrice(nftContract, tokenId, priceInWei);
+        await tx.wait();
+        console.log(`✅ AI Agent automatically adjusted price to ${newPrice} STT/second`);
+      } else {
+        console.warn('updateRentalPrice method not available in contract');
+      }
     } catch (error) {
       console.error('Failed to adjust pricing:', error);
     }

@@ -28,7 +28,7 @@ export const useWorkflowOrchestrator = () => {
         
         const workflowOrchestrator = new WorkflowOrchestrator(
           apiKey,
-          provider,
+          provider as any,
           CONTRACT_ADDRESSES.NFTFlow,
           nftFlowABI
         );

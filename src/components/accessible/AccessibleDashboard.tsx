@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAccount, useProvider } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // AI Agent Types
@@ -28,7 +28,6 @@ interface AccessibleAction {
 
 export const AccessibleDashboard: React.FC = () => {
   const { address, isConnected } = useAccount();
-  const provider = useProvider();
   
   const [agents, setAgents] = useState<AIAgentState[]>([
     {
@@ -171,7 +170,7 @@ export const AccessibleDashboard: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Skip to main content
-      if (event.key === 'Tab' && event.shiftKey && event.key === 'Home') {
+      if (event.key === 'Tab' && event.shiftKey) {
         event.preventDefault();
         skipToContentRef.current?.focus();
       }

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { 
   Accessibility, 
-  HighContrast, 
-  TextSize, 
-  NoAnimation,
-  Microphone,
-  MicrophoneOff
+  Contrast, 
+  Type, 
+  Pause,
+  Mic,
+  MicOff,
+  Volume2
 } from 'lucide-react';
 
 interface AccessibilityControlsProps {
@@ -75,7 +76,7 @@ export const AccessibilityControls: React.FC<AccessibilityControlsProps> = ({
             {/* High Contrast Toggle */}
             <div className="flex items-center justify-between">
               <label htmlFor="high-contrast" className="flex items-center gap-2 cursor-pointer">
-                <HighContrast size={18} />
+                <Contrast size={18} />
                 <span>High Contrast</span>
               </label>
               <button
@@ -100,7 +101,7 @@ export const AccessibilityControls: React.FC<AccessibilityControlsProps> = ({
             {/* Font Size Controls */}
             <div>
               <label className="flex items-center gap-2 mb-2">
-                <TextSize size={18} />
+                <Type size={18} />
                 <span>Font Size</span>
               </label>
               <div className="flex gap-2">
@@ -130,7 +131,7 @@ export const AccessibilityControls: React.FC<AccessibilityControlsProps> = ({
             {/* Reduced Motion */}
             <div className="flex items-center justify-between">
               <label htmlFor="reduced-motion" className="flex items-center gap-2 cursor-pointer">
-                <NoAnimation size={18} />
+                <Pause size={18} />
                 <span>Reduced Motion</span>
               </label>
               <button
@@ -155,7 +156,7 @@ export const AccessibilityControls: React.FC<AccessibilityControlsProps> = ({
             {/* Voice Control */}
             <div className="flex items-center justify-between">
               <label htmlFor="voice-control" className="flex items-center gap-2 cursor-pointer">
-                {voiceControlActive ? <Microphone size={18} /> : <MicrophoneOff size={18} />}
+                {voiceControlActive ? <Mic size={18} /> : <MicOff size={18} />}
                 <span>Voice Control</span>
               </label>
               <button

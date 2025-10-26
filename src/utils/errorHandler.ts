@@ -21,7 +21,7 @@ export function logError(context: string, error: unknown): void {
 export function createError(message: string, cause?: unknown): Error {
   const error = new Error(message);
   if (cause) {
-    error.cause = cause;
+    (error as any).cause = cause;
   }
   return error;
 }
