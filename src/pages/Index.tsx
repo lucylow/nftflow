@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import { AIHeroIntegration } from '@/components/landing/AIHeroIntegration';
+import { AIAgentsSection } from '@/components/landing/AIAgentsSection';
 
 const Index: React.FC = () => {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -129,6 +131,9 @@ const Index: React.FC = () => {
               </Button>
             </Link>
           </div>
+
+          {/* AI Integration */}
+          <AIHeroIntegration />
         </motion.div>
 
         {/* Dynamic Feature Showcase */}
@@ -210,6 +215,9 @@ const Index: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* AI Agents Section */}
+      <AIAgentsSection />
     </div>
   );
 };
