@@ -174,6 +174,11 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         throw new Error('MetaMask not installed. Please install MetaMask browser extension.');
       }
 
+      // Check if ethereum object is available (for Lovable dev compatibility)
+      if (!window.ethereum || typeof window.ethereum.request !== 'function') {
+        throw new Error('Ethereum provider not available. Please ensure MetaMask is installed and enabled.');
+      }
+
       // Request account access with timeout
       console.log('🔑 Requesting account access...');
       const accounts = await Promise.race([

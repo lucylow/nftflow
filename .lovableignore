@@ -1,0 +1,32 @@
+# Lovable.dev specific ignore file
+# Files that shouldn't be editable in Lovable
+
+# Context files to avoid (we're using the main one)
+src/contexts/Web3Context-minimal.tsx
+src/contexts/Web3Context-simple.tsx
+src/contexts/Web3Context-fixed.tsx
+
+# Build artifacts
+dist/
+build/
+.next/
+
+# Dependencies
+node_modules/
+
+# Backend files (not needed in Lovable)
+backend/
+
+# Database files
+database/
+
+# Docker files
+Dockerfile.*
+docker-compose*.yml
+
+# Infrastructure
+infrastructure/
+
+# Documentation (optional to include)
+docs/
+
