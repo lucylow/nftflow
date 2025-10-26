@@ -2,8 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title NFTFlowMetadata
@@ -12,7 +11,6 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * Optimized for Somnia Network's low storage costs
  */
 contract NFTFlowMetadata is Ownable, ReentrancyGuard {
-    using SafeMath for uint256;
 
     // ============ METADATA STRUCTS ============
     

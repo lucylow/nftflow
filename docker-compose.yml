@@ -145,6 +145,32 @@ services:
       - /app/node_modules
     restart: unless-stopped
 
+  # AI Agent Service
+  agents:
+    build:
+      context: ./backend/agents
+      dockerfile: Dockerfile
+    container_name: nftflow-agents
+    ports:
+      - "3002:3001"
+    environment:
+      NODE_ENV: development
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SUBGRAPH_URL: http://localhost:8000/subgraphs/name/nftflow
+      SOMNIA_RPC_URL: https://dream-rpc.somnia.network/
+      ORACLE_URL: https://oracle.somnia.network
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://nftflow:nftflow@postgres:5432/nftflow
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
@@ -157,6 +183,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
       - api
+      - agents
     restart: unless-stopped
 
   # Monitoring with Prometheus

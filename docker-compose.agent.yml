@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  agent-service:
+    build:
+      context: ./backend/agent-service
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    env_file:
+      - ./backend/agent-service/.env
+    restart: unless-stopped
+    networks:
+      - nftflow-network
+
+networks:
+  nftflow-network:
+    external: true
+

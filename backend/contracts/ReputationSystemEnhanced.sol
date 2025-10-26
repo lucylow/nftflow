@@ -686,7 +686,7 @@ contract ReputationSystemEnhanced is Ownable {
         int256 scoreChange,
         string memory description
     ) internal {
-        ReputationEvent memory event = ReputationEvent({
+        ReputationEvent memory repEvent = ReputationEvent({
             timestamp: block.timestamp,
             eventType: eventType,
             scoreChange: uint256(scoreChange),
@@ -694,7 +694,7 @@ contract ReputationSystemEnhanced is Ownable {
             description: description
         });
         
-        reputationHistory[user].push(event);
+        reputationHistory[user].push(repEvent);
         
         emit ReputationEventAdded(user, eventType, uint256(scoreChange), block.timestamp);
     }
