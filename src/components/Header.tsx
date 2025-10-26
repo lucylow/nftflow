@@ -57,7 +57,7 @@ const Header = () => {
       animate={{ y: 0 }}
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-background/95 backdrop-blur-xl border-b border-border shadow-lg' 
+          ? 'bg-background/95 backdrop-blur-xl border-b border-border shadow-lg glass' 
           : 'bg-background/80 backdrop-blur-md border-b border-border/50'
       }`}
     >
@@ -65,15 +65,15 @@ const Header = () => {
         {/* Main Header Row */}
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo - Always visible */}
-          <Link to="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <Link to="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0 group">
             <motion.div
-              whileHover={{ rotate: 360 }}
+              whileHover={{ rotate: 360, scale: 1.1 }}
               transition={{ duration: 0.5 }}
-              className="p-1.5 sm:p-2 bg-gradient-to-r from-primary to-accent rounded-lg"
+              className="p-1.5 sm:p-2 bg-gradient-to-r from-primary to-accent rounded-lg shadow-lg group-hover:shadow-primary/50 transition-shadow"
             >
               <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </motion.div>
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-lg sm:text-xl font-bold">
+            <span className="gradient-text text-lg sm:text-xl font-bold hover:scale-105 transition-transform inline-block">
               NFTFlow
             </span>
           </Link>
@@ -91,7 +91,7 @@ const Header = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
-                  className="pl-7 sm:pl-10 h-8 sm:h-9 text-sm bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  className="pl-7 sm:pl-10 h-8 sm:h-9 text-sm bg-muted/50 border-border/50 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
             </form>

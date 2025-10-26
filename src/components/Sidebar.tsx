@@ -26,7 +26,10 @@ import {
   Activity,
   Star,
   Heart,
-  Share2
+  Share2,
+  Rocket,
+  Target,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,6 +79,14 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     '🔄': CreditCard,
     '👤': User,
     '📱': Globe,
+    '🤖': Activity,
+    '🔍': Search,
+    '🌟': Star,
+    '🛒': Store,
+    '🎭': Palette,
+    '🎯': Target,
+    '🚀': Rocket,
+    '🔧': Settings,
   };
 
   const mainNavItems = getMainNavItems().map(item => ({
