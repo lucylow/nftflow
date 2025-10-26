@@ -21,7 +21,7 @@ import {
   Heart,
   Share2
 } from 'lucide-react';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 
 const Community = () => {
   const { account } = useWeb3();

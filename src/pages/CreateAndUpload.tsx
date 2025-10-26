@@ -19,7 +19,7 @@ import {
   Plus,
   Trash2
 } from 'lucide-react';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 
 const CreateAndUpload = () => {
   const { account } = useWeb3();

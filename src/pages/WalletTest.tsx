@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 import { 
   Wallet, 
   CheckCircle, 

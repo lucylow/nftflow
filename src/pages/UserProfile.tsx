@@ -20,7 +20,7 @@ import {
   Filter,
   Search
 } from 'lucide-react';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 
 const UserProfile = () => {
   const { account } = useWeb3();

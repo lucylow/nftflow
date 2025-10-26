@@ -363,7 +363,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
 
   // Listen for account changes
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
+    if (typeof window !== 'undefined' && window.ethereum && window.ethereum.on) {
       const handleAccountsChanged = (accounts: string[]) => {
         console.log('Accounts changed:', accounts);
         if (accounts.length === 0) {
@@ -399,18 +399,22 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       };
 
       // Add event listeners
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-      window.ethereum.on('connect', handleConnect);
-      window.ethereum.on('disconnect', handleDisconnect);
+      if (window.ethereum.on && window.ethereum.removeListener) {
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged);
+        window.ethereum.on('connect', handleConnect);
+        window.ethereum.on('disconnect', handleDisconnect);
 
-      return () => {
-        // Clean up event listeners
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
-        window.ethereum.removeListener('connect', handleConnect);
-        window.ethereum.removeListener('disconnect', handleDisconnect);
-      };
+        return () => {
+          // Clean up event listeners
+          if (window.ethereum && window.ethereum.removeListener) {
+            window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+            window.ethereum.removeListener('chainChanged', handleChainChanged);
+            window.ethereum.removeListener('connect', handleConnect);
+            window.ethereum.removeListener('disconnect', handleDisconnect);
+          }
+        };
+      }
     }
   }, [isConnected, account, initializeContracts, refreshBalance, disconnectWallet]);
 

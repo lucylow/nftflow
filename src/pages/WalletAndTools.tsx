@@ -24,7 +24,7 @@ import {
   ExternalLink,
   Users
 } from 'lucide-react';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 
 const WalletAndTools = () => {
   const { account, balance, isConnected, connectWallet, disconnectWallet } = useWeb3();

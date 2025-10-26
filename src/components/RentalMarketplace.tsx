@@ -35,7 +35,7 @@ import {
 import { useNFTFlow } from '@/hooks/useNFTFlow';
 import { useEnhancedNFTFlow } from '@/hooks/useEnhancedNFTFlow';
 import { useBlockchainEvents } from '@/hooks/useBlockchainEvents';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 import { formatEther, parseEther } from 'ethers';
 import { TransactionStatus } from '@/components/TransactionStatus';
 
