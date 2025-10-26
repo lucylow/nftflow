@@ -123,13 +123,13 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   };
 
   // Disconnect wallet
-  const disconnectWallet = () => {
+  const disconnectWallet = useCallback(() => {
     setIsConnected(false);
     setAccount(null);
     setBalance(null);
     setChainId(null);
     setNftFlowContract(null);
-  };
+  }, []);
 
   // Switch network (simplified)
   const switchNetwork = async (targetChainId: number) => {
@@ -185,6 +185,47 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   useEffect(() => {
     refreshBlockchainConnection();
   }, [refreshBlockchainConnection]);
+
+  // Listen for account changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        console.log('Accounts changed:', accounts);
+        if (accounts.length === 0) {
+          console.log('No accounts found, disconnecting wallet');
+          disconnectWallet();
+        } else if (accounts[0] !== account) {
+          console.log('Account changed to:', accounts[0]);
+          setAccount(accounts[0]);
+          refreshBalance();
+        }
+      };
+
+      const handleChainChanged = () => {
+        console.log('Chain changed, refreshing blockchain connection');
+        refreshBlockchainConnection();
+      };
+
+      const handleDisconnect = () => {
+        console.log('MetaMask disconnected');
+        disconnectWallet();
+      };
+
+      // Add event listeners
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on('disconnect', handleDisconnect);
+
+      return () => {
+        // Clean up event listeners
+        if (window.ethereum.removeListener) {
+          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+          window.ethereum.removeListener('chainChanged', handleChainChanged);
+          window.ethereum.removeListener('disconnect', handleDisconnect);
+        }
+      };
+    }
+  }, [account, disconnectWallet, refreshBalance, refreshBlockchainConnection]);
 
   // Mock functions for compatibility
   const createMicroRental = async () => { 
@@ -249,3 +290,18 @@ export const useWeb3 = () => {
   }
   return context;
 };
+
+// Declare window.ethereum type
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+      on: (event: string, callback: (...args: unknown[]) => void) => void;
+      removeListener: (event: string, callback: (...args: unknown[]) => void) => void;
+      isMetaMask?: boolean;
+      isCoinbaseWallet?: boolean;
+      selectedAddress?: string;
+      networkVersion?: string;
+    };
+  }
+}

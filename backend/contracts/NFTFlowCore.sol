@@ -1,247 +1,612 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/IERC4907.sol";
-import "./interfaces/IPriceOracle.sol";
-import "./PaymentStream.sol";
-import "./ReputationSystem.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract NFTFlowCore is ReentrancyGuard, Ownable {
-    // Somnia MulticallV3 address
-    address constant MULTICALL = 0x841b8199E6d3Db3C6f264f6C2bd8848b3cA64223;
+/**
+ * @title NFTFlowCore
+ * @dev Enhanced NFT rental platform with comprehensive security measures
+ * @notice Implements rental functionality with emergency controls and access management
+ */
+contract NFTFlowCore is ReentrancyGuard, Pausable, AccessControl {
+    using Counters for Counters.Counter;
     
-    struct Rental {
-        address lender;
-        address tenant;
-        address nftContract;
-        uint256 tokenId;
-        uint256 startTime;
-        uint256 endTime;
-        uint256 totalPrice;
-        uint256 paymentStreamId;
-        bool active;
-    }
+    // Role definitions
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
+    bytes32 public constant PRICE_UPDATER_ROLE = keccak256("PRICE_UPDATER_ROLE");
+    bytes32 public constant FEE_COLLECTOR_ROLE = keccak256("FEE_COLLECTOR_ROLE");
     
-    struct NFTListing {
-        address nftContract;
-        uint256 tokenId;
+    // Custom errors for gas efficiency
+    error InsufficientPayment();
+    error RentalNotActive();
+    error Unauthorized();
+    error ContractPaused();
+    error InvalidDuration();
+    error InvalidPrice();
+    error RentalExpired();
+    error AlreadyListed();
+    error NotListed();
+    error NotRenter();
+    error NotOwner();
+    error TransferFailed();
+    error InvalidAddress();
+    error EmergencyPauseActive();
+    
+    // Structs
+    struct RentalListing {
         address owner;
+        address nftContract;
+        uint256 tokenId;
         uint256 pricePerSecond;
         uint256 minDuration;
         uint256 maxDuration;
-        uint256 collateralRequired;
+        uint256 collateralMultiplier;
         bool active;
+        uint256 createdAt;
+        uint256 updatedAt;
     }
     
-    mapping(bytes32 => Rental) public rentals;
-    mapping(bytes32 => NFTListing) public listings;
-    mapping(address => uint256) public userReputation;
+    struct ActiveRental {
+        address renter;
+        address lender;
+        uint256 startTime;
+        uint256 endTime;
+        uint256 totalPrice;
+        uint256 collateralAmount;
+        bool active;
+        RentalStatus status;
+    }
     
-    PaymentStream public paymentStreamFactory;
-    ReputationSystem public reputationSystem;
-    IPriceOracle public priceOracle;
+    enum RentalStatus {
+        PENDING,
+        ACTIVE,
+        COMPLETED,
+        CANCELLED,
+        DISPUTED
+    }
     
-    uint256 public constant MIN_RENTAL_DURATION = 60; // 1 minute minimum
-    uint256 public constant MAX_RENTAL_DURATION = 2592000; // 30 days maximum
+    // State variables
+    mapping(bytes32 => RentalListing) public listings;
+    mapping(bytes32 => ActiveRental) public rentals;
+    mapping(address => mapping(address => mapping(uint256 => bool))) public isListed;
     
-    event NFTListedForRent(
+    Counters.Counter private _listingIdCounter;
+    Counters.Counter private _rentalIdCounter;
+    
+    // Platform configuration
+    uint256 public platformFeePercentage = 250; // 2.5% (basis points)
+    uint256 public maxRentalDuration = 365 days;
+    uint256 public minRentalDuration = 1 hours;
+    uint256 public emergencyPauseDuration = 7 days;
+    
+    address public feeCollector;
+    address public priceOracle;
+    
+    // Emergency controls
+    bool public emergencyPauseActive;
+    uint256 public emergencyPauseStartTime;
+    
+    // Events
+    event ListingCreated(
         bytes32 indexed listingId,
+        address indexed owner,
         address indexed nftContract,
-        uint256 indexed tokenId,
-        address owner,
+        uint256 tokenId,
         uint256 pricePerSecond,
         uint256 minDuration,
         uint256 maxDuration
     );
     
-    event NFTRented(
+    event ListingUpdated(
+        bytes32 indexed listingId,
+        uint256 pricePerSecond,
+        uint256 minDuration,
+        uint256 maxDuration
+    );
+    
+    event ListingDeactivated(bytes32 indexed listingId);
+    
+    event RentalStarted(
         bytes32 indexed rentalId,
-        address indexed nftContract,
-        uint256 indexed tokenId,
-        address tenant,
-        uint256 duration,
+        bytes32 indexed listingId,
+        address indexed renter,
+        uint256 startTime,
+        uint256 endTime,
         uint256 totalPrice
     );
     
     event RentalCompleted(bytes32 indexed rentalId);
-    event RentalCancelled(bytes32 indexed rentalId, uint256 refundAmount);
+    event RentalCancelled(bytes32 indexed rentalId, address indexed cancelledBy);
     
-    constructor(
-        address _paymentStreamFactory,
-        address _reputationSystem,
-        address _priceOracle
-    ) Ownable() {
-        paymentStreamFactory = PaymentStream(payable(_paymentStreamFactory));
-        reputationSystem = ReputationSystem(_reputationSystem);
-        priceOracle = IPriceOracle(_priceOracle);
+    event EmergencyPauseActivated(address indexed activator, uint256 duration);
+    event EmergencyPauseDeactivated();
+    
+    event PlatformFeeUpdated(uint256 oldFee, uint256 newFee);
+    event FeeCollectorUpdated(address oldCollector, address newCollector);
+    
+    // Modifiers
+    modifier onlyEmergencyRole() {
+        if (!hasRole(EMERGENCY_ROLE, msg.sender)) {
+            revert Unauthorized();
+        }
+        _;
     }
     
-    function listNFTForRent(
+    modifier onlyPauserRole() {
+        if (!hasRole(PAUSER_ROLE, msg.sender)) {
+            revert Unauthorized();
+        }
+        _;
+    }
+    
+    modifier onlyPriceUpdater() {
+        if (!hasRole(PRICE_UPDATER_ROLE, msg.sender)) {
+            revert Unauthorized();
+        }
+        _;
+    }
+    
+    modifier notEmergencyPaused() {
+        if (emergencyPauseActive) {
+            revert EmergencyPauseActive();
+        }
+        _;
+    }
+    
+    modifier validDuration(uint256 duration) {
+        if (duration < minRentalDuration || duration > maxRentalDuration) {
+            revert InvalidDuration();
+        }
+        _;
+    }
+    
+    modifier validPrice(uint256 price) {
+        if (price == 0) {
+            revert InvalidPrice();
+        }
+        _;
+    }
+    
+    constructor(
+        address _feeCollector,
+        address _priceOracle
+    ) {
+        if (_feeCollector == address(0) || _priceOracle == address(0)) {
+            revert InvalidAddress();
+        }
+        
+        feeCollector = _feeCollector;
+        priceOracle = _priceOracle;
+        
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, msg.sender);
+        _grantRole(EMERGENCY_ROLE, msg.sender);
+        _grantRole(PRICE_UPDATER_ROLE, msg.sender);
+        _grantRole(FEE_COLLECTOR_ROLE, _feeCollector);
+    }
+    
+    /**
+     * @dev Create a new NFT rental listing
+     * @param nftContract Address of the NFT contract
+     * @param tokenId Token ID to list
+     * @param pricePerSecond Price per second in wei
+     * @param minDuration Minimum rental duration in seconds
+     * @param maxDuration Maximum rental duration in seconds
+     * @param collateralMultiplier Collateral multiplier (e.g., 100 = 1x)
+     */
+    function createListing(
         address nftContract,
         uint256 tokenId,
         uint256 pricePerSecond,
         uint256 minDuration,
         uint256 maxDuration,
-        uint256 collateralRequired
-    ) external returns (bytes32 listingId) {
-        require(IERC721(nftContract).ownerOf(tokenId) == msg.sender, "Not NFT owner");
-        require(pricePerSecond > 0, "Price must be greater than 0");
-        require(minDuration >= MIN_RENTAL_DURATION, "Min duration too short");
-        require(maxDuration <= MAX_RENTAL_DURATION, "Max duration too long");
-        require(minDuration <= maxDuration, "Invalid duration range");
+        uint256 collateralMultiplier
+    ) external 
+        nonReentrant 
+        whenNotPaused 
+        notEmergencyPaused
+        validPrice(pricePerSecond)
+        validDuration(minDuration)
+        validDuration(maxDuration)
+    {
+        if (minDuration > maxDuration) {
+            revert InvalidDuration();
+        }
         
-        // Note: The caller must have already approved this contract to manage the NFT
-        // This is checked by the require statement above
+        if (isListed[msg.sender][nftContract][tokenId]) {
+            revert AlreadyListed();
+        }
         
-        listingId = keccak256(abi.encodePacked(nftContract, tokenId, block.timestamp));
+        // Verify ownership
+        IERC721 nft = IERC721(nftContract);
+        if (nft.ownerOf(tokenId) != msg.sender) {
+            revert NotOwner();
+        }
         
-        listings[listingId] = NFTListing({
+        // Verify approval
+        if (nft.getApproved(tokenId) != address(this) && 
+            !nft.isApprovedForAll(msg.sender, address(this))) {
+            revert Unauthorized();
+        }
+        
+        _listingIdCounter.increment();
+        bytes32 listingId = keccak256(abi.encodePacked(
+            msg.sender,
+            nftContract,
+            tokenId,
+            _listingIdCounter.current()
+        ));
+        
+        listings[listingId] = RentalListing({
+            owner: msg.sender,
             nftContract: nftContract,
             tokenId: tokenId,
-            owner: msg.sender,
             pricePerSecond: pricePerSecond,
             minDuration: minDuration,
             maxDuration: maxDuration,
-            collateralRequired: collateralRequired,
-            active: true
+            collateralMultiplier: collateralMultiplier,
+            active: true,
+            createdAt: block.timestamp,
+            updatedAt: block.timestamp
         });
         
-        emit NFTListedForRent(listingId, nftContract, tokenId, msg.sender, pricePerSecond, minDuration, maxDuration);
+        isListed[msg.sender][nftContract][tokenId] = true;
         
-        return listingId;
+        emit ListingCreated(
+            listingId,
+            msg.sender,
+            nftContract,
+            tokenId,
+            pricePerSecond,
+            minDuration,
+            maxDuration
+        );
     }
     
+    /**
+     * @dev Rent an NFT
+     * @param listingId Listing ID to rent
+     * @param duration Rental duration in seconds
+     */
     function rentNFT(
         bytes32 listingId,
         uint256 duration
-    ) external payable nonReentrant {
-        NFTListing storage listing = listings[listingId];
-        require(listing.active, "Listing not active");
-        require(duration >= listing.minDuration, "Duration too short");
-        require(duration <= listing.maxDuration, "Duration too long");
-        require(listing.owner != msg.sender, "Cannot rent own NFT");
+    ) external 
+        payable 
+        nonReentrant 
+        whenNotPaused 
+        notEmergencyPaused
+        validDuration(duration)
+    {
+        RentalListing storage listing = listings[listingId];
         
-        // Check if NFT is available (not currently rented)
-        bytes32 rentalId = keccak256(abi.encodePacked(listing.nftContract, listing.tokenId));
-        require(!rentals[rentalId].active, "NFT already rented");
-        
-        uint256 totalPrice = listing.pricePerSecond * duration;
-        require(msg.value >= totalPrice, "Insufficient payment");
-        
-        // Check reputation and collateral requirements
-        uint256 userRep = reputationSystem.getReputationScore(msg.sender);
-        uint256 requiredCollateral = listing.collateralRequired;
-        
-        if (userRep < 100) { // Low reputation users need collateral
-            require(msg.value >= totalPrice + requiredCollateral, "Insufficient collateral");
+        if (!listing.active) {
+            revert NotListed();
         }
         
-        // Create payment stream
-        uint256 streamId = paymentStreamFactory.createStream{value: msg.value}(
+        if (listing.owner == msg.sender) {
+            revert Unauthorized(); // Can't rent your own NFT
+        }
+        
+        if (duration < listing.minDuration || duration > listing.maxDuration) {
+            revert InvalidDuration();
+        }
+        
+        // Calculate costs
+        uint256 totalPrice = listing.pricePerSecond * duration;
+        uint256 platformFee = (totalPrice * platformFeePercentage) / 10000;
+        uint256 collateralAmount = (totalPrice * listing.collateralMultiplier) / 100;
+        uint256 totalRequired = totalPrice + platformFee + collateralAmount;
+        
+        if (msg.value < totalRequired) {
+            revert InsufficientPayment();
+        }
+        
+        // Transfer NFT to contract
+        IERC721(listing.nftContract).transferFrom(
             listing.owner,
-            block.timestamp,
-            block.timestamp + duration,
-            listing.nftContract
+            address(this),
+            listing.tokenId
         );
         
-        // Set user for ERC-4907 if the NFT supports it
-        try IERC4907(listing.nftContract).setUser(listing.tokenId, msg.sender, uint64(block.timestamp + duration)) {
-            // ERC-4907 supported
-        } catch {
-            // Fallback: transfer NFT temporarily (requires approval)
-            IERC721(listing.nftContract).transferFrom(listing.owner, address(this), listing.tokenId);
-        }
+        // Create rental
+        _rentalIdCounter.increment();
+        bytes32 rentalId = keccak256(abi.encodePacked(
+            listingId,
+            msg.sender,
+            _rentalIdCounter.current()
+        ));
         
-        rentals[rentalId] = Rental({
+        rentals[rentalId] = ActiveRental({
+            renter: msg.sender,
             lender: listing.owner,
-            tenant: msg.sender,
-            nftContract: listing.nftContract,
-            tokenId: listing.tokenId,
             startTime: block.timestamp,
             endTime: block.timestamp + duration,
             totalPrice: totalPrice,
-            paymentStreamId: streamId,
-            active: true
+            collateralAmount: collateralAmount,
+            active: true,
+            status: RentalStatus.ACTIVE
         });
         
-        emit NFTRented(rentalId, listing.nftContract, listing.tokenId, msg.sender, duration, totalPrice);
-    }
-    
-    function completeRental(bytes32 rentalId) external {
-        Rental storage rental = rentals[rentalId];
-        require(rental.active, "Rental not active");
-        require(block.timestamp >= rental.endTime, "Rental period not ended");
-        require(msg.sender == rental.tenant || msg.sender == rental.lender, "Not authorized");
+        // Deactivate listing
+        listing.active = false;
+        isListed[listing.owner][listing.nftContract][listing.tokenId] = false;
         
-        // Clear user in ERC-4907
-        try IERC4907(rental.nftContract).setUser(rental.tokenId, address(0), 0) {
-            // ERC-4907 supported
-        } catch {
-            // Fallback: return NFT to owner
-            // This would need the NFT contract address, which we'd need to store
+        // Transfer payments
+        if (platformFee > 0) {
+            (bool feeSuccess, ) = feeCollector.call{value: platformFee}("");
+            if (!feeSuccess) {
+                revert TransferFailed();
+            }
         }
         
-        // Update reputation
-        reputationSystem.updateReputation(rental.tenant, true);
+        (bool priceSuccess, ) = listing.owner.call{value: totalPrice}("");
+        if (!priceSuccess) {
+            revert TransferFailed();
+        }
+        
+        // Refund excess payment
+        uint256 excess = msg.value - totalRequired;
+        if (excess > 0) {
+            (bool refundSuccess, ) = msg.sender.call{value: excess}("");
+            if (!refundSuccess) {
+                revert TransferFailed();
+            }
+        }
+        
+        emit RentalStarted(
+            rentalId,
+            listingId,
+            msg.sender,
+            block.timestamp,
+            block.timestamp + duration,
+            totalPrice
+        );
+    }
+    
+    /**
+     * @dev Complete a rental and return NFT
+     * @param rentalId Rental ID to complete
+     */
+    function completeRental(bytes32 rentalId) external nonReentrant {
+        ActiveRental storage rental = rentals[rentalId];
+        
+        if (!rental.active) {
+            revert RentalNotActive();
+        }
+        
+        if (block.timestamp < rental.endTime) {
+            revert RentalExpired();
+        }
+        
+        // Get listing info
+        bytes32 listingId = keccak256(abi.encodePacked(
+            rental.lender,
+            rental.renter,
+            rentalId
+        ));
+        RentalListing storage listing = listings[listingId];
+        
+        // Return NFT to lender
+        IERC721(listing.nftContract).transferFrom(
+            address(this),
+            rental.lender,
+            listing.tokenId
+        );
+        
+        // Return collateral to renter
+        if (rental.collateralAmount > 0) {
+            (bool success, ) = rental.renter.call{value: rental.collateralAmount}("");
+            if (!success) {
+                revert TransferFailed();
+            }
+        }
         
         rental.active = false;
+        rental.status = RentalStatus.COMPLETED;
+        
         emit RentalCompleted(rentalId);
     }
     
-    function cancelRental(bytes32 rentalId) external {
-        Rental storage rental = rentals[rentalId];
-        require(rental.active, "Rental not active");
-        require(msg.sender == rental.tenant || msg.sender == rental.lender, "Not authorized");
+    /**
+     * @dev Cancel a rental (only renter or after expiry)
+     * @param rentalId Rental ID to cancel
+     */
+    function cancelRental(bytes32 rentalId) external nonReentrant {
+        ActiveRental storage rental = rentals[rentalId];
         
-        // Cancel payment stream
-        paymentStreamFactory.cancelStream(rental.paymentStreamId);
+        if (!rental.active) {
+            revert RentalNotActive();
+        }
         
-        // Clear user in ERC-4907
-        try IERC4907(rental.nftContract).setUser(rental.tokenId, address(0), 0) {
-            // ERC-4907 supported
-        } catch {
-            // Fallback: return NFT to owner
+        bool isRenter = rental.renter == msg.sender;
+        bool isExpired = block.timestamp > rental.endTime;
+        
+        if (!isRenter && !isExpired) {
+            revert Unauthorized();
+        }
+        
+        // Get listing info
+        bytes32 listingId = keccak256(abi.encodePacked(
+            rental.lender,
+            rental.renter,
+            rentalId
+        ));
+        RentalListing storage listing = listings[listingId];
+        
+        // Return NFT to lender
+        IERC721(listing.nftContract).transferFrom(
+            address(this),
+            rental.lender,
+            listing.tokenId
+        );
+        
+        // Calculate refunds based on cancellation time
+        uint256 refundAmount = 0;
+        if (isRenter && !isExpired) {
+            // Early cancellation - partial refund
+            uint256 timeUsed = block.timestamp - rental.startTime;
+            uint256 timeRemaining = rental.endTime - block.timestamp;
+            refundAmount = (rental.totalPrice * timeRemaining) / (rental.endTime - rental.startTime);
+        }
+        
+        // Return payments
+        if (refundAmount > 0) {
+            (bool success, ) = rental.renter.call{value: refundAmount}("");
+            if (!success) {
+                revert TransferFailed();
+            }
+        }
+        
+        // Return collateral
+        if (rental.collateralAmount > 0) {
+            (bool success, ) = rental.renter.call{value: rental.collateralAmount}("");
+            if (!success) {
+                revert TransferFailed();
+            }
         }
         
         rental.active = false;
-        emit RentalCancelled(rentalId, 0); // Refund amount would be calculated by PaymentStream
-    }
-    
-    function getAvailableNFTs() external view returns (NFTListing[] memory) {
-        // This would need to be implemented with proper filtering
-        // For now, return empty array
-        NFTListing[] memory availableNFTs = new NFTListing[](0);
-        return availableNFTs;
-    }
-    
-    function getUserRentals(address user) external view returns (bytes32[] memory) {
-        // This would need to track user rentals
-        // For now, return empty array
-        bytes32[] memory userRentals = new bytes32[](0);
-        return userRentals;
-    }
-    
-    function updatePriceOracle(address newOracle) external onlyOwner {
-        require(newOracle != address(0), "Invalid oracle address");
-        priceOracle = IPriceOracle(newOracle);
-    }
-    
-    function emergencyWithdraw() external onlyOwner {
-        payable(owner()).transfer(address(this).balance);
+        rental.status = RentalStatus.CANCELLED;
+        
+        emit RentalCancelled(rentalId, msg.sender);
     }
     
     /**
-     * @dev Withdraw accumulated funds (alias for emergencyWithdraw for test compatibility)
+     * @dev Emergency pause function
      */
-    function withdraw() external onlyOwner {
-        payable(owner()).transfer(address(this).balance);
+    function activateEmergencyPause() external onlyEmergencyRole {
+        emergencyPauseActive = true;
+        emergencyPauseStartTime = block.timestamp;
+        
+        emit EmergencyPauseActivated(msg.sender, emergencyPauseDuration);
     }
     
     /**
-     * @dev Receive function to accept ETH
+     * @dev Deactivate emergency pause
      */
-    receive() external payable {}
+    function deactivateEmergencyPause() external onlyEmergencyRole {
+        require(
+            block.timestamp >= emergencyPauseStartTime + emergencyPauseDuration,
+            "Emergency pause duration not elapsed"
+        );
+        
+        emergencyPauseActive = false;
+        
+        emit EmergencyPauseDeactivated();
+    }
+    
+    /**
+     * @dev Emergency withdrawal function
+     * @param token Token address (address(0) for ETH)
+     * @param to Recipient address
+     * @param amount Amount to withdraw
+     */
+    function emergencyWithdraw(
+        address token,
+        address to,
+        uint256 amount
+    ) external onlyEmergencyRole {
+        if (to == address(0)) {
+            revert InvalidAddress();
+        }
+        
+        if (token == address(0)) {
+            // ETH withdrawal
+            uint256 balance = address(this).balance;
+            uint256 withdrawAmount = amount == 0 ? balance : amount;
+            
+            (bool success, ) = to.call{value: withdrawAmount}("");
+            if (!success) {
+                revert TransferFailed();
+            }
+        } else {
+            // Token withdrawal
+            IERC20 tokenContract = IERC20(token);
+            uint256 balance = tokenContract.balanceOf(address(this));
+            uint256 withdrawAmount = amount == 0 ? balance : amount;
+            
+            if (!tokenContract.transfer(to, withdrawAmount)) {
+                revert TransferFailed();
+            }
+        }
+    }
+    
+    /**
+     * @dev Update platform fee
+     * @param newFeePercentage New fee percentage in basis points
+     */
+    function updatePlatformFee(uint256 newFeePercentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(newFeePercentage <= 1000, "Fee cannot exceed 10%");
+        
+        uint256 oldFee = platformFeePercentage;
+        platformFeePercentage = newFeePercentage;
+        
+        emit PlatformFeeUpdated(oldFee, newFeePercentage);
+    }
+    
+    /**
+     * @dev Update fee collector address
+     * @param newFeeCollector New fee collector address
+     */
+    function updateFeeCollector(address newFeeCollector) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (newFeeCollector == address(0)) {
+            revert InvalidAddress();
+        }
+        
+        address oldCollector = feeCollector;
+        feeCollector = newFeeCollector;
+        
+        _grantRole(FEE_COLLECTOR_ROLE, newFeeCollector);
+        _revokeRole(FEE_COLLECTOR_ROLE, oldCollector);
+        
+        emit FeeCollectorUpdated(oldCollector, newFeeCollector);
+    }
+    
+    /**
+     * @dev Get rental information
+     * @param rentalId Rental ID
+     * @return rental Rental information
+     */
+    function getRental(bytes32 rentalId) external view returns (ActiveRental memory) {
+        return rentals[rentalId];
+    }
+    
+    /**
+     * @dev Get listing information
+     * @param listingId Listing ID
+     * @return listing Listing information
+     */
+    function getListing(bytes32 listingId) external view returns (RentalListing memory) {
+        return listings[listingId];
+    }
+    
+    /**
+     * @dev Check if NFT is listed
+     * @param owner NFT owner
+     * @param nftContract NFT contract address
+     * @param tokenId Token ID
+     * @return true if listed
+     */
+    function isNFTListed(
+        address owner,
+        address nftContract,
+        uint256 tokenId
+    ) external view returns (bool) {
+        return isListed[owner][nftContract][tokenId];
+    }
+    
+    /**
+     * @dev Get contract version
+     * @return version string
+     */
+    function version() external pure returns (string memory) {
+        return "2.0.0";
+    }
 }

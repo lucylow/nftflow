@@ -258,7 +258,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
   };
 
   // Disconnect wallet
-  const disconnectWallet = () => {
+  const disconnectWallet = useCallback(() => {
     setIsConnected(false);
     setAccount(null);
     setBalance(null);
@@ -269,7 +269,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     setPriceOracleContract(null);
     setDynamicPricingContract(null);
     setUtilityTrackerContract(null);
-  };
+  }, []);
 
   // Switch network
   const switchNetwork = async (targetChainId: number) => {
@@ -359,7 +359,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     };
 
     checkConnection();
-  }, []);
+  }, [initializeContracts, refreshBalance]);
 
   // Listen for account changes
   useEffect(() => {
@@ -412,7 +412,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
         window.ethereum.removeListener('disconnect', handleDisconnect);
       };
     }
-  }, [isConnected, account]);
+  }, [isConnected, account, initializeContracts, refreshBalance, disconnectWallet]);
 
   // Somnia-specific methods
   const createMicroRental = useCallback(async (

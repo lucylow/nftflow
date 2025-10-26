@@ -2,395 +2,413 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
  * @title ReputationSystem
- * @dev On-chain reputation system for collateral-free rentals
+ * @dev On-chain reputation and review system for NFTFlow
+ * @notice Manages user reviews, ratings, and reputation scores
  */
-contract ReputationSystem is Ownable {
-    // Reputation score structure
-    struct Reputation {
-        uint256 score;
-        uint256 totalRentals;
-        uint256 successfulRentals;
-        uint256 lastUpdate;
-        bool isWhitelisted;
-        bool isBlacklisted;
-        uint256 collateralMultiplier; // Multiplier for collateral requirements (100 = 1x, 50 = 0.5x)
+contract ReputationSystem is Ownable, ReentrancyGuard {
+    using Counters for Counters.Counter;
+    
+    // Structs
+    struct Review {
+        address reviewer;
+        address reviewee;
+        uint8 rating; // 1-5 stars
+        string comment;
+        uint256 timestamp;
+        bytes32 rentalId;
+        bool verified;
+        ReviewType reviewType;
     }
     
-    // Mapping of user address to reputation data
-    mapping(address => Reputation) public reputations;
+    struct ReputationData {
+        uint256 totalScore;
+        uint256 reviewCount;
+        uint256 rentalCount;
+        uint256 successfulRentals;
+        uint256 disputeCount;
+        uint256 lastUpdated;
+        uint256 streak;
+        uint256 maxStreak;
+    }
     
-    // Constants for reputation calculation
-    uint256 public constant REPUTATION_GAIN = 10;
-    uint256 public constant REPUTATION_LOSS = 20;
-    uint256 public constant MAX_SCORE = 1000;
-    uint256 public constant COLLATERAL_FREE_THRESHOLD = 750;
-    uint256 public constant REDUCED_COLLATERAL_THRESHOLD = 500;
+    enum ReviewType {
+        RENTER_TO_LENDER,
+        LENDER_TO_RENTER,
+        MUTUAL
+    }
     
-    // Rental contract address (only this contract can update reputations)
-    address public rentalContract;
+    // State variables
+    mapping(address => ReputationData) public reputationData;
+    mapping(address => Review[]) public userReviews;
+    mapping(bytes32 => Review) public reviews;
+    mapping(bytes32 => bool) public reviewExists;
+    mapping(address => mapping(address => mapping(bytes32 => bool))) public hasReviewed;
     
-    // Authorized contracts that can update reputation
-    mapping(address => bool) public authorizedContracts;
+    Counters.Counter private _reviewIdCounter;
+    
+    // Configuration
+    uint256 public constant MAX_RATING = 5;
+    uint256 public constant MIN_RATING = 1;
+    uint256 public constant REPUTATION_DECAY_PERIOD = 30 days;
+    uint256 public constant STREAK_BONUS_THRESHOLD = 5;
     
     // Events
-    event ReputationUpdated(address indexed user, uint256 newScore, bool success);
-    event UserWhitelisted(address indexed user);
-    event UserBlacklisted(address indexed user);
-    event CollateralMultiplierUpdated(address indexed user, uint256 multiplier);
+    event ReviewSubmitted(
+        bytes32 indexed reviewId,
+        address indexed reviewer,
+        address indexed reviewee,
+        uint8 rating,
+        bytes32 rentalId,
+        ReviewType reviewType
+    );
     
-    // Modifier to restrict access to rental contract only
-    modifier onlyRentalContract() {
-        require(msg.sender == rentalContract, "Caller is not the rental contract");
+    event ReputationUpdated(
+        address indexed user,
+        uint256 newScore,
+        uint256 reviewCount,
+        uint256 streak
+    );
+    
+    event ReviewDisputed(
+        bytes32 indexed reviewId,
+        address indexed disputer,
+        string reason
+    );
+    
+    event ReviewVerified(
+        bytes32 indexed reviewId,
+        address indexed verifier
+    );
+    
+    // Modifiers
+    modifier validRating(uint8 rating) {
+        require(rating >= MIN_RATING && rating <= MAX_RATING, "Invalid rating");
+        _;
+    }
+    
+    modifier notSelfReview(address reviewee) {
+        require(msg.sender != reviewee, "Cannot review yourself");
+        _;
+    }
+    
+    modifier rentalCompleted(bytes32 rentalId) {
+        // In a real implementation, this would check with the rental contract
+        // For now, we'll assume the rental is completed
         _;
     }
     
     /**
-     * @dev Set the rental contract address
-     * @param _rentalContract Address of the rental contract
+     * @dev Submit a review for a completed rental
+     * @param reviewee Address of the user being reviewed
+     * @param rating Rating from 1-5 stars
+     * @param comment Review comment
+     * @param rentalId ID of the completed rental
+     * @param reviewType Type of review (renter to lender, lender to renter, or mutual)
      */
-    function setRentalContract(address _rentalContract) external onlyOwner {
-        rentalContract = _rentalContract;
+    function submitReview(
+        address reviewee,
+        uint8 rating,
+        string calldata comment,
+        bytes32 rentalId,
+        ReviewType reviewType
+    ) external 
+        nonReentrant 
+        validRating(rating) 
+        notSelfReview(reviewee)
+        rentalCompleted(rentalId)
+    {
+        require(!hasReviewed[msg.sender][reviewee][rentalId], "Already reviewed");
+        require(bytes(comment).length <= 500, "Comment too long");
+        
+        _reviewIdCounter.increment();
+        bytes32 reviewId = keccak256(abi.encodePacked(
+            msg.sender,
+            reviewee,
+            rentalId,
+            _reviewIdCounter.current()
+        ));
+        
+        reviews[reviewId] = Review({
+            reviewer: msg.sender,
+            reviewee: reviewee,
+            rating: rating,
+            comment: comment,
+            timestamp: block.timestamp,
+            rentalId: rentalId,
+            verified: false,
+            reviewType: reviewType
+        });
+        
+        reviewExists[reviewId] = true;
+        hasReviewed[msg.sender][reviewee][rentalId] = true;
+        
+        // Add to user reviews
+        userReviews[reviewee].push(reviews[reviewId]);
+        
+        // Update reputation
+        _updateReputation(reviewee, rating);
+        
+        emit ReviewSubmitted(reviewId, msg.sender, reviewee, rating, rentalId, reviewType);
     }
     
     /**
-     * @dev Add authorized contract
-     * @param _contract Address of the authorized contract
+     * @dev Update user reputation based on new review
+     * @param user User address
+     * @param rating New rating received
      */
-    function addAuthorizedContract(address _contract) external onlyOwner {
-        authorizedContracts[_contract] = true;
-    }
-    
-    /**
-     * @dev Update user reputation based on rental outcome
-     * @param user Address of the user
-     * @param success Whether the rental was successful
-     */
-    function updateReputation(address user, bool success) external {
-        require(msg.sender == rentalContract || authorizedContracts[msg.sender], "Not authorized");
-        Reputation storage rep = reputations[user];
+    function _updateReputation(address user, uint8 rating) internal {
+        ReputationData storage data = reputationData[user];
         
-        // Initialize reputation if first time
-        if (rep.lastUpdate == 0) {
-            rep.score = 500; // Start with neutral score
-            rep.collateralMultiplier = 100; // Full collateral required
-        }
+        // Calculate new total score
+        uint256 newTotalScore = data.totalScore + (rating * 20); // Convert to 0-100 scale
+        uint256 newReviewCount = data.reviewCount + 1;
         
-        rep.totalRentals++;
+        // Calculate new average reputation score
+        uint256 newReputationScore = newTotalScore / newReviewCount;
         
-        if (success) {
-            rep.successfulRentals++;
-            rep.score = _min(MAX_SCORE, rep.score + REPUTATION_GAIN);
+        // Update streak
+        if (rating >= 4) {
+            data.streak += 1;
+            if (data.streak > data.maxStreak) {
+                data.maxStreak = data.streak;
+            }
         } else {
-            rep.score = rep.score > REPUTATION_LOSS ? 
-                rep.score - REPUTATION_LOSS : 0;
+            data.streak = 0;
         }
         
-        // Update collateral multiplier based on new score
-        rep.collateralMultiplier = _calculateCollateralMultiplier(rep.score);
+        // Update data
+        data.totalScore = newTotalScore;
+        data.reviewCount = newReviewCount;
+        data.lastUpdated = block.timestamp;
         
-        rep.lastUpdate = block.timestamp;
-        
-        emit ReputationUpdated(user, rep.score, success);
+        emit ReputationUpdated(user, newReputationScore, newReviewCount, data.streak);
     }
     
     /**
-     * @dev Check if a user requires collateral
-     * @param user Address of the user
-     * @return true if user requires collateral, false otherwise
+     * @dev Update rental statistics
+     * @param user User address
+     * @param successful Whether the rental was successful
+     * @param disputed Whether there was a dispute
      */
-    function requiresCollateral(address user) external view returns (bool) {
-        Reputation memory rep = reputations[user];
+    function updateRentalStats(
+        address user,
+        bool successful,
+        bool disputed
+    ) external onlyOwner {
+        ReputationData storage data = reputationData[user];
         
-        // Blacklisted users always require collateral
-        if (rep.isBlacklisted) {
-            return true;
+        data.rentalCount += 1;
+        
+        if (successful) {
+            data.successfulRentals += 1;
         }
         
-        // Whitelisted users or users with high reputation don't need collateral
-        return !(rep.isWhitelisted || rep.score >= COLLATERAL_FREE_THRESHOLD);
+        if (disputed) {
+            data.disputeCount += 1;
+            // Reduce reputation for disputes
+            if (data.totalScore > 100) {
+                data.totalScore -= 100;
+            }
+        }
+        
+        data.lastUpdated = block.timestamp;
     }
     
     /**
-     * @dev Get collateral multiplier for a user
-     * @param user Address of the user
-     * @return multiplier Collateral multiplier (100 = 1x, 50 = 0.5x, 0 = no collateral)
-     */
-    function getCollateralMultiplier(address user) external view returns (uint256 multiplier) {
-        Reputation memory rep = reputations[user];
-        
-        // Blacklisted users require full collateral
-        if (rep.isBlacklisted) {
-            return 100;
-        }
-        
-        // Whitelisted users don't need collateral
-        if (rep.isWhitelisted) {
-            return 0;
-        }
-        
-        return rep.collateralMultiplier;
-    }
-    
-    /**
-     * @dev Get user reputation score
-     * @param user Address of the user
-     * @return reputation score
+     * @dev Get reputation score for a user
+     * @param user User address
+     * @return score Reputation score (0-100)
      */
     function getReputationScore(address user) external view returns (uint256) {
-        return reputations[user].score;
-    }
-    
-    /**
-     * @dev Get user rental statistics
-     * @param user Address of the user
-     * @return totalRentals Total number of rentals
-     * @return successfulRentals Number of successful rentals
-     * @return successRate Success rate (0-100)
-     */
-    function getRentalStats(address user) external view returns (
-        uint256 totalRentals,
-        uint256 successfulRentals,
-        uint256 successRate
-    ) {
-        Reputation memory rep = reputations[user];
-        uint256 rate = rep.totalRentals > 0 ? 
-            (rep.successfulRentals * 100) / rep.totalRentals : 0;
-            
-        return (rep.totalRentals, rep.successfulRentals, rate);
-    }
-    
-    /**
-     * @dev Get comprehensive reputation data for a user
-     * @param user Address of the user
-     * @return rep Complete reputation data
-     */
-    function getReputationData(address user) external view returns (Reputation memory rep) {
-        return reputations[user];
-    }
-    
-    /**
-     * @dev Whitelist a user (bypass collateral requirements)
-     * @param user Address of the user
-     */
-    function whitelistUser(address user) external onlyOwner {
-        Reputation storage rep = reputations[user];
-        rep.isWhitelisted = true;
-        rep.isBlacklisted = false;
-        rep.collateralMultiplier = 0;
-        emit UserWhitelisted(user);
-    }
-    
-    /**
-     * @dev Blacklist a user
-     * @param user Address of the user
-     */
-    function blacklistUser(address user) external onlyOwner {
-        Reputation storage rep = reputations[user];
-        rep.isBlacklisted = true;
-        rep.isWhitelisted = false;
-        rep.collateralMultiplier = 100;
-        emit UserBlacklisted(user);
-    }
-    
-    /**
-     * @dev Remove user from whitelist/blacklist
-     * @param user Address of the user
-     */
-    function removeUserFromLists(address user) external onlyOwner {
-        Reputation storage rep = reputations[user];
-        rep.isWhitelisted = false;
-        rep.isBlacklisted = false;
-        rep.collateralMultiplier = _calculateCollateralMultiplier(rep.score);
-        emit CollateralMultiplierUpdated(user, rep.collateralMultiplier);
-    }
-    
-    /**
-     * @dev Manually set reputation score (for admin use)
-     * @param user Address of the user
-     * @param score New reputation score
-     */
-    function setReputationScore(address user, uint256 score) external onlyOwner {
-        require(score <= MAX_SCORE, "Score exceeds maximum");
+        ReputationData memory data = reputationData[user];
         
-        Reputation storage rep = reputations[user];
-        rep.score = score;
-        rep.collateralMultiplier = _calculateCollateralMultiplier(score);
-        rep.lastUpdate = block.timestamp;
-        
-        emit ReputationUpdated(user, score, true);
-        emit CollateralMultiplierUpdated(user, rep.collateralMultiplier);
-    }
-    
-    /**
-     * @dev Calculate collateral multiplier based on reputation score
-     * @param score Reputation score
-     * @return multiplier Collateral multiplier
-     */
-    function _calculateCollateralMultiplier(uint256 score) internal pure returns (uint256 multiplier) {
-        if (score >= COLLATERAL_FREE_THRESHOLD) {
-            return 0; // No collateral required
-        } else if (score >= REDUCED_COLLATERAL_THRESHOLD) {
-            // Linear reduction from 100% to 0% collateral
-            return 100 - ((score - REDUCED_COLLATERAL_THRESHOLD) * 100) / (COLLATERAL_FREE_THRESHOLD - REDUCED_COLLATERAL_THRESHOLD);
-        } else {
-            return 100; // Full collateral required
-        }
-    }
-    
-    /**
-     * @dev Internal function to calculate minimum of two numbers
-     */
-    function _min(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a < b ? a : b;
-    }
-    
-    /**
-     * @dev Get reputation tier for a user
-     * @param user Address of the user
-     * @return tier Reputation tier (0-4)
-     */
-    function getReputationTier(address user) external view returns (uint256 tier) {
-        Reputation memory rep = reputations[user];
-        
-        if (rep.isWhitelisted) {
-            return 4; // VIP
-        } else if (rep.isBlacklisted) {
-            return 0; // Blacklisted
-        } else if (rep.score >= 900) {
-            return 3; // Elite
-        } else if (rep.score >= 750) {
-            return 2; // Trusted
-        } else if (rep.score >= 500) {
-            return 1; // Standard
-        } else {
-            return 0; // New/Risk
-        }
-    }
-
-    // Additional functions needed by tests
-    
-    /**
-     * @dev Get total number of achievements
-     */
-    function getTotalAchievements() external pure returns (uint256) {
-        return 3; // We have 3 default achievements
-    }
-    
-    /**
-     * @dev Get achievement by index
-     */
-    function getAchievement(uint256 index) external pure returns (string memory name, uint256 requiredRentals) {
-        if (index == 0) {
-            return ("First Rental", 1);
-        } else if (index == 1) {
-            return ("Rental Novice", 5);
-        } else if (index == 2) {
-            return ("Perfect Record", 10);
-        } else {
-            revert("Invalid achievement index");
-        }
-    }
-    
-    // authorizedContracts mapping is already declared above
-    
-    /**
-     * @dev Remove authorized contract
-     */
-    function removeAuthorizedContract(address _contract) external onlyOwner {
-        authorizedContracts[_contract] = false;
-    }
-    
-    /**
-     * @dev Get user reputation (alias for getReputationScore)
-     */
-    function getUserReputation(address user) external view returns (uint256) {
-        return reputations[user].score;
-    }
-    
-    /**
-     * @dev Set user blacklisted status
-     */
-    function setUserBlacklisted(address user, bool blacklisted) external onlyOwner {
-        Reputation storage rep = reputations[user];
-        rep.isBlacklisted = blacklisted;
-        if (blacklisted) {
-            rep.isWhitelisted = false;
-            emit UserBlacklisted(user);
-        } else {
-            rep.isWhitelisted = false;
-            rep.isBlacklisted = false;
-        }
-    }
-    
-    /**
-     * @dev Get success rate for user
-     */
-    function getSuccessRate(address user) external view returns (uint256) {
-        Reputation memory rep = reputations[user];
-        if (rep.totalRentals == 0) {
-            return 0;
-        }
-        return (rep.successfulRentals * 100) / rep.totalRentals;
-    }
-    
-    /**
-     * @dev Check if user has achievement
-     */
-    function hasAchievement(address user, uint256 achievementIndex) external view returns (bool) {
-        Reputation memory rep = reputations[user];
-        
-        if (achievementIndex == 0) { // First Rental
-            return rep.totalRentals >= 1;
-        } else if (achievementIndex == 1) { // Rental Novice
-            return rep.totalRentals >= 5;
-        } else if (achievementIndex == 2) { // Perfect Record
-            return rep.totalRentals >= 10 && rep.successfulRentals == rep.totalRentals;
+        if (data.reviewCount == 0) {
+            return 50; // Default score for new users
         }
         
-        return false;
+        return data.totalScore / data.reviewCount;
     }
     
     /**
-     * @dev Get user's unlocked achievements
+     * @dev Get detailed reputation data
+     * @param user User address
+     * @return data Reputation data struct
      */
-    function getUserAchievements(address user) external view returns (uint256[] memory) {
-        Reputation memory rep = reputations[user];
-        uint256[] memory achievements = new uint256[](3);
-        uint256 count = 0;
+    function getReputationData(address user) external view returns (ReputationData memory) {
+        return reputationData[user];
+    }
+    
+    /**
+     * @dev Get reviews for a user
+     * @param user User address
+     * @param limit Maximum number of reviews to return
+     * @param offset Starting index
+     * @return reviews Array of reviews
+     */
+    function getUserReviews(
+        address user,
+        uint256 limit,
+        uint256 offset
+    ) external view returns (Review[] memory) {
+        Review[] memory allReviews = userReviews[user];
+        uint256 totalReviews = allReviews.length;
         
-        if (rep.totalRentals >= 1) {
-            achievements[count++] = 0; // First Rental
-        }
-        if (rep.totalRentals >= 5) {
-            achievements[count++] = 1; // Rental Novice
-        }
-        if (rep.totalRentals >= 10 && rep.successfulRentals == rep.totalRentals) {
-            achievements[count++] = 2; // Perfect Record
+        if (offset >= totalReviews) {
+            return new Review[](0);
         }
         
-        // Resize array to actual count
-        uint256[] memory result = new uint256[](count);
-        for (uint256 i = 0; i < count; i++) {
-            result[i] = achievements[i];
+        uint256 endIndex = offset + limit;
+        if (endIndex > totalReviews) {
+            endIndex = totalReviews;
+        }
+        
+        uint256 resultLength = endIndex - offset;
+        Review[] memory result = new Review[](resultLength);
+        
+        for (uint256 i = 0; i < resultLength; i++) {
+            result[i] = allReviews[totalReviews - 1 - offset - i]; // Most recent first
         }
         
         return result;
     }
     
     /**
-     * @dev Create new achievement (placeholder)
+     * @dev Get a specific review
+     * @param reviewId Review ID
+     * @return review Review data
      */
-    function createAchievement(string memory name, uint256 requiredRentals) external onlyOwner {
-        // This is a placeholder - in a real implementation, you'd store achievements
-        // For now, we just emit an event
-        emit ReputationUpdated(msg.sender, 0, true);
+    function getReview(bytes32 reviewId) external view returns (Review memory) {
+        require(reviewExists[reviewId], "Review does not exist");
+        return reviews[reviewId];
     }
     
     /**
-     * @dev Achievement unlocked event
+     * @dev Verify a review (only owner)
+     * @param reviewId Review ID to verify
      */
-    event AchievementUnlocked(address indexed user, uint256 indexed achievementId, string name);
+    function verifyReview(bytes32 reviewId) external onlyOwner {
+        require(reviewExists[reviewId], "Review does not exist");
+        require(!reviews[reviewId].verified, "Review already verified");
+        
+        reviews[reviewId].verified = true;
+        
+        emit ReviewVerified(reviewId, msg.sender);
+    }
+    
+    /**
+     * @dev Dispute a review
+     * @param reviewId Review ID to dispute
+     * @param reason Reason for dispute
+     */
+    function disputeReview(bytes32 reviewId, string calldata reason) external {
+        require(reviewExists[reviewId], "Review does not exist");
+        require(
+            msg.sender == reviews[reviewId].reviewer || 
+            msg.sender == reviews[reviewId].reviewee,
+            "Not authorized to dispute this review"
+        );
+        
+        emit ReviewDisputed(reviewId, msg.sender, reason);
+    }
+    
+    /**
+     * @dev Calculate reputation tier
+     * @param user User address
+     * @return tier Tier level (1-5)
+     */
+    function getReputationTier(address user) external view returns (uint256) {
+        ReputationData memory data = reputationData[user];
+        
+        if (data.reviewCount == 0) {
+            return 1; // New user tier
+        }
+        
+        uint256 score = data.totalScore / data.reviewCount;
+        
+        if (score >= 90) return 5; // Excellent
+        if (score >= 80) return 4; // Very Good
+        if (score >= 70) return 3; // Good
+        if (score >= 60) return 2; // Fair
+        return 1; // Poor
+    }
+    
+    /**
+     * @dev Get reputation tier name
+     * @param user User address
+     * @return tierName Tier name
+     */
+    function getReputationTierName(address user) external view returns (string memory) {
+        uint256 tier = this.getReputationTier(user);
+        
+        if (tier == 5) return "Excellent";
+        if (tier == 4) return "Very Good";
+        if (tier == 3) return "Good";
+        if (tier == 2) return "Fair";
+        return "New User";
+    }
+    
+    /**
+     * @dev Check if user can review
+     * @param reviewer Reviewer address
+     * @param reviewee Reviewee address
+     * @param rentalId Rental ID
+     * @return canReview True if can review
+     */
+    function canReview(
+        address reviewer,
+        address reviewee,
+        bytes32 rentalId
+    ) external view returns (bool) {
+        return !hasReviewed[reviewer][reviewee][rentalId] && reviewer != reviewee;
+    }
+    
+    /**
+     * @dev Get review statistics
+     * @param user User address
+     * @return stats Review statistics
+     */
+    function getReviewStats(address user) external view returns (
+        uint256 totalReviews,
+        uint256 averageRating,
+        uint256 fiveStarReviews,
+        uint256 fourStarReviews,
+        uint256 threeStarReviews,
+        uint256 twoStarReviews,
+        uint256 oneStarReviews
+    ) {
+        Review[] memory reviews = userReviews[user];
+        totalReviews = reviews.length;
+        
+        if (totalReviews == 0) {
+            return (0, 0, 0, 0, 0, 0, 0);
+        }
+        
+        uint256 totalRating = 0;
+        
+        for (uint256 i = 0; i < totalReviews; i++) {
+            uint8 rating = reviews[i].rating;
+            totalRating += rating;
+            
+            if (rating == 5) fiveStarReviews++;
+            else if (rating == 4) fourStarReviews++;
+            else if (rating == 3) threeStarReviews++;
+            else if (rating == 2) twoStarReviews++;
+            else if (rating == 1) oneStarReviews++;
+        }
+        
+        averageRating = totalRating / totalReviews;
+    }
+    
+    /**
+     * @dev Get contract version
+     * @return version string
+     */
+    function version() external pure returns (string memory) {
+        return "1.0.0";
+    }
 }
