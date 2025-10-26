@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { useWeb3 } from './Web3Context-minimal';
+import { useWeb3 } from './Web3Context';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Notification {

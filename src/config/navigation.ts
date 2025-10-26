@@ -106,6 +106,14 @@ export const navigationConfig: NavItem[] = [
     description: 'Somnia network integration',
     category: 'user'
   },
+  { 
+    label: 'AI Agents', 
+    href: '/ai-agents', 
+    icon: '🤖', 
+    badge: 'Hackathon',
+    description: 'Autonomous AI agents for NFT rentals',
+    category: 'features'
+  },
 
   // Tool Navigation
   { 

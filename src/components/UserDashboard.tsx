@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useWeb3 } from '@/contexts/Web3Context-minimal';
+import { useWeb3 } from '@/contexts/Web3Context';
 import { useNFTFlow } from '@/hooks/useNFTFlow';
 import { useReputationSystem } from '@/hooks/useReputationSystem';
 import { usePaymentStream } from '@/hooks/usePaymentStream';
