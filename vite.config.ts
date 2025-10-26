@@ -35,7 +35,8 @@ export default defineConfig({
       '/api/agent': {
         target: 'http://localhost:4001',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path
       }
     }
   }

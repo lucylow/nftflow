@@ -24,11 +24,11 @@ export const initializeBlockchain = () => {
   const rpc = process.env.SOMNIA_RPC || "http://localhost:8545";
   provider = new ethers.JsonRpcProvider(rpc);
   
-  const privateKey = process.env.PRIVATE_KEY;
+  const privateKey = process.env.PRIVATE_KEY || process.env.AGENT_PRIVATE_KEY;
   if (privateKey) {
     signer = new ethers.Wallet(privateKey, provider);
   } else {
-    console.warn("⚠️ No PRIVATE_KEY in env - agent actions will not be signed");
+    console.warn("⚠️ No PRIVATE_KEY or AGENT_PRIVATE_KEY in env - agent actions will not be signed");
   }
 
   const controllerAddress = process.env.AUTONOMOUS_CONTROLLER || "";

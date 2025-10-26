@@ -43,7 +43,7 @@ interface PricingAnalysis {
   timestamp: number;
 }
 
-const AGENT_API_URL = import.meta.env.VITE_AGENT_API_URL || 'http://localhost:3002';
+const AGENT_API_URL = import.meta.env.VITE_AGENT_API_URL || 'http://localhost:4001';
 
 export function useAgentAPI() {
   const [loading, setLoading] = useState(false);

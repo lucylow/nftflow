@@ -21,7 +21,7 @@ export const ArbitragePanel: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [proposing, setProposing] = useState<string | null>(null);
 
-  const AGENT_API_URL = process.env.VITE_ARBITRAGE_AGENT_URL || "http://localhost:4011";
+  const AGENT_API_URL = import.meta.env.VITE_ARBITRAGE_AGENT_URL || "http://localhost:4011";
 
   const fetchOps = async () => {
     setLoading(true);

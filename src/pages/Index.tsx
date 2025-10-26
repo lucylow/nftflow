@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { AIHeroIntegration } from '@/components/landing/AIHeroIntegration';
 import { AIAgentsSection } from '@/components/landing/AIAgentsSection';
+import AIHeroSection from '@/components/marketing/AIHeroSection';
+import { AIImageGenerationShowcase } from '@/components/marketing/AIImageGenerationShowcase';
+import { AIUsageExamples } from '@/components/marketing/AIUsageExamples';
 
 const Index: React.FC = () => {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -218,6 +221,19 @@ const Index: React.FC = () => {
 
       {/* AI Agents Section */}
       <AIAgentsSection />
+
+      {/* AI Hero Marketing Section */}
+      <AIHeroSection />
+
+      {/* AI Image Generation Showcase */}
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-black py-20 px-4">
+        <AIImageGenerationShowcase />
+      </div>
+
+      {/* AI Usage Examples */}
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-black py-20 px-4">
+        <AIUsageExamples />
+      </div>
     </div>
   );
 };

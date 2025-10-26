@@ -145,7 +145,34 @@ services:
       - /app/node_modules
     restart: unless-stopped
 
-  # AI Agent Service
+  # AI Agent Service (TypeScript)
+  agent-service:
+    build:
+      context: ./backend/agent-service
+      dockerfile: Dockerfile
+    container_name: nftflow-agent-service
+    ports:
+      - "4001:4001"
+    environment:
+      NODE_ENV: development
+      PORT: 4001
+      SOMNIA_RPC: ${SOMNIA_HTTP_RPC:-https://dream-rpc.somnia.network/}
+      AUTONOMOUS_CONTROLLER: ${AUTONOMOUS_CONTROLLER:-}
+      NFTFLOW_CONTRACT: ${NFTFLOW_CORE_ADDRESS:-}
+      SUBGRAPH_URL: ${SUBGRAPH_URL:-http://localhost:8000/subgraphs/name/nftflow}
+      PRIVATE_KEY: ${AGENT_PRIVATE_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Legacy AI Agent Service (Node.js)
   agents:
     build:
       context: ./backend/agents

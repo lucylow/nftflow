@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp, Eye, CheckCircle } from 'lucide-react';
 
+const AGENT_API_URL = import.meta.env.VITE_AGENT_API_URL || 'http://localhost:4001';
+
 interface Recommendation {
   collection: string;
   tokenId: string;
@@ -33,8 +35,8 @@ export const AccessibleAgentRecommendations: React.FC = () => {
 
     setLoading(true);
     try {
-      // In production, this would call your agent service
-      const res = await axios.post('/api/agent/recommendations', { 
+      // Call the backend agent service
+      const res = await axios.post(`${AGENT_API_URL}/api/agent/recommendations`, { 
         user: address 
       });
       setRecs(res.data.recommendations || []);
@@ -76,8 +78,8 @@ export const AccessibleAgentRecommendations: React.FC = () => {
 
     setProposing(true);
     try {
-      // This would call the agent service which calls AutonomousController
-      const res = await axios.post('/api/agent/propose-price', {
+      // Call the backend agent service which calls AutonomousController
+      const res = await axios.post(`${AGENT_API_URL}/api/agent/propose-price`, {
         listingId: rec.tokenId,
         newPrice,
         reasonCID: `ipfs://reason-${Date.now()}`
