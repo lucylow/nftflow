@@ -345,6 +345,214 @@ Everything is working perfectly! The frontend is fully integrated with all backe
 
 ---
 
+## 📱 Application Pages
+
+NFTFlow is organized into **4 main navigation categories** with essential pages for a complete NFT rental marketplace experience:
+
+### 🎯 **Primary Pages** (Core Features)
+
+#### Home (`/`) 🏠
+- Landing page with overview of NFTFlow features
+- Quick access to key functionality
+- Showcase of trending NFTs and popular collections
+
+#### Marketplace (`/marketplace`) 🏪
+- Browse all available NFT rentals
+- Search and filter NFTs by collection, price, duration
+- Real-time availability and pricing
+- Quick rental functionality
+- **Netflix-style layout** for immersive browsing
+
+#### Create NFT (`/creativity`) 🎨 **[NEW]**
+- Mint and create new NFTs
+- Upload metadata and images
+- Set up rental parameters
+- Manage your NFT collection
+
+#### Upload (`/upload`) 📤
+- Upload NFT assets and metadata
+- IPFS integration for decentralized storage
+- Batch upload capabilities
+- Preview and manage uploads
+
+#### Dashboard (`/dashboard`) 📊
+- **NFT Management**: View collection, mint new NFTs, manage approvals
+- **Payment Streams**: Create, monitor, and withdraw from streams
+- **Statistics**: Reputation score, rental history, earnings
+- **Activity Tracking**: Monitor all platform interactions
+
+---
+
+### ✨ **Feature Pages** (Advanced Functionality)
+
+#### AI Agents (`/ai-agents`) 🤖 **[AI-POWERED]**
+- **5 Autonomous AI Agents**:
+  - 🎯 Rental Intelligence Agent (pricing optimization)
+  - 🎨 Recommendation Agent (personalized suggestions)
+  - 🛡️ Collateral Management Agent (risk assessment)
+  - 📈 Pricing Analyst Agent (market analysis)
+  - 🎛️ Workflow Orchestrator (multi-agent coordination)
+- Real-time agent monitoring dashboard
+- Performance metrics and analytics
+- Configure agent parameters and budgets
+
+#### NFT Rental (`/rental`) 🔄
+- Detailed rental marketplace
+- Advanced filtering and search
+- Rental history and tracking
+- Real-time availability updates
+
+#### Analytics (`/analytics`) 📈
+- Market trends and insights
+- Price history and predictions
+- User statistics
+- Collection analytics
+- Revenue tracking
+
+#### Community (`/community`) 👥
+- Connect with creators and collectors
+- Social features and forums
+- Follow users and collections
+- Activity feed and notifications
+
+---
+
+### 👤 **Account Pages** (User Management)
+
+#### Profile (`/profile`) 👤
+- User profile management
+- Avatar and settings
+- Activity history
+- Collection overview
+- Badges and achievements
+
+#### Wallet (`/wallet`) 💳
+- Wallet management and balance
+- Transaction history
+- Payment stream management
+- Withdraw funds
+- Connect/disconnect wallets
+
+---
+
+### 🔧 **Advanced Pages** (Developer & Admin Tools)
+
+#### DAO Governance (`/dao`) 🏛️
+- Decentralized governance portal
+- Voting on proposals
+- Treasury management
+- Propose new features
+
+#### Governance (`/governance`) 👑
+- Community governance tools
+- Proposal creation and voting
+- Snapshot integration
+- Governance history
+
+#### Somnia Integration (`/somnia`) ⚡ **[SOMNIA-NATIVE]**
+- Somnia Network integration
+- Native token (HUS) operations
+- Cross-chain bridges
+- Somnia-specific features
+
+#### Subgraph (`/subgraph`) 🗄️
+- Blockchain data indexing
+- Query interface for on-chain data
+- Historical data analytics
+- Custom query builder
+
+#### Social (`/social`) 🌟
+- Social features and community
+- User interactions
+- Sharing and discoverability
+- Social graphs
+
+#### Discover (`/discover`) 🔍
+- Discover new NFTs and creators
+- Trending collections
+- Featured artists
+- Browse by categories
+
+---
+
+### 🛠️ **Additional Pages** (Technical & API)
+
+#### API Routes
+- `/api/analytics/update.js` - Analytics data updates
+- `/api/events/store.js` - Event tracking storage
+- `/api/somnia/convert-to-usd.js` - Currency conversion
+
+#### Development & Testing
+- `/mobile` - Mobile-optimized interface
+- `/wallet-test` - Wallet testing tools
+- `/orchestrator-dashboard` - AI orchestrator monitoring
+- `/subgraph-dashboard` - Subgraph analytics
+- `/subgraph-showcase` - Subgraph data showcase
+
+#### Auxiliary Pages
+- `/marketplace-simple` - Simplified marketplace view
+- `/netflix-marketplace` - Netflix-style layout
+- `/creativity-showcase` - Creative works showcase
+- `/enhanced-marketplace` - Advanced marketplace features
+- `/create-and-upload` - Combined create/upload flow
+- `/wallet-and-tools` - Advanced wallet tools
+- `/nft/:id` - Individual NFT detail view
+- `/user-profile` - User profile pages
+
+---
+
+### 🧭 **Navigation Structure**
+
+The application features a **unified navigation system**:
+
+```
+📱 NFTFlow Navigation
+│
+├─ 🎯 Primary Navigation
+│  ├─ Home
+│  ├─ Marketplace
+│  ├─ Create NFT
+│  ├─ Upload
+│  └─ Dashboard
+│
+├─ ✨ Feature Navigation
+│  ├─ AI Agents (AI-powered)
+│  ├─ NFT Rental
+│  ├─ Analytics
+│  └─ Community
+│
+├─ 👤 Account Navigation
+│  ├─ Profile
+│  └─ Wallet
+│
+└─ 🔧 Advanced Navigation
+   ├─ DAO Governance
+   ├─ Governance
+   ├─ Somnia Integration
+   ├─ Subgraph
+   ├─ Social
+   └─ Discover
+```
+
+### 🌐 **Mobile Responsive**
+
+All pages are fully responsive and optimized for:
+- 📱 Mobile devices (320px+)
+- 💻 Tablets (768px+)
+- 🖥️ Desktop (1024px+)
+- 🖥️ Large screens (1920px+)
+
+### 🚀 **Key Navigation Features**
+
+- **Unified Menu**: Single sidebar navigation (desktop)
+- **Mobile Drawer**: Collapsible menu on mobile
+- **Search Integration**: Find any page quickly
+- **Active States**: Visual indicators for current page
+- **Smooth Transitions**: Framer Motion animations
+- **Dark/Light Mode**: Theme toggle support
+
+---
+
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
@@ -832,3 +1040,62 @@ For detailed AI agent documentation, see:
 
 **AI Agent Features**: Discover the power of autonomous AI agents in NFTFlow! 🤖
 
+---
+
+## 🗺️ **Page Navigation Guide**
+
+### **Quick Access Shortcuts**
+
+| Page | Route | Category | Key Features |
+|------|-------|----------|--------------|
+| 🏠 Home | `/` | Primary | Landing, overview, trending NFTs |
+| 🏪 Marketplace | `/marketplace` | Primary | Browse, search, rent NFTs |
+| 🎨 Create NFT | `/creativity` | Primary | Mint NFTs, upload assets |
+| 📤 Upload | `/upload` | Primary | Batch upload, IPFS integration |
+| 📊 Dashboard | `/dashboard` | Primary | Portfolio, streams, analytics |
+| 🤖 AI Agents | `/ai-agents` | Features | 5 autonomous AI agents |
+| 🔄 NFT Rental | `/rental` | Features | Advanced rental marketplace |
+| 📈 Analytics | `/analytics` | Features | Market insights, trends |
+| 👥 Community | `/community` | Features | Social, forums, connections |
+| 👤 Profile | `/profile` | Account | User settings, activity |
+| 💳 Wallet | `/wallet` | Account | Balance, transactions, funds |
+| 🏛️ DAO | `/dao` | Advanced | Governance, voting, treasury |
+| 👑 Governance | `/governance` | Advanced | Proposals, governance tools |
+| ⚡ Somnia | `/somnia` | Advanced | Somnia network integration |
+| 🗄️ Subgraph | `/subgraph` | Advanced | Data indexing, queries |
+| 🌟 Social | `/social` | Advanced | Social features, sharing |
+| 🔍 Discover | `/discover` | Advanced | Explore, trending, featured |
+
+### **Use Cases by Page**
+
+#### For NFT Owners 📜
+1. **Home** → Overview of platform
+2. **Create NFT** → Mint your assets
+3. **Upload** → Batch upload files
+4. **Dashboard** → Manage collection and earnings
+5. **AI Agents** → Optimize pricing automatically
+
+#### For Renters 🛒
+1. **Marketplace** → Browse available NFTs
+2. **Discover** → Find trending collections
+3. **Profile** → Track rental history
+4. **Wallet** → Manage payments and funds
+5. **Community** → Connect with creators
+
+#### For Developers 💻
+1. **Subgraph** → Query blockchain data
+2. **Somnia** → Network integration
+3. **API Routes** → Backend integration
+4. **Governance** → Contribute to platform
+5. **DAO** → Participate in decisions
+
+#### For Analysts 📊
+1. **Analytics** → Market trends and insights
+2. **Dashboard** → User statistics
+3. **Subgraph Dashboard** → On-chain analytics
+4. **AI Agents** → Monitor agent performance
+5. **Orchestrator Dashboard** → System monitoring
+
+---
+
+**Navigate seamlessly through all pages with the unified navigation menu! 🚀**

@@ -24,7 +24,10 @@ import {
   Globe,
   Search,
   Settings,
-  Target
+  Target,
+  Activity,
+  Star,
+  Rocket
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +45,7 @@ interface MobileNavigationProps {
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(['main']);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['primary']);
 
   // Icon mapping
   const iconMap: { [key: string]: any } = {
@@ -63,8 +66,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
     '🔄': CreditCard,
     '👤': User,
     '📱': Globe,
+    '🤖': Zap,
     '🔍': Search,
-    '🌟': Users,
+    '🌟': Star,
     '🛒': Store,
     '🎭': Palette,
     '🎯': Target,
@@ -94,11 +98,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
   }, {} as Record<string, typeof navigationConfig>);
 
   const categoryLabels = {
-    main: 'Main',
+    primary: 'Primary',
     features: 'Features',
-    user: 'User',
-    tools: 'Tools',
-    additional: 'More'
+    user: 'Account',
+    advanced: 'Advanced'
   };
 
   return (

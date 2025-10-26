@@ -4,86 +4,80 @@ export interface NavItem {
   icon: string;
   badge?: string;
   description?: string;
-  category?: 'main' | 'features' | 'user' | 'tools' | 'additional';
+  category?: 'primary' | 'features' | 'user' | 'advanced';
 }
 
 export const navigationConfig: NavItem[] = [
-  // Main Navigation
+  // PRIMARY NAVIGATION - Core features
   { 
     label: 'Home', 
     href: '/', 
     icon: '🏠', 
     description: 'Welcome to NFTFlow',
-    category: 'main'
+    category: 'primary'
   },
   { 
     label: 'Marketplace', 
     href: '/marketplace', 
     icon: '🏪', 
     description: 'Browse and trade NFTs',
-    category: 'main'
+    category: 'primary'
+  },
+  { 
+    label: 'Create NFT', 
+    href: '/creativity', 
+    icon: '🎨', 
+    badge: 'New',
+    description: 'Create and mint your NFTs',
+    category: 'primary'
   },
   { 
     label: 'Upload', 
     href: '/upload', 
     icon: '📤', 
     description: 'Upload NFT assets',
-    category: 'main'
+    category: 'primary'
   },
   { 
     label: 'Dashboard', 
     href: '/dashboard', 
     icon: '📊', 
     description: 'Your portfolio overview',
-    category: 'main'
+    category: 'primary'
+  },
+
+  // FEATURES - Advanced functionality
+  { 
+    label: 'AI Agents', 
+    href: '/ai-agents', 
+    icon: '🤖', 
+    badge: 'AI',
+    description: 'Autonomous AI agents for NFT rentals',
+    category: 'features'
+  },
+  { 
+    label: 'NFT Rental', 
+    href: '/rental', 
+    icon: '🔄', 
+    description: 'Rent NFTs and earn passive income',
+    category: 'features'
   },
   { 
     label: 'Analytics', 
     href: '/analytics', 
     icon: '📈', 
     description: 'Market analytics and insights',
-    category: 'main'
-  },
-
-  // Feature Navigation
-  { 
-    label: 'DAO', 
-    href: '/dao', 
-    icon: '🏛️', 
-    description: 'Decentralized governance',
     category: 'features'
   },
   { 
-    label: 'Governance', 
-    href: '/governance', 
-    icon: '👑', 
-    description: 'Community governance tools',
-    category: 'features'
-  },
-  { 
-    label: 'Create', 
-    href: '/creativity', 
-    icon: '🎨', 
-    badge: 'Hot',
-    description: 'Creative tools and showcase',
-    category: 'features'
-  },
-  { 
-    label: 'Subgraph', 
-    href: '/subgraph', 
-    icon: '🗄️', 
-    description: 'Blockchain data indexing',
-    category: 'features'
-  },
-  { 
-    label: 'Social', 
-    href: '/social', 
+    label: 'Community', 
+    href: '/community', 
     icon: '👥', 
-    description: 'Social features and community',
+    description: 'Connect with creators and collectors',
     category: 'features'
   },
 
-  // User Navigation
+  // USER - Account management
   { 
     label: 'Profile', 
     href: '/profile', 
@@ -98,103 +92,49 @@ export const navigationConfig: NavItem[] = [
     description: 'Wallet management',
     category: 'user'
   },
+
+  // ADVANCED - Developer and admin tools
   { 
-    label: 'Somnia', 
+    label: 'DAO Governance', 
+    href: '/dao', 
+    icon: '🏛️', 
+    description: 'Decentralized governance',
+    category: 'advanced'
+  },
+  { 
+    label: 'Governance', 
+    href: '/governance', 
+    icon: '👑', 
+    description: 'Community governance tools',
+    category: 'advanced'
+  },
+  { 
+    label: 'Somnia Integration', 
     href: '/somnia', 
     icon: '⚡', 
-    badge: 'New',
     description: 'Somnia network integration',
-    category: 'user'
+    category: 'advanced'
   },
   { 
-    label: 'AI Agents', 
-    href: '/ai-agents', 
-    icon: '🤖', 
-    badge: 'Hackathon',
-    description: 'Autonomous AI agents for NFT rentals',
-    category: 'features'
-  },
-
-  // Tool Navigation
-  { 
-    label: 'Wallet Test', 
-    href: '/wallet-test', 
-    icon: '🧪', 
-    badge: 'Test',
-    description: 'Wallet testing tools',
-    category: 'tools'
+    label: 'Subgraph', 
+    href: '/subgraph', 
+    icon: '🗄️', 
+    description: 'Blockchain data indexing',
+    category: 'advanced'
   },
   { 
-    label: 'Rental Flow', 
-    href: '/rental', 
-    icon: '🔄', 
-    description: 'NFT rental marketplace',
-    category: 'tools'
+    label: 'Social', 
+    href: '/social', 
+    icon: '🌟', 
+    description: 'Social features and community',
+    category: 'advanced'
   },
-  { 
-    label: 'Mobile', 
-    href: '/mobile', 
-    icon: '📱', 
-    description: 'Mobile-optimized interface',
-    category: 'tools'
-  },
-
-  // Additional Navigation
   { 
     label: 'Discover', 
     href: '/discover', 
     icon: '🔍', 
     description: 'Discover new NFTs and creators',
-    category: 'additional'
-  },
-  { 
-    label: 'Community', 
-    href: '/community', 
-    icon: '🌟', 
-    description: 'Community features and forums',
-    category: 'additional'
-  },
-  { 
-    label: 'Enhanced Marketplace', 
-    href: '/enhanced-marketplace', 
-    icon: '🛒', 
-    description: 'Advanced marketplace features',
-    category: 'additional'
-  },
-  { 
-    label: 'Creativity Showcase', 
-    href: '/creativity-showcase', 
-    icon: '🎭', 
-    description: 'Showcase creative works',
-    category: 'additional'
-  },
-  { 
-    label: 'Subgraph Dashboard', 
-    href: '/subgraph-dashboard', 
-    icon: '📊', 
-    description: 'Subgraph analytics dashboard',
-    category: 'additional'
-  },
-  { 
-    label: 'Subgraph Showcase', 
-    href: '/subgraph-showcase', 
-    icon: '🎯', 
-    description: 'Subgraph data showcase',
-    category: 'additional'
-  },
-  { 
-    label: 'Create & Upload', 
-    href: '/create-and-upload', 
-    icon: '🚀', 
-    description: 'Combined create and upload flow',
-    category: 'additional'
-  },
-  { 
-    label: 'Wallet & Tools', 
-    href: '/wallet-and-tools', 
-    icon: '🔧', 
-    description: 'Advanced wallet tools',
-    category: 'additional'
+    category: 'advanced'
   }
 ];
 
@@ -202,8 +142,12 @@ export const getNavItemsByCategory = (category: NavItem['category']) => {
   return navigationConfig.filter(item => item.category === category);
 };
 
-export const getMainNavItems = () => getNavItemsByCategory('main');
+export const getPrimaryNavItems = () => getNavItemsByCategory('primary');
 export const getFeatureNavItems = () => getNavItemsByCategory('features');
 export const getUserNavItems = () => getNavItemsByCategory('user');
-export const getToolNavItems = () => getNavItemsByCategory('tools');
-export const getAdditionalNavItems = () => getNavItemsByCategory('additional');
+export const getAdvancedNavItems = () => getNavItemsByCategory('advanced');
+
+// Legacy helpers for compatibility
+export const getMainNavItems = () => getPrimaryNavItems();
+export const getToolNavItems = () => getAdvancedNavItems();
+export const getAdditionalNavItems = () => getAdvancedNavItems();

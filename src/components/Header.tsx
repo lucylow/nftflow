@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMainNavItems, getUserNavItems } from '@/config/navigation';
 import MobileNavigation from './MobileNavigation';
 
 const Header = () => {
@@ -28,13 +27,6 @@ const Header = () => {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { notifications, unreadCount, isOpen, setIsOpen, markAsRead, deleteNotification, markAllAsRead } = useNotifications();
-
-  const navItems = getMainNavItems().concat([
-    { label: "DAO", href: "/dao", icon: "🏛️", badge: undefined },
-    { label: "Create", href: "/creativity", icon: "🎨", badge: "Hot" }
-  ]);
-
-  const userItems = getUserNavItems();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,36 +88,6 @@ const Header = () => {
               </div>
             </form>
           </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 relative group ${
-                  location.pathname === item.href
-                    ? 'text-primary bg-primary/10'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
-              >
-                <span className="text-sm">{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
-                {item.badge && (
-                  <Badge variant="secondary" className="text-xs px-1 py-0 ml-1">
-                    {item.badge}
-                  </Badge>
-                )}
-                {location.pathname === item.href && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-primary/10 rounded-md -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </Link>
-            ))}
-          </nav>
 
           {/* Right Side Actions - Responsive */}
           <div className="flex items-center gap-1 sm:gap-2">

@@ -36,7 +36,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useWeb3 } from '@/contexts/Web3Context';
-import { getMainNavItems, getFeatureNavItems, getUserNavItems, getToolNavItems } from '@/config/navigation';
+import { getPrimaryNavItems, getFeatureNavItems, getUserNavItems, getAdvancedNavItems } from '@/config/navigation';
 
 interface SidebarProps {
   className?: string;
@@ -89,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     '🔧': Settings,
   };
 
-  const mainNavItems = getMainNavItems().map(item => ({
+  const primaryNavItems = getPrimaryNavItems().map(item => ({
     label: item.label,
     href: item.href,
     icon: iconMap[item.icon] || Home,
@@ -110,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     badge: item.badge || null,
   }));
 
-  const toolsNavItems = getToolNavItems().map(item => ({
+  const advancedNavItems = getAdvancedNavItems().map(item => ({
     label: item.label,
     href: item.href,
     icon: iconMap[item.icon] || Home,
@@ -265,13 +265,13 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       {/* Navigation */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-6">
-          <NavSection title="Main" items={mainNavItems} />
+          <NavSection title="Primary" items={primaryNavItems} />
           <Separator />
           <NavSection title="Features" items={featuresNavItems} />
           <Separator />
-          <NavSection title="User" items={userNavItems} />
+          <NavSection title="Account" items={userNavItems} />
           <Separator />
-          <NavSection title="Tools" items={toolsNavItems} />
+          <NavSection title="Advanced" items={advancedNavItems} />
         </div>
       </ScrollArea>
 
