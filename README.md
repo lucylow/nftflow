@@ -1,4 +1,4 @@
-# 🚀 NFTFlow: The Autonomous AI-Driven NFT Utility Economy (5X Expanded Hackathon README)
+# 🚀 NFTFlow: The Autonomous AI-Driven NFT Utility Economy 
 
 **Somnia AI Hackathon Submission** | **Project Track:** AI Agents & DeFi Utility
 
