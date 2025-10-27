@@ -14,7 +14,7 @@
 
 ---
 
-## 🥇 HACKATHON WINNING NARRATIVE: THE AUTONOMOUS AI RENTAL ARBITRAGE AGENT
+## 🥇 THE AUTONOMOUS AI RENTAL ARBITRAGE AGENT
 
 NFTFlow is a revolutionary marketplace that enables **micro-rentals** of NFTs down to the second, powered by Somnia Network's sub-second finality. Our submission for the Somnia AI Hackathon introduces the **Autonomous AI Rental Arbitrage Agent**, transforming NFTFlow from a passive marketplace into a self-optimizing, revenue-generating economic primitive.
 
