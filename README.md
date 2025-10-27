@@ -12,6 +12,21 @@
 
 > **The Netflix for NFTs** - A revolutionary marketplace that transforms NFT utility from static ownership to dynamic, accessible usage powered by Somnia Network's 1M+ TPS blockchain.
 
+
+> **The Netflix for NFTs** - A revolutionary marketplace that transforms NFT utility from static ownership to dynamic, accessible usage powered by Somnia Network's 1M+ TPS blockchain.
+
+![](./assets/images/logo.png)
+## 🌟 Overview
+
+NFTFlow **fundamentally redefines NFT utility** by shifting the paradigm from speculative ownership to **active, accessible usage**. We unlock the $200B+ NFT market by enabling **micro-rentals** of digital assets, making premium NFT utilities accessible to everyone through real-time payment streaming and Somnia Network's sub-second finality.
+
+**Enhanced with AI**: NFTFlow now features **5 autonomous AI agents** that optimize pricing, deliver personalized recommendations, assess risk, and manage marketplace operations 24/7.
+
+**Live Demo:** [https://nftflow.lovable.app](https://nftflow.lovable.app/)
+
+**Video Demo:** [YouTube Walkthrough](https://youtube.com/demo)
+
+
 ---
 
 ## 🥇 THE AUTONOMOUS AI RENTAL ARBITRAGE AGENT
@@ -38,6 +53,8 @@ The AI Agent facilitates this by:
 *   **Generating Encoded Bundles:** It translates the complex financial strategy into a precise, low-level calldata bundle for the smart contract.
 *   **Trustless Execution:** By using the `ArbitrageRouter.sol` with its profit-verification logic, we ensure the agent's actions are trustless and auditable, a significant leap beyond simple off-chain trading bots.
 
+*   ![](https://cdn.dorahacks.io/static/files/19962adb4a55322037c0d2a4cff9e184.png)
+
 #### 2. Impact: Market Efficiency and Passive Revenue
 
 The agent's impact is measurable and transformative for the ecosystem:
@@ -50,6 +67,8 @@ The agent's impact is measurable and transformative for the ecosystem:
 | **Liquidity Barrier** | High (due to price discrepancies) | Low (due to price convergence) | Creates a more rational, predictable, and liquid rental environment. |
 
 #### 3. Technical Complexity: Multi-Agent Orchestration and Atomic Smart Contracts
+
+![](./assets/images/architecture.png)
 
 This project integrates a full-stack, multi-disciplinary technical solution:
 
