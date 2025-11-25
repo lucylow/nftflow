@@ -65,9 +65,10 @@ export const AIImageGenerationShowcase: React.FC = () => {
     }, 200);
 
     setTimeout(() => {
+      const promptElement = document.getElementById('prompt') as HTMLTextAreaElement;
       const newImage: AIGeneratedImage = {
         id: Date.now().toString(),
-        prompt: document.getElementById('prompt')?.value || 'Custom AI-generated NFT',
+        prompt: promptElement?.value || 'Custom AI-generated NFT',
         style: 'Auto',
         model: 'GPT-4 DALL-E',
         image: '/api/placeholder/400/400',

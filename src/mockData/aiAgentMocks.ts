@@ -161,6 +161,7 @@ export const mockWorkflows = [
     status: 'completed',
     agents: ['Orchestrator', 'Pricing Analyst', 'Rental Intelligence'],
     duration: '28s',
+    progress: 100,
     result: {
       oldPrice: '0.0029 ETH/s',
       newPrice: '0.0033 ETH/s',
@@ -174,7 +175,13 @@ export const mockWorkflows = [
     status: 'processing',
     agents: ['Orchestrator', 'Collateral Agent', 'Pricing Analyst'],
     duration: '12s',
-    progress: 67
+    progress: 67,
+    result: {
+      oldPrice: '0.0025 ETH/s',
+      newPrice: '0.0028 ETH/s',
+      impact: '+12% revenue',
+      confidence: 88
+    }
   },
   {
     id: 'workflow-125',
@@ -182,7 +189,14 @@ export const mockWorkflows = [
     status: 'pending',
     agents: ['Orchestrator', 'Recommendation Agent'],
     duration: '0s',
-    estimatedTime: '15s'
+    progress: 0,
+    estimatedTime: '15s',
+    result: {
+      oldPrice: '0.0030 ETH/s',
+      newPrice: '0.0030 ETH/s',
+      impact: '0% revenue',
+      confidence: 0
+    }
   }
 ];
 

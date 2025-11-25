@@ -201,7 +201,11 @@ const AIAgentsPage: React.FC = () => {
                     confidence: 65,
                     threshold: 75,
                     action: 'review_recommendations',
-                    details: { demo: true },
+                    details: {
+                      userAge: 'Demo user',
+                      userHistory: 'Demo history',
+                      recommendationCount: 5
+                    },
                     timestamp: new Date()
                   }]);
                 }}
