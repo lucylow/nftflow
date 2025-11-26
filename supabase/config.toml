@@ -1,1 +1,10 @@
 project_id = "pbpmhxewduhmyyloujvv"
+
+[functions.analyze-nft-pricing]
+verify_jwt = false
+
+[functions.analyze-rental-risk]
+verify_jwt = false
+
+[functions.market-insights]
+verify_jwt = false
