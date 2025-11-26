@@ -3,6 +3,9 @@ project_id = "pbpmhxewduhmyyloujvv"
 [functions.analyze-nft-pricing]
 verify_jwt = false
 
+[functions.analyze-nft-pricing-stream]
+verify_jwt = false
+
 [functions.analyze-rental-risk]
 verify_jwt = false
 

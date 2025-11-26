@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -148,6 +149,27 @@ Analyze this Somnia NFT collection's market performance and provide:
     }
 
     const insights = JSON.parse(toolCall.function.arguments);
+
+    // Store in database
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      await supabase.from('market_insights').insert({
+        collection_address: collectionAddress,
+        timeframe,
+        sentiment: insights.sentiment,
+        sentiment_score: insights.sentimentScore,
+        trends: insights.trends,
+        recommendations: insights.recommendations,
+        prediction: insights.prediction,
+        opportunities: insights.opportunities,
+        risks: insights.risks,
+        summary: insights.summary,
+        metrics
+      });
+    }
 
     return new Response(
       JSON.stringify({

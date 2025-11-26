@@ -5,15 +5,20 @@ import { Badge } from '@/components/ui/badge';
 import { useSomniaAI } from '@/hooks/useSomniaAI';
 import { Brain, TrendingUp, Shield, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AIAnalysisHistory } from './AIAnalysisHistory';
 
 export const SomniaAIInsights: React.FC = () => {
-  const { analyzePricing, assessRisk, getMarketInsights, isAnalyzing } = useSomniaAI();
+  const { analyzePricingStream, assessRisk, getMarketInsights, isAnalyzing } = useSomniaAI();
   const [pricingResult, setPricingResult] = useState<any>(null);
+  const [streamedText, setStreamedText] = useState<string>('');
   const [riskResult, setRiskResult] = useState<any>(null);
   const [marketResult, setMarketResult] = useState<any>(null);
 
   const handlePricingAnalysis = async () => {
-    const result = await analyzePricing(
+    setStreamedText('');
+    setPricingResult(null);
+    
+    const result = await analyzePricingStream(
       '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
       '1',
       {
@@ -21,8 +26,10 @@ export const SomniaAIInsights: React.FC = () => {
         volume24h: 150,
         trending: true,
         avgRentalDuration: 7200
-      }
+      },
+      (text) => setStreamedText(text)
     );
+    
     setPricingResult(result);
   };
 
@@ -86,7 +93,7 @@ export const SomniaAIInsights: React.FC = () => {
       </div>
 
       <Tabs defaultValue="pricing" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pricing">
             <TrendingUp className="w-4 h-4 mr-2" />
             Pricing Analysis
@@ -98,6 +105,9 @@ export const SomniaAIInsights: React.FC = () => {
           <TabsTrigger value="market">
             <Brain className="w-4 h-4 mr-2" />
             Market Insights
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            History
           </TabsTrigger>
         </TabsList>
 
@@ -115,8 +125,18 @@ export const SomniaAIInsights: React.FC = () => {
                 disabled={isAnalyzing}
                 className="w-full"
               >
-                {isAnalyzing ? 'Analyzing...' : 'Analyze Demo NFT Pricing'}
+                {isAnalyzing ? 'Analyzing (Streaming)...' : 'Analyze Demo NFT (Stream)'}
               </Button>
+
+              {streamedText && !pricingResult && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm whitespace-pre-wrap">{streamedText}</p>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="animate-pulse">●</div>
+                    AI is thinking...
+                  </div>
+                </div>
+              )}
 
               {pricingResult && (
                 <div className="space-y-4 p-4 bg-muted rounded-lg">
@@ -309,6 +329,10 @@ export const SomniaAIInsights: React.FC = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          <AIAnalysisHistory />
         </TabsContent>
       </Tabs>
     </div>

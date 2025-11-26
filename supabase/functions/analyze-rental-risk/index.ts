@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -122,6 +123,26 @@ Analyze the risk of renting to this user on Somnia blockchain and provide:
     }
 
     const assessment = JSON.parse(toolCall.function.arguments);
+
+    // Store in database
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      await supabase.from('rental_risk_assessments').insert({
+        renter_address: renterAddress,
+        nft_value,
+        duration,
+        risk_level: assessment.riskLevel,
+        collateral_percentage: assessment.collateralPercentage,
+        risk_score: assessment.riskScore,
+        risk_factors: assessment.riskFactors,
+        mitigation_strategies: assessment.mitigationStrategies,
+        explanation: assessment.explanation,
+        rental_history: rentalHistory
+      });
+    }
 
     return new Response(
       JSON.stringify({
