@@ -14,7 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      market_insights: {
+        Row: {
+          collection_address: string
+          created_at: string | null
+          id: string
+          metrics: Json | null
+          opportunities: Json | null
+          prediction: string | null
+          recommendations: Json | null
+          risks: Json | null
+          sentiment: string | null
+          sentiment_score: number | null
+          summary: string | null
+          timeframe: string | null
+          trends: Json | null
+        }
+        Insert: {
+          collection_address: string
+          created_at?: string | null
+          id?: string
+          metrics?: Json | null
+          opportunities?: Json | null
+          prediction?: string | null
+          recommendations?: Json | null
+          risks?: Json | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          summary?: string | null
+          timeframe?: string | null
+          trends?: Json | null
+        }
+        Update: {
+          collection_address?: string
+          created_at?: string | null
+          id?: string
+          metrics?: Json | null
+          opportunities?: Json | null
+          prediction?: string | null
+          recommendations?: Json | null
+          risks?: Json | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          summary?: string | null
+          timeframe?: string | null
+          trends?: Json | null
+        }
+        Relationships: []
+      }
+      nft_pricing_analyses: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          id: string
+          market_data: Json | null
+          market_trend: string | null
+          nft_address: string
+          optimal_price: number | null
+          reasoning: string | null
+          strategy: string | null
+          token_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          market_data?: Json | null
+          market_trend?: string | null
+          nft_address: string
+          optimal_price?: number | null
+          reasoning?: string | null
+          strategy?: string | null
+          token_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          id?: string
+          market_data?: Json | null
+          market_trend?: string | null
+          nft_address?: string
+          optimal_price?: number | null
+          reasoning?: string | null
+          strategy?: string | null
+          token_id?: string
+        }
+        Relationships: []
+      }
+      rental_risk_assessments: {
+        Row: {
+          collateral_percentage: number | null
+          created_at: string | null
+          duration: number | null
+          explanation: string | null
+          id: string
+          mitigation_strategies: Json | null
+          nft_value: number | null
+          rental_history: Json | null
+          renter_address: string
+          risk_factors: Json | null
+          risk_level: string | null
+          risk_score: number | null
+        }
+        Insert: {
+          collateral_percentage?: number | null
+          created_at?: string | null
+          duration?: number | null
+          explanation?: string | null
+          id?: string
+          mitigation_strategies?: Json | null
+          nft_value?: number | null
+          rental_history?: Json | null
+          renter_address: string
+          risk_factors?: Json | null
+          risk_level?: string | null
+          risk_score?: number | null
+        }
+        Update: {
+          collateral_percentage?: number | null
+          created_at?: string | null
+          duration?: number | null
+          explanation?: string | null
+          id?: string
+          mitigation_strategies?: Json | null
+          nft_value?: number | null
+          rental_history?: Json | null
+          renter_address?: string
+          risk_factors?: Json | null
+          risk_level?: string | null
+          risk_score?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
