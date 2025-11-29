@@ -1,6 +1,5 @@
 # 🚀 NFTFlow: The Autonomous AI-Driven NFT Utility Economy 
 
-**Somnia AI Hackathon Submission** | **Project Track:** AI Agents & DeFi Utility
 
 [![Somnia Network](https://img.shields.io/badge/Powered%20by-Somnia%20Network-000000?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IjgwIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNCIvPjxwYXRoIGQ9Ik03MCA3MGg2MHY2MEg3MHoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=)](https://somnia.network)
 [![AI Agents](https://img.shields.io/badge/AI-Agents-blue?style=for-the-badge&logo=openai)](https://openai.com)
