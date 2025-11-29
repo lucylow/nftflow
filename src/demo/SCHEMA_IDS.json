@@ -1,0 +1,29 @@
+{
+  "project": "NFTFlow",
+  "description": "Somnia Data Streams schema IDs for NFT rental marketplace",
+  "mode": "mock",
+  "schemas": {
+    "RENTAL_STARTED": {
+      "schemaId": "0x72656e74616c5f73",
+      "description": "Emitted when a new rental begins",
+      "fields": ["rentalId", "nftContract", "tokenId", "owner", "renter", "startTs", "expiresTs", "pricePerSecond"]
+    },
+    "RENTAL_TICK": {
+      "schemaId": "0x72656e74616c5f74",
+      "description": "Per-second payment tick during active rental",
+      "fields": ["rentalId", "ts", "deltaWei", "balanceWei", "sequence"]
+    },
+    "PRICING_SUGGESTION": {
+      "schemaId": "0x707269636573756767",
+      "description": "AI-generated pricing recommendation",
+      "fields": ["nftId", "nftContract", "tokenId", "suggestedPricePerSecond", "confidence", "modelVersion", "note"]
+    },
+    "AGENT_ACTION": {
+      "schemaId": "0x6167656e745f616374",
+      "description": "Autonomous agent action notification",
+      "fields": ["agentType", "action", "listingId", "newPrice", "confidence", "note"]
+    }
+  },
+  "publisher": "Server wallet (signs & publishes streams)",
+  "subscribers": "Frontend + AI Agents (read-only)"
+}
