@@ -5,7 +5,11 @@ import { DemoPricingPanel } from '@/demo/components/DemoPricingPanel';
 import { useSomniaSimulation } from '@/demo/useSomniaMock';
 import { SCHEMA_IDS } from '@/demo/sampleSchemas';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Database, Code } from 'lucide-react';
+import { Zap, Database, Code, ExternalLink } from 'lucide-react';
+
+const ELEVATOR_PITCH = "NFTFlow — a Netflix-style NFT rental marketplace that uses Somnia Data Streams to publish real-time rental lifecycle events (rental_started, per-second rental_tick, pricing_suggestion) so frontends and AI agents react instantly with sub-second UX.";
+
+const WHAT_IT_DOES = "NFTFlow enables NFT owners to rent out assets in time-limited micro-rentals. When a rental starts, structured events are published to Somnia Data Streams. Frontend subscribers receive these events in real-time to update UI instantly, show per-second streaming payments, and surface AI pricing suggestions — all without polling.";
 
 export default function DemoPage() {
   const {
@@ -32,10 +36,10 @@ export default function DemoPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">
-                  Somnia Data Streams Demo
+                  NFTFlow — Somnia Data Streams Demo
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Interactive mock streaming for NFT rentals
+                  Real-time NFT Rental Marketplace
                 </p>
               </div>
             </div>
@@ -50,6 +54,14 @@ export default function DemoPage() {
               </Badge>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Elevator Pitch */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg p-4 border border-primary/20">
+          <p className="text-sm text-foreground font-medium">{ELEVATOR_PITCH}</p>
+          <p className="text-xs text-muted-foreground mt-2">{WHAT_IT_DOES}</p>
         </div>
       </div>
 
