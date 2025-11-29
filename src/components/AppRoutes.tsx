@@ -38,6 +38,7 @@ const CreateAndUpload = lazy(() => import('@/pages/CreateAndUpload'));
 const AIAgentsPage = lazy(() => import('@/pages/AIAgentsPage'));
 const AIDashboard = lazy(() => import('@/pages/AIDashboard'));
 const SomniaAI = lazy(() => import('@/components/ai/SomniaAIInsights').then(module => ({ default: module.default })));
+const DemoPage = lazy(() => import('@/pages/DemoPage'));
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -83,6 +84,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/ai-agents" element={<AIAgentsPage />} />
         <Route path="/ai-dashboard" element={<AIDashboard />} />
         <Route path="/somnia-ai" element={<SomniaAI />} />
+        <Route path="/demo" element={<DemoPage />} />
         
         {/* 404 Route */}
         <Route path="*" element={
